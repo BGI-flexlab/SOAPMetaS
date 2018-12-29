@@ -31,9 +31,9 @@ public final class ProfilingUtils {
     public MetasSamPairRecord readSamListToSamPair(Iterable<MetasSamRecord> metasSamRecords){
         try {
             if (this.sequencingMode.equals(SequencingMode.SINGLEEND)) {
-                return singleListToSamPair(metasSamRecords)
+                return singleListToSamPair(metasSamRecords);
             } else if (this.sequencingMode.equals(SequencingMode.PAIREND)){
-                return pairedListToSamPair(metasSamRecords)
+                return pairedListToSamPair(metasSamRecords);
             }
         } catch (final Exception e) {
             e.printStackTrace();
@@ -152,6 +152,7 @@ public final class ProfilingUtils {
         } catch (final NullPointerException e){
             e.printStackTrace();
         }
+        return null;
     }
 
     public Double computeRelativeAbundance(Double abundance, Double totalAbundance){
