@@ -49,6 +49,10 @@ public class ProfilingProcess {
 
     /**
      * Runs profiling. All options should have been set.
+     *
+     * @param metasSamRecordRDD The RDD of MetasSamRecord instances generated from SamReader.
+     * @return The RDD of ProfilingResultRecord, which stores the data of all the profiling result and
+     *     and other necessary information.
      */
     public JavaRDD<ProfilingResultRecord> runProfilingProcess(JavaRDD<MetasSamRecord> metasSamRecordRDD){
 
@@ -79,17 +83,16 @@ public class ProfilingProcess {
                 .mapToPair(readSamGroup -> new Tuple2<>(readSamGroup._1, this.pUtil.readSamListToSamPair(readSamGroup._2)))
                 .filter(item -> (item._2 != null));
 
+        JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = profilingMethod.runProfiling(readMetasSamPairRDD);
 
-        JavaPairRDD<String, ProfilingResultRecord> clusterProfilingResultRDD = profilingMethod.runProfiling(readMetasSamPairRDD);
-
-        Double totalAbundance = clusterProfilingResultRDD.map(resultRec -> resultRec._2.getAbundance()).reduce((a,b) -> a+b);
-
-        JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = clusterProfilingResultRDD
-                .map(clusterResult -> {
-                    ProfilingResultRecord resultRecord = clusterResult._2;
-                    resultRecord.setRelativeAbun(this.pUtil.computeRelativeAbundance(resultRecord.getAbundance(), totalAbundance));
-                    return resultRecord;
-                });
+        //NOTE: 相对丰度的计算不应该放在profiling result结果中，因为它是全局相关的，在输出结果的时候进行计算最好
+        //Double totalAbundance = rawProfilingRecordRDD.map(resultRec -> resultRec.getAbundance()).reduce((a,b) -> a+b);
+        //JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = rawProfilingRecordRDD
+        //        .map(resultRecord -> {
+        //            ProfilingResultRecord updatedResultRecord = resultRecord;
+        //            updatedResultRecord.setRelativeAbun(this.pUtil.computeRelativeAbundance(resultRecord.getAbundance(), totalAbundance));
+        //            return updatedResultRecord;
+        //        });
 
         return profilingResultRecordRDD;
     }

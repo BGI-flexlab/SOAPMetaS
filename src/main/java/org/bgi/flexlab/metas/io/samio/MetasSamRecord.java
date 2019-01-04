@@ -2,8 +2,8 @@ package org.bgi.flexlab.metas.io.samio;
 
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
-import htsjdk.samtools.util.StringUtil;
-import org.bgi.flexlab.metas.util.SequencingMode;
+import htsjdk.samtools.util.SequenceUtil;
+
 
 /**
  * ClassName: MetasSamRecord
@@ -25,6 +25,10 @@ public class MetasSamRecord extends SAMRecord {
         return this.getReadName().replaceFirst("/[12]$", "");
     }
 
+    public Double getGCContent(){
+        return SequenceUtil.calculateGc(this.getReadBases());
+    }
+
     @Override
     public String getPairedReadName() {
         final StringBuilder builder = new StringBuilder(64);
@@ -38,6 +42,7 @@ public class MetasSamRecord extends SAMRecord {
         }
         return builder.toString();
     }
+
 
     ///**
     // * Set the identity value of the SamRecord.

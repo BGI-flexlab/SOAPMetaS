@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas;
 
+import org.apache.hadoop.fs.Path;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.ProfilingPipelineMode;
@@ -15,13 +16,16 @@ import org.bgi.flexlab.metas.util.SequencingMode;
 public class MetasOptions {
 
     /**
-     * TODO: Options initialization.
+     * TODO: 需要完善options的读取和初始化.
      */
 
     private ProfilingAnalysisMode profilingAnalysisMode;
     private SequencingMode sequencingMode;
     private ProfilingPipelineMode profilingPipelineMode;
     private ProfilingAnalysisLevel profilingAnalysisLevel;
+    private String referenceMatrixFilePath;
+    private int insertSize;
+    private int readLength;
 
     public MetasOptions() {}
 
@@ -39,6 +43,18 @@ public class MetasOptions {
 
     public ProfilingAnalysisLevel getProfilingAnalysisLevel(){
         return this.profilingAnalysisLevel;
+    }
+
+    public String getReferenceMatrixFilePath(){
+        return this.referenceMatrixFilePath;
+    }
+
+    public int getInsertSize(){
+        return this.insertSize;
+    }
+
+    public int getReadLength(){
+        return this.readLength;
     }
 
 }

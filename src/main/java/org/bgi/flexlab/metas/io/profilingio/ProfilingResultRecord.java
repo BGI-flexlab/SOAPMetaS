@@ -13,8 +13,9 @@ public class ProfilingResultRecord implements Serializable {
 
     protected String clusterName;
     protected Integer rawReadCount;
-    protected Double abundance;
-    protected Double relativeAbun;
+    protected Double correctedReadCount;
+    protected Double abundance; // correctedReadCount divided by marker length
+    //protected Double relativeAbun;
     //protected Byte readNameString; //后续需要考虑采用更合适的方式来存储read name字符串
 
     public void setClusterName(String name){
@@ -41,12 +42,20 @@ public class ProfilingResultRecord implements Serializable {
         return this.abundance;
     }
 
-    public void setRelativeAbun(Double relativeAbun){
-        this.relativeAbun = relativeAbun;
+    public void setCorrectedReadCount(Double correctedReadCount) {
+        this.correctedReadCount = correctedReadCount;
     }
 
-    public Double getRelativeAbun(){
-        return this.relativeAbun;
+    public Double getCorrectedReadCount() {
+        return this.correctedReadCount;
     }
+
+    //public void setRelativeAbun(Double relativeAbun){
+    //    this.relativeAbun = relativeAbun;
+    //}
+
+    //public Double getRelativeAbun(){
+    //    return this.relativeAbun;
+    //}
 
 }

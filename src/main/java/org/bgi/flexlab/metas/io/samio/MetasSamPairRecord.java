@@ -52,4 +52,13 @@ public class MetasSamPairRecord {
     public boolean isPairedMode(){
         return this.pairedMode;
     }
+
+    public MetasSamRecord getFirstRecord() {
+        return this.record1;
+    }
+
+    public MetasSamRecord getSecondRecord() {
+        return this.record2;
+    }
+
 }

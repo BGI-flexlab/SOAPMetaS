@@ -133,9 +133,11 @@ public final class ProfilingUtils {
 
         } else if (exact1) {
             pairRecord = new MetasSamPairRecord(tempRec1);
+            pairRecord.setPairedMode(true);
 
         } else if (exact2) {
             pairRecord = new MetasSamPairRecord(tempRec2);
+            pairRecord.setPairedMode(true);
         }
 
         return pairRecord;
