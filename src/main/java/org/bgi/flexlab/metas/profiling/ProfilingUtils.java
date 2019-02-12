@@ -73,7 +73,7 @@ public final class ProfilingUtils {
     }
 
     /**
-     * TODO: 关于insertsize的过滤需要确认是在此步完成还是在后续步骤，因为需要用到marker length数据
+     * TODO: 关于insertsize的过滤需要确认是在此步完成还是在后续步骤，因为需要用到marker length数据。以及，需要确认insert size的具体功能需求。
      * Generator of MetasSamPairRecord for paired-end sequencing data, both "record1" and "record2" fields
      * will be set. There are several status of the paired records:
      * + Both reads are unmapped. This kind of pairs will have been filtered out in the first operation of RDD.
@@ -88,9 +88,12 @@ public final class ProfilingUtils {
      *    same as the exact one, treat them as the proper pair. If none, treated the multiple read as unmapped.
      * + Both are multiply mapped, abandoned.
      *
-     * @param metasSamRecords Iterator of MetasSamRecords created by groupByKey() operation of RDD.
+     * @param metasSamRecords Iterator of MetasSamRecords created by groupByKey() operation of RDD, all
+     *                        the records from the iterator have the same record name (read id) without
+     *                        "/1/2" suffix.
      * @return MetasSamPairRecord if the read is exactly mapped to one reference, else null.
      */
+
     private MetasSamPairRecord pairedListToSamPair(Iterable<MetasSamRecord> metasSamRecords){
         MetasSamPairRecord pairRecord = null;
 
@@ -159,5 +162,31 @@ public final class ProfilingUtils {
 
     public Double computeRelativeAbundance(Double abundance, Double totalAbundance){
         return abundance/totalAbundance;
+    }
+
+
+    /**
+     * Compute SAMRecord insert size
+     *
+     * The method is copied from org.bgi.flexlab.gaea.util.GaeaSamPairUtil
+     */
+    public static int computeInsertSize(final MetasSamRecord firstEnd,
+                                        final MetasSamRecord secondEnd) {
+        if (firstEnd.getReadUnmappedFlag() || secondEnd.getReadUnmappedFlag()) {
+            return 0;
+        }
+        if (!firstEnd.getReferenceName().equals(secondEnd.getReferenceName())) {
+            return 0;
+        }
+
+        final int firstEnd5PrimePosition = firstEnd.getReadNegativeStrandFlag() ? firstEnd
+                .getAlignmentEnd() : firstEnd.getAlignmentStart();
+        final int secondEnd5PrimePosition = secondEnd
+                .getReadNegativeStrandFlag() ? secondEnd.getAlignmentEnd()
+                : secondEnd.getAlignmentStart();
+
+        final int adjustment = (secondEnd5PrimePosition >= firstEnd5PrimePosition) ? +1
+                : -1;
+        return secondEnd5PrimePosition - firstEnd5PrimePosition + adjustment;
     }
 }

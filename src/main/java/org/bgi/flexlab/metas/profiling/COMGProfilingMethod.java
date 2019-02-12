@@ -3,7 +3,7 @@ package org.bgi.flexlab.metas.profiling;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.accuracy.gcbias.GCBiasCorrection;
+import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelBase;
 import org.bgi.flexlab.metas.io.profilingio.ProfilingResultRecord;
 import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
 import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
@@ -25,11 +25,12 @@ import java.util.Iterator;
 
 public final class COMGProfilingMethod extends ProfilingMethodBase {
 
-    private GCBiasCorrection gcBiasCorrection;
+    private GCBiasCorrectionModelBase gcBiasCorrectionModel;
+    private int insDeviation = 0;
 
     public COMGProfilingMethod(MetasOptions options){
         super(options);
-        this.gcBiasCorrection = new GCBiasCorrection(options);
+        this.gcBiasCorrectionModel = this.gcBiasCorrectionModelFactory.getGCBiasCorrectionModel();
     }
 
 
@@ -58,16 +59,13 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
     }
 
     /**
-     * TODO: GCBias矫正的方法确定之后，此部分需要更新相应的流程。
-     * TODO: read名称考虑采用string to byte方法？
-     *
      * The method is designed for the call function of the lambda expression in flatMapToPair operation of
      * readMetasSamPairRDDD.
      *
      * Note: Assume that paired-end read A-B are mapped to two different reference gene, in
      *     ProfilingAnalysisLevel.MARKER mode, A and B will be treated as two unrelated read, but in
-     *     ProfilingAnalysisLevel.SPECIES mode, the two reference genes may belong to the same species. In
-     *     later situation, the read count of the species should add 1, but in the
+     *     ProfilingAnalysisLevel.SPECIES mode, the two reference genes may belong to the same species.
+     *     In later situation, the read count of the species should add 1.
      *
      * @param samPairRecord The object that store the properly mapped MetasSamRecords for both single-end
      *                      and paired-end sequencing mode.
@@ -128,7 +126,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
                 this.referenceInfomation.getReferenceSpeciesName(record.getReferenceName()):
                 record.getReferenceName();
         rawReadCount = 1;
-        correctedReadCount = this.gcBiasCorrection.genomeGCCorrectForSingle(record.getGCContent(),
+        correctedReadCount = this.gcBiasCorrectionModel.correctedCountForSingle(record.getGCContent(),
                 this.referenceInfomation.getReferenceGCContent(record.getReferenceName()));
         readNameLine = record.getReadName() + "|";
 
@@ -137,13 +135,13 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
 
     private Tuple2<String, Tuple3<Integer, Double, String>> pairedCountTupleGenerator(MetasSamRecord record1,
                                                                                       MetasSamRecord record2){
-        String clusterName;
-        Integer rawReadCount;
-        Double correctedReadCount;
+        final String clusterName;
+        final Integer rawReadCount;
+        final Double correctedReadCount;
 
-        String readName1;
-        String readName2;
-        String readNameLine;
+        final String readName1;
+        final String readName2;
+        final String readNameLine;
 
         clusterName = (record1 != null)? record1.getReferenceName():record2.getReferenceName();
 
@@ -152,7 +150,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
         }
 
         rawReadCount = 1;
-        correctedReadCount = this.gcBiasCorrection.genomeGCCorrectForPair();
+        correctedReadCount = this.gcBiasCorrectionModel.correctedCountForPair(record1.getGCContent(),
+                record2.getGCContent(), this.referenceInfomation.getReferenceGCContent(clusterName));
 
         readName1 = (record1 != null)? record1.getReadName() + "|" : "";
         readName2 = (record2 != null)? record2.getReadName() + "|" : "";
@@ -162,7 +161,6 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
     }
 
     /**
-     * TODO: 关于insertsize的过滤，后续需要考虑insert size的过滤模型，根据数据特征动态设定insert size的阈值。因为pair-end测序得到的insertsize也存在误差。。
      *
      * @param samRecord The instance of MetasSamRecord in pair-end sequencing mode which is not properly
      *                  mapped as pair.
@@ -174,7 +172,23 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
             return (this.referenceInfomation.getReferenceLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
                     < (this.insertSize + this.standardReadLength);
         } else {
-            return samRecord.getAlignmentStart() < (this.insertSize - samRecord.getReadLength() + 100);
+            return samRecord.getAlignmentStart() < (this.insertSize - samRecord.getReadLength() + this.standardReadLength);
+        }
+    }
+
+    public void setProfilingParameters(String paraName, Object paraValue){
+        switch (paraName){
+            case "InsertSize": {
+                // mean value of insert size distribution.
+                this.insertSize = (int) paraValue;
+                break;
+            }
+
+            case "InsertSizeSD":{
+                // standard deviation of insert size distribution
+                this.insDeviation = (int) paraValue;
+                break;
+            }
         }
     }
 }

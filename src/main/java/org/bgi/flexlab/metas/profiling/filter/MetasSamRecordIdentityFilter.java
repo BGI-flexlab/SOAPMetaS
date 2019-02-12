@@ -19,7 +19,7 @@ public class MetasSamRecordIdentityFilter implements MetasSamRecordFilter {
 
 
     /**
-     * TODO: Identity computing method.
+     * TODO: Identity computing method. 可以参考humann2的模块neucleotide.calculate_percent_identity
      *
      * @param record MetasSamRecord to be evaluated.
      * @return

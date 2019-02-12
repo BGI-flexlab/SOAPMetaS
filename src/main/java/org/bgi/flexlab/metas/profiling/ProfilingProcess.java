@@ -1,5 +1,7 @@
 package org.bgi.flexlab.metas.profiling;
 
+import org.apache.commons.math3.fitting.GaussianCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
@@ -11,6 +13,8 @@ import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.ProfilingPipelineMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
+
+import java.util.List;
 
 /**
  * ClassName: ProfilingProcess
@@ -30,6 +34,8 @@ public class ProfilingProcess {
     private double minIdentity;
     private ProfilingUtils pUtil;
 
+    private boolean insRecalibration = false;
+
 
     public ProfilingProcess(final MetasOptions options){
         this.metasOpt = options;
@@ -42,6 +48,7 @@ public class ProfilingProcess {
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
         this.pipelineMode = this.metasOpt.getProfilingPipelineMode();
 
+        this.insRecalibration = this.metasOpt.getInsRecalibration();
         this.minIdentity = 0;
         this.pUtil = new ProfilingUtils(this.metasOpt);
 
@@ -70,11 +77,11 @@ public class ProfilingProcess {
          * In paired end sequencing mode, the read name has no "/1" or "/2" suffix.
          * In single end sequencing mode, the read name remains unchanged.
          *
-         * 关于输入fastq的文件格式，此处只针对"@readname/1 @readname/2"的形式，对于其他pair-end的name形式暂时不兼容。
-         * bowtie2的结果可能造成read的/1/2后缀丢失，因此，需要在进行sampairrecord的mapping过程中需要考虑不同的seqMode。
+         * The method is currently designed for read name in the form of "@readname/1 @readname/2" and
+         * not compatible with other forms.
+         * The results generated from bowtie2 may lose the "/1/2" suffix of read name, so it is important
+         * to check the sequencing mode in the spark mapToPair(the 2nd of following) step for samPairRecord.
          */
-
-
 
         JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD = metasSamRecordRDD
                 .filter(rawRecFilter)
@@ -83,7 +90,23 @@ public class ProfilingProcess {
                 .mapToPair(readSamGroup -> new Tuple2<>(readSamGroup._1, this.pUtil.readSamListToSamPair(readSamGroup._2)))
                 .filter(item -> (item._2 != null));
 
+        if (this.insRecalibration){
+            int ins = this.metasOpt.getInsertSize();
+            List<WeightedObservedPoint> pointList = readMetasSamPairRDD.values()
+                    .filter(pairRec -> pairRec.isProperPaired())
+                    .mapToPair(pairRec -> new Tuple2<>(this.pUtil.computeInsertSize(pairRec.getFirstRecord(), pairRec.getSecondRecord()), 1))
+                    .reduceByKey((a, b) -> a+b)
+                    .map(tup -> new WeightedObservedPoint(1.0, tup._1, tup._2))
+                    .collect();
+            GaussianCurveFitter.ParameterGuesser guesser = new GaussianCurveFitter.ParameterGuesser(pointList);
+
+            ins = (int) guesser.guess()[1];
+            profilingMethod.setProfilingParameters("InsertSize", ins);
+        }
+
         JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = profilingMethod.runProfiling(readMetasSamPairRDD);
+
+
 
         //NOTE: 相对丰度的计算不应该放在profiling result结果中，因为它是全局相关的，在输出结果的时候进行计算最好
         //Double totalAbundance = rawProfilingRecordRDD.map(resultRec -> resultRec.getAbundance()).reduce((a,b) -> a+b);
@@ -111,7 +134,7 @@ public class ProfilingProcess {
             }
         } catch (final NullPointerException e){
             e.printStackTrace();
-        } catch (final Exception e){
+        } catch (final RuntimeException e){
             e.printStackTrace();
         }
         return null;

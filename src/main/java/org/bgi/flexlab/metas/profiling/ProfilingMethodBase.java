@@ -6,6 +6,7 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.io.profilingio.ProfilingResultRecord;
 import org.bgi.flexlab.metas.io.referenceio.ReferenceInfomation;
 import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
+import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
@@ -24,6 +25,7 @@ public abstract class ProfilingMethodBase {
     protected ProfilingAnalysisLevel profilingAnalysisLevel;
     protected SequencingMode sequencingMode;
     protected ReferenceInfomation referenceInfomation;
+    protected GCBiasCorrectionModelFactory gcBiasCorrectionModelFactory;
 
     protected int standardReadLength;
     protected int insertSize = Integer.MAX_VALUE;
@@ -36,6 +38,9 @@ public abstract class ProfilingMethodBase {
         this.referenceInfomation = new ReferenceInfomation(options.getReferenceMatrixFilePath());
         this.profilingAnalysisLevel = options.getProfilingAnalysisLevel();
         this.standardReadLength = options.getReadLength();
+
+        this.gcBiasCorrectionModelFactory = new GCBiasCorrectionModelFactory(options.getModelName(),
+                options.getGcBiasModelCoefficientsFile());
 
         if (this.sequencingMode.equals(SequencingMode.PAIREND)){
             this.insertSize = options.getInsertSize();
@@ -60,5 +65,14 @@ public abstract class ProfilingMethodBase {
      * of cluster, corrected abundance, and name list of all mapped reads(ProfilingAnalysisLevel.ESTIMATE).
      */
     public abstract JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD);
+
+    /**
+     * Used for setting special value of special parameters. For example, the insert size value in cOMG
+     * profiling method.
+     *
+     * @param paraName Name of parameters.
+     * @param paraValue Value of parameters.
+     */
+    public abstract void setProfilingParameters(String paraName, Object paraValue);
 
 }
