@@ -1,0 +1,33 @@
+package org.bgi.flexlab.metas.profiling;
+
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.bgi.flexlab.metas.MetasOptions;
+import org.bgi.flexlab.metas.io.profilingio.ProfilingResultRecord;
+import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
+
+/**
+ * ClassName: METAPHLANProfilingMethod
+ * Description:
+ *
+ * @author: heshixu@genomics.cn
+ */
+
+public class METAPHLANProfilingMethod extends ProfilingMethodBase {
+
+    public METAPHLANProfilingMethod(MetasOptions options){
+        super(options);
+    }
+
+    /**
+     * TODO: 需要完善基于METAPHLAN策略的丰度计算方法。
+     *
+     * @param readMetasSamPairRDD
+     * @return
+     */
+    @Override
+    public JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD){
+        return null;
+    }
+
+}
