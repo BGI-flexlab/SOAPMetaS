@@ -3,12 +3,15 @@ package org.bgi.flexlab.metas.profiling;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
+import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordInsertSizeFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelBase;
 import org.bgi.flexlab.metas.io.profilingio.ProfilingResultRecord;
 import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
 import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
+import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 
+import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 import scala.Tuple3;
 
@@ -26,11 +29,21 @@ import java.util.Iterator;
 public final class COMGProfilingMethod extends ProfilingMethodBase {
 
     private GCBiasCorrectionModelBase gcBiasCorrectionModel;
-    private int insDeviation = 0;
+
+    private MetasSamRecordInsertSizeFilter insertSizeFilter;
+
+    private boolean doInsRecalibration;
 
     public COMGProfilingMethod(MetasOptions options){
         super(options);
         this.gcBiasCorrectionModel = this.gcBiasCorrectionModelFactory.getGCBiasCorrectionModel();
+
+        this.gcBiasCorrectionModelFactory = new GCBiasCorrectionModelFactory(options.getModelName(),
+                options.getGcBiasModelCoefficientsFile());
+
+        this.insertSizeFilter = new MetasSamRecordInsertSizeFilter(options.getInsertSize(), this.referenceInformation);
+
+        this.doInsRecalibration = options.isDoInsRecalibration();
     }
 
 
@@ -41,6 +54,11 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
      */
     @Override
     public JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD){
+
+        if (this.doInsRecalibration && this.sequencingMode.equals(SequencingMode.PAIREND)){
+            this.insertSizeFilter.training(readMetasSamPairRDD);
+        }
+
         return readMetasSamPairRDD.flatMapToPair(readSamPairRec -> this.computeReadCount(readSamPairRec._2))
                 .filter(tuple -> tuple._2._1() > 0)
                 .reduceByKey((a, b) -> new Tuple3<>(a._1()+b._1(), a._2()+b._2(), a._3()+b._3()))
@@ -53,7 +71,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
         resultRecord.setClusterName(rawResultPair._1);
         resultRecord.setRawReadCount(rawResultPair._2._1());
         resultRecord.setCorrectedReadCount(rawResultPair._2._2());
-        resultRecord.setAbundance(rawResultPair._2._2()/this.referenceInfomation.getReferenceLength(rawResultPair._1));
+        resultRecord.setAbundance(rawResultPair._2._2()/this.referenceInformation.getReferenceLength(rawResultPair._1));
 
         return resultRecord;
     }
@@ -90,13 +108,14 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
                     this.isPairedAtSpeciesLevel(samRecord1, samRecord2)) {
                 readCountTupleList.add(this.pairedCountTupleGenerator(samRecord1, samRecord2));
             } else {
+                assert this.sequencingMode.equals(SequencingMode.PAIREND);
                 if (samRecord1 != null) {
-                    if (this.satisfyInsertSizeThreshold(samRecord1)) {
+                    if (this.insertSizeFilter.filter(samRecord1)) {
                         readCountTupleList.add(this.pairedCountTupleGenerator(samRecord1, null));
                     }
                 }
                 if (samRecord2 != null) {
-                    if (this.satisfyInsertSizeThreshold(samRecord2)) {
+                    if (this.insertSizeFilter.filter(samRecord2)) {
                         readCountTupleList.add(this.pairedCountTupleGenerator(null, samRecord2));
                     }
                 }
@@ -109,8 +128,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
     }
 
     private Boolean isPairedAtSpeciesLevel(MetasSamRecord record1, MetasSamRecord record2){
-        return this.referenceInfomation.getReferenceSpeciesName(record1.getReferenceName()).equals(
-                this.referenceInfomation.getReferenceSpeciesName(record2.getReferenceName())
+        return this.referenceInformation.getReferenceSpeciesName(record1.getReferenceName()).equals(
+                this.referenceInformation.getReferenceSpeciesName(record2.getReferenceName())
         );
     }
 
@@ -123,11 +142,11 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
 
 
         clusterName = (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES))?
-                this.referenceInfomation.getReferenceSpeciesName(record.getReferenceName()):
+                this.referenceInformation.getReferenceSpeciesName(record.getReferenceName()):
                 record.getReferenceName();
         rawReadCount = 1;
         correctedReadCount = this.gcBiasCorrectionModel.correctedCountForSingle(record.getGCContent(),
-                this.referenceInfomation.getReferenceGCContent(record.getReferenceName()));
+                this.referenceInformation.getReferenceGCContent(record.getReferenceName()));
         readNameLine = record.getReadName() + "|";
 
         return new Tuple2<>(clusterName, new Tuple3<>(rawReadCount, correctedReadCount, readNameLine));
@@ -143,15 +162,15 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
         final String readName2;
         final String readNameLine;
 
-        clusterName = (record1 != null)? record1.getReferenceName():record2.getReferenceName();
-
         if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES)){
-            clusterName = this.referenceInfomation.getReferenceSpeciesName(clusterName);
+            clusterName = this.referenceInformation.getReferenceSpeciesName((record1 != null)? record1.getReferenceName():record2.getReferenceName());
+        } else {
+            clusterName = (record1 != null)? record1.getReferenceName():record2.getReferenceName();
         }
 
         rawReadCount = 1;
         correctedReadCount = this.gcBiasCorrectionModel.correctedCountForPair(record1.getGCContent(),
-                record2.getGCContent(), this.referenceInfomation.getReferenceGCContent(clusterName));
+                record2.getGCContent(), this.referenceInformation.getReferenceGCContent(clusterName));
 
         readName1 = (record1 != null)? record1.getReadName() + "|" : "";
         readName2 = (record2 != null)? record2.getReadName() + "|" : "";
@@ -160,35 +179,4 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
         return new Tuple2<>(clusterName, new Tuple3<>(rawReadCount, correctedReadCount, readNameLine));
     }
 
-    /**
-     *
-     * @param samRecord The instance of MetasSamRecord in pair-end sequencing mode which is not properly
-     *                  mapped as pair.
-     * @return true if the mate read is probably mapped to the sequence region outside around reference marker.
-     */
-    private Boolean satisfyInsertSizeThreshold(MetasSamRecord samRecord){
-
-        if (samRecord.getReadNegativeStrandFlag()){
-            return (this.referenceInfomation.getReferenceLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
-                    < (this.insertSize + this.standardReadLength);
-        } else {
-            return samRecord.getAlignmentStart() < (this.insertSize - samRecord.getReadLength() + this.standardReadLength);
-        }
-    }
-
-    public void setProfilingParameters(String paraName, Object paraValue){
-        switch (paraName){
-            case "InsertSize": {
-                // mean value of insert size distribution.
-                this.insertSize = (int) paraValue;
-                break;
-            }
-
-            case "InsertSizeSD":{
-                // standard deviation of insert size distribution
-                this.insDeviation = (int) paraValue;
-                break;
-            }
-        }
-    }
 }

@@ -73,7 +73,7 @@ public final class ProfilingUtils {
     }
 
     /**
-     * TODO: 关于insertsize的过滤需要确认是在此步完成还是在后续步骤，因为需要用到marker length数据。以及，需要确认insert size的具体功能需求。
+     * TODO: 关于insertsize的过滤需要确认是在此步完成还是在后续步骤，因为需要用到marker length数据。cOMG原流程中insertsize+100的100是为了容错，insertsize本身包含end+gap+end的区域。
      * Generator of MetasSamPairRecord for paired-end sequencing data, both "record1" and "record2" fields
      * will be set. There are several status of the paired records:
      * + Both reads are unmapped. This kind of pairs will have been filtered out in the first operation of RDD.

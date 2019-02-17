@@ -84,6 +84,7 @@ public class GCBiasTrainingProcess {
         }
 
         this.trainer.train();
+        this.trainer.getTrainedModel().outputCoefficients(this.trainingResultFile);
     }
 
     private double sum(final int[] values) {
@@ -93,10 +94,6 @@ public class GCBiasTrainingProcess {
             total += values[i];
         }
         return total;
-    }
-
-    public void writeModel(){
-        this.trainer.getTrainedModel().outputCoefficients(this.trainingResultFile);
     }
 
     class SpeciesGC {

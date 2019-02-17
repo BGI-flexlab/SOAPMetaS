@@ -30,7 +30,7 @@ public class MetasOptions {
 
     private String referenceMatrixFilePath;
 
-    private boolean insRecalibration;
+    private boolean doInsRecalibration;
     private int insertSize;
     private int readLength;
 
@@ -39,7 +39,10 @@ public class MetasOptions {
     private File gcBiasCoefficientsTrainingTargetFile;
     private File gcBiasCoefficientsModelFile;
     private String modelName = "default";
-    private boolean isTrainingMode = false;
+    private boolean gcBiasTrainingMode = false;
+
+    private boolean doIdentityFiltering = false;
+    private double minIdentity = 0;
 
     public MetasOptions() {}
 
@@ -67,8 +70,8 @@ public class MetasOptions {
         return this.referenceMatrixFilePath;
     }
 
-    public boolean getInsRecalibration(){
-        return this.insRecalibration;
+    public boolean isDoInsRecalibration(){
+        return this.doInsRecalibration;
     }
 
     /**
@@ -76,7 +79,6 @@ public class MetasOptions {
      * @return
      */
     public int getInsertSize(){
-
         return this.insertSize;
     }
 
@@ -100,7 +102,15 @@ public class MetasOptions {
         return this.modelName;
     }
 
-    public boolean getTrainingMode(){
-        return this.isTrainingMode;
+    public boolean isGCBiasTrainingMode(){
+        return this.gcBiasTrainingMode;
+    }
+
+    public double getMinIdentity(){
+        return this.minIdentity;
+    }
+
+    public boolean isDoIdentityFiltering(){
+        return this.doIdentityFiltering;
     }
 }

@@ -32,6 +32,12 @@ import htsjdk.samtools.util.StringUtil;
 /** Utilities to calculate GC Bias
  * Created by kbergin on 9/23/15.
  */
+
+/**
+ * The script is copied from Picard.analysis module of Picard Library.
+ * <https://github.com/broadinstitute/picard/blob/master/src/main/java/picard/analysis/GcBiasUtils.java>
+ */
+
 public class GcBiasUtils {
 
     /////////////////////////////////////////////////////////////////////////////

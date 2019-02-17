@@ -3,13 +3,13 @@ package org.bgi.flexlab.metas.io.referenceio;
 import java.util.HashMap;
 
 /**
- * ClassName: ReferenceInfomation
+ * ClassName: ReferenceInformation
  * Description:
  *
  * @author: heshixu@genomics.cn
  */
 
-public class ReferenceInfomation {
+public class ReferenceInformation {
 
     private HashMap<String, ReferenceRecord> referenceRecordHashMap;
 
@@ -18,7 +18,7 @@ public class ReferenceInfomation {
      *
      * @param referenceMatrixFilePath
      */
-    public ReferenceInfomation(String referenceMatrixFilePath){
+    public ReferenceInformation(String referenceMatrixFilePath){
 
     }
 
