@@ -17,9 +17,14 @@ import java.util.List;
  * paired-end data are not fixed which can be caused by experimental factors, environmental factors
  * or many other factors.
  *
- * Note: The filter is merely suitable for pair-end sequencing mode.
+ * Note: The filter is merely suitable for pair-end sequencing mode. The main intention of the filter
+ * is to detect whether the unmapped end of pair reads is located outside the reference gene (the
+ * deviation of gene boundary), in other words, whether the unmapping is caused by boundary effect.
+ * If so, the mapped end will be treated as "proper mapped read", or the mapped "single" end will
+ * be filtered out.
  *
  * TODO: 根据实际测序数据分析，ins的分布并不是标准的正态分布模式，所以fitter需要重新考虑。
+ * TODO: 注意insert size的基本目的，是为了判断比对边界问题对在PE测序模式下带来的影响。边界问题其实不用在意R2序列一半比对上一半比不上的情况（如果真的有一半，那也就不会被视为未必对上）。
  *
  * @author: heshixu@genomics.cn
  */
@@ -28,7 +33,7 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
 
     private int meanInsertSize;
 
-    private int inserSizeSD = 0;
+    private int insertSizeSD = 0;
 
     private int insTolerance = 100;
 
@@ -44,19 +49,18 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
     @Override
     public boolean filter(MetasSamRecord record){
         if (this.doTraining){
-            return;
+            return this.insertSizeRangeCheck(record);
         } else {
             return this.satisfyInsertSizeThreshold(record);
         }
-        return false;
     }
 
     public void setMeanInsertSize(int meanIns){
         this.meanInsertSize = meanIns;
     }
 
-    public void setInserSizeSD(int inserSizeSD) {
-        this.inserSizeSD = inserSizeSD;
+    public void setInserSizeSD(int insertSizeSD) {
+        this.insertSizeSD = insertSizeSD;
     }
 
     /**
@@ -83,18 +87,47 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
     }
 
     /**
+     * Filtering paired-end reads with only one mapped end. If the unmapped end is located outside
+     * the referencce gene, the function will return true.
+     *
+     * Situation of retaining: (only end1 is mapped on reference gene, end2 is unmapped)
+     *                   end1  =====-------------------===== end2              paired-end read
+     * --|-----------------------------------------|--------------             reference gene region
+     *   ^boundary                                 ^boundary
+     *
+     * Situation of filtering: (only end1 is mapped on reference gene, end2 is unmapped)
+     *             end1  =====---------------===== end2                        paired-end read
+     * --|-----------------------------------------|--------------             reference gene region
+     *   ^boundary                                 ^boundary
+     *
      *
      * @param samRecord The instance of MetasSamRecord in pair-end sequencing mode which is not properly
      *                  mapped as pair.
-     * @return true if the mate read is probably mapped to the sequence region outside around reference marker.
+     * @return True if the mate read is probably mapped to the sequence region outside around reference marker.
      */
-    private Boolean satisfyInsertSizeThreshold(MetasSamRecord samRecord){
-
+    private boolean satisfyInsertSizeThreshold(MetasSamRecord samRecord){
         if (samRecord.getReadNegativeStrandFlag()){
             return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + this.insTolerance);
         } else {
             return (this.referenceInformation.getReferenceLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
                     < (this.meanInsertSize + this.insTolerance);
+        }
+    }
+
+    /**
+     * More precise method for insert size filtering. As the insert size of reads from paired-end
+     * sequencing is not "certain"， we will use the mean insert size of all reads pair in the sample
+     * and 2-sigma rule as the criterion.
+     *
+     * @param samRecord MetasSamRecord instance of the single mapped end that is to be check.
+     * @return True if the unmapped end is located outside reference gene.
+     */
+    private boolean insertSizeRangeCheck(MetasSamRecord samRecord){
+        if (samRecord.getReadNegativeStrandFlag()){
+            return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + 2 * this.insertSizeSD);
+        } else {
+            return (this.referenceInformation.getReferenceLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
+                    < (this.meanInsertSize + 2 * this.insertSizeSD);
         }
     }
 }
