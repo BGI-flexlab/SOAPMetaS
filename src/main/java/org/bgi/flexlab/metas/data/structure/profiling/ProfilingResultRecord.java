@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.io.profilingio;
+package org.bgi.flexlab.metas.data.structure.profiling;
 
 import java.io.Serializable;
 

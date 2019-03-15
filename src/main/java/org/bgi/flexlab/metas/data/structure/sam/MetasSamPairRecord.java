@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.io.samio;
+package org.bgi.flexlab.metas.data.structure.sam;
 
 /**
  * ClassName: MetasSamPairRecord

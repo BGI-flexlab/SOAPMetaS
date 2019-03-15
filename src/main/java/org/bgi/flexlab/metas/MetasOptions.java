@@ -21,30 +21,69 @@ public class MetasOptions {
      * TODO: 需要完善options的读取和初始化.
      */
 
+    // Running mode group.
     private ProfilingAnalysisMode profilingAnalysisMode;
     private SequencingMode sequencingMode;
     private ProfilingPipelineMode profilingPipelineMode;
     private ProfilingAnalysisLevel profilingAnalysisLevel;
 
+    // Alignment process arguments group.
+    private String alignmentTool = "bowtie";
+
+    private String alignmentIndexPath = "";
+    private boolean alignmentShortIndex = true;
+
+    private String inputFastqPath = "";
+    private String inputFastqPath2 = "";
+
+    private String samOutputHdfsDir = "";
+    private int partitionNumber = 0;
+    private String alignmentTmpDir = "";
+
+    private boolean sortFastqReads = false;
+    private boolean sortFastqReadsHdfs 	= false;
+    private boolean mergeOutputSamBySample = false;
+
+    private String extraAlignmentArguments = "";
+
+    // GCBias correction arguments group.
     private String gcBiasCorrectionModelType = "default";
-
-    private String referenceMatrixFilePath;
-
-    private boolean doInsRecalibration;
-    private int insertSize;
-    private int readLength;
-
-    private int scanWindowSize;
-
     private File gcBiasCoefficientsTrainingTargetFile;
     private File gcBiasCoefficientsModelFile;
     private String modelName = "default";
     private boolean gcBiasTrainingMode = false;
+    private int scanWindowSize;
 
+    // Insert size related training.
+    private boolean doInsRecalibration;
+
+    // Profiling process arguments group.
+    private String referenceMatrixFilePath;
+    private int insertSize;
+    private int readLength;
     private boolean doIdentityFiltering = false;
     private double minIdentity = 0;
 
+    /**
+     * Constructor
+     */
     public MetasOptions() {}
+
+    /**
+     * Constructor
+     * @param args Arguments from command line.
+     */
+    public MetasOptions(String[] args){}
+
+
+
+    public String getReferenceMatrixFilePath(){
+        return this.referenceMatrixFilePath;
+    }
+
+    /*
+    Analysis mode method group.
+     */
 
     public ProfilingAnalysisMode getProfilingAnalysisMode(){
         return this.profilingAnalysisMode;
@@ -62,13 +101,9 @@ public class MetasOptions {
         return this.profilingAnalysisLevel;
     }
 
-    public String getGcBiasCorrectionModelType(){
-        return this.gcBiasCorrectionModelType;
-    }
-
-    public String getReferenceMatrixFilePath(){
-        return this.referenceMatrixFilePath;
-    }
+    /*
+    Filteration related method group.
+     */
 
     public boolean isDoInsRecalibration(){
         return this.doInsRecalibration;
@@ -82,9 +117,21 @@ public class MetasOptions {
         return this.insertSize;
     }
 
+    public double getMinIdentity(){
+        return this.minIdentity;
+    }
+
+    public boolean isDoIdentityFiltering(){
+        return this.doIdentityFiltering;
+    }
+
     public int getReadLength(){
         return this.readLength;
     }
+
+    /*
+    GCBias recalibration related method group
+     */
 
     public int getScanWindowSize() {
         return scanWindowSize;
@@ -106,11 +153,59 @@ public class MetasOptions {
         return this.gcBiasTrainingMode;
     }
 
-    public double getMinIdentity(){
-        return this.minIdentity;
+    public String getGcBiasCorrectionModelType(){
+        return this.gcBiasCorrectionModelType;
     }
 
-    public boolean isDoIdentityFiltering(){
-        return this.doIdentityFiltering;
+    /*
+    Alignment related method group.
+     */
+
+    public String getInputFastqPath() {
+        return this.inputFastqPath;
+    }
+
+    public String getInputFastqPath2(){
+        return this.inputFastqPath2;
+    }
+
+    public String getAlignmentIndexPath(){
+        return this.alignmentIndexPath;
+    }
+
+    public String getSamOutputHdfsDir() {
+        return this.samOutputHdfsDir;
+    }
+
+    public boolean isAlignmentShortIndex() {
+        return this.alignmentShortIndex;
+    }
+
+    public int getPartitionNumber() {
+        return this.partitionNumber;
+    }
+
+    public boolean isSortFastqReads() {
+        return this.sortFastqReads;
+    }
+
+    public boolean isMergeOutputSamBySample() {
+        return this.mergeOutputSamBySample;
+    }
+
+    public String getAlignmentTool(){
+        return this.alignmentTool;
+    }
+
+    public boolean isSortFastqReadsHdfs() {
+        return this.sortFastqReadsHdfs;
+    }
+
+    public String getExtraAlignmentArguments(){
+        return this.extraAlignmentArguments;
+    }
+
+    public String getAlignmentTmpDir() {
+        return alignmentTmpDir;
     }
 }

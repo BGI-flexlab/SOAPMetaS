@@ -1,7 +1,7 @@
 package org.bgi.flexlab.metas.profiling.filter;
 
 import org.apache.spark.api.java.function.Function;
-import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ public class MetasSamRecordIdentityFilter implements MetasSamRecordFilter, Funct
 
 
     @Override
-    public Boolean call(MetasSamRecord record) throws Exception{
+    public Boolean call(MetasSamRecord record){
         if (this.filter(record)){
             return false;
         }

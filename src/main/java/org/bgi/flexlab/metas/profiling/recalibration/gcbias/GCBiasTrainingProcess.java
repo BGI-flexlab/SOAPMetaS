@@ -4,7 +4,7 @@ import htsjdk.samtools.reference.ReferenceSequence;
 import htsjdk.samtools.util.SequenceUtil;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import scala.Tuple2;
 
 import java.io.File;

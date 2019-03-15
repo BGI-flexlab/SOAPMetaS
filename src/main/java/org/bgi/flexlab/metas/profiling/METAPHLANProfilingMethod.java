@@ -3,8 +3,8 @@ package org.bgi.flexlab.metas.profiling;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.io.profilingio.ProfilingResultRecord;
-import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 
 /**
  * ClassName: METAPHLANProfilingMethod

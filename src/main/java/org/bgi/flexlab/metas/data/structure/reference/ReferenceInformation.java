@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.io.referenceio;
+package org.bgi.flexlab.metas.data.structure.reference;
 
 import java.util.HashMap;
 

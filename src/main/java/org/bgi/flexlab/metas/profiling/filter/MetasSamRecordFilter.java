@@ -1,6 +1,6 @@
 package org.bgi.flexlab.metas.profiling.filter;
 
-import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 
 /**
  * Basic APi for filtering MetasSamRecord instance.

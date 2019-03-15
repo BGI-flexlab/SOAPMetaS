@@ -3,9 +3,9 @@ package org.bgi.flexlab.metas.profiling;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.io.profilingio.ProfilingResultRecord;
-import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
-import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
+import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.ProfilingPipelineMode;
@@ -15,7 +15,7 @@ import scala.Tuple2;
 
 /**
  * ClassName: ProfilingProcess
- * Description: 控制丰度计算流程。
+ * Description: Control the profiling process.
  *
  * @author: heshixu@genomics.cn
  */
@@ -31,7 +31,6 @@ public class ProfilingProcess {
     private ProfilingUtils pUtil;
 
     private boolean doIdentityFiltering = false;
-    private boolean doInsRecalibration = false;
 
     private MetasSamRecordIdentityFilter identityFilter;
 
@@ -46,7 +45,6 @@ public class ProfilingProcess {
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
         this.pipelineMode = this.metasOpt.getProfilingPipelineMode();
 
-        this.doInsRecalibration = this.metasOpt.isDoInsRecalibration();
         this.pUtil = new ProfilingUtils(this.metasOpt);
 
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
@@ -63,8 +61,6 @@ public class ProfilingProcess {
     public JavaRDD<ProfilingResultRecord> runProfilingProcess(JavaRDD<MetasSamRecord> metasSamRecordRDD){
 
         ProfilingMethodBase profilingMethod = getProfilingMethod();
-
-        assert (profilingMethod != null);
 
         /**
          * Note: filter() operation of rdd will return a new RDD containing only the elements that
@@ -87,14 +83,21 @@ public class ProfilingProcess {
          * The results generated from bowtie2 may lose the "/1/2" suffix of read name, so it is important
          * to check the sequencing mode in the spark mapToPair(the 2nd of following) step for samPairRecord.
          *
+         * TODO: groupByKey方法考虑用其他的bykey方法替换，参考 https://databricks.gitbooks.io/databricks-spark-knowledge-base/content/best_practices/prefer_reducebykey_over_groupbykey.html
+         *
+         * TODO: 注意在最后输出结果时计算相对丰度
+         *
          */
-
         JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
                 .mapToPair(record -> new Tuple2<>(this.pUtil.samRecordNameModifier(record), record))
                 .groupByKey()
                 .mapToPair(readSamGroup -> new Tuple2<>(readSamGroup._1, this.pUtil.readSamListToSamPair(readSamGroup._2)))
                 .filter(item -> (item._2 != null));
 
+
+        /**
+         * TODO: 后续输入要改成 sample-ref 模式的键，record 都有 sample tag，需要对不同的 sample 进行聚合处理
+         */
         JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = profilingMethod.runProfiling(readMetasSamPairRDD);
 
 

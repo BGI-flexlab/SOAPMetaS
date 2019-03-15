@@ -1,8 +1,8 @@
 package org.bgi.flexlab.metas.profiling;
 
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
-import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
 /**
@@ -29,17 +29,13 @@ public final class ProfilingUtils {
      * @return
      */
     public MetasSamPairRecord readSamListToSamPair(Iterable<MetasSamRecord> metasSamRecords){
-        try {
-            if (this.sequencingMode.equals(SequencingMode.SINGLEEND)) {
-                return singleListToSamPair(metasSamRecords);
-            } else if (this.sequencingMode.equals(SequencingMode.PAIREND)){
-                return pairedListToSamPair(metasSamRecords);
-            }
-        } catch (final Exception e) {
-            e.printStackTrace();
+        if (this.sequencingMode.equals(SequencingMode.PAIREND)){
+            return pairedListToSamPair(metasSamRecords);
+        } else if (this.sequencingMode.equals(SequencingMode.SINGLEEND)){
+            return singleListToSamPair(metasSamRecords);
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     /**

@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.io.referenceio;
+package org.bgi.flexlab.metas.data.structure.reference;
 
 import htsjdk.samtools.reference.ReferenceSequence;
 import htsjdk.samtools.util.SequenceUtil;

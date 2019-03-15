@@ -5,9 +5,9 @@ import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordInsertSizeFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelBase;
-import org.bgi.flexlab.metas.io.profilingio.ProfilingResultRecord;
-import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
-import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
+import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 
@@ -48,8 +48,11 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
 
 
     /**
+     * TODO: 提供内容控制参数，控制输出结果所包含的内容。
+     * TODO: ReadsName 的连接方法尝试使用 jointer 或者 SpringBuilder
      *
-     * @param readMetasSamPairRDD
+     * @param readMetasSamPairRDD 键是对应的 SamPair 的 read name，值 SamPairRecord 聚合了该 read name
+     *                            对应的所有有效的 MetasSamRecord 信息。
      * @return
      */
     @Override

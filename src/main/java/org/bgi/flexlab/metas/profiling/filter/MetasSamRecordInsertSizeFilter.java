@@ -3,9 +3,9 @@ package org.bgi.flexlab.metas.profiling.filter;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.bgi.flexlab.metas.io.referenceio.ReferenceInformation;
-import org.bgi.flexlab.metas.io.samio.MetasSamPairRecord;
-import org.bgi.flexlab.metas.io.samio.MetasSamRecord;
+import org.bgi.flexlab.metas.data.structure.reference.ReferenceInformation;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.profiling.ProfilingUtils;
 import scala.Tuple2;
 
