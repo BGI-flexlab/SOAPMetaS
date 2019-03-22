@@ -87,7 +87,7 @@ public class AlignmentMethodBase implements Serializable {
             toolWrapper.setInputFile2(fastqFileName2);
         }
 
-        if(this.tmpDir.lastIndexOf("/") == this.tmpDir.length()-1) {
+        if(this.tmpDir.endsWith("/")) {
             this.toolWrapper.setOutputFile(this.tmpDir + outputSamFileName);
         }
         else{
@@ -110,7 +110,6 @@ public class AlignmentMethodBase implements Serializable {
      */
     public ArrayList<String> copyResults(String outputSamFileName) {
         ArrayList<String> returnedValues = new ArrayList<>();
-        String outputDir = this.toolWrapper.getOutputHdfsDir();
 
         this.LOG.info("["+this.getClass().getName()+"] :: " + this.appId + " - " + this.appName + " Copying files...");
 
@@ -121,12 +120,8 @@ public class AlignmentMethodBase implements Serializable {
 
             fs.copyFromLocalFile(
                     new Path(this.toolWrapper.getOutputFile()),
-                    new Path(outputDir + "/" + outputSamFileName)
+                    new Path(this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName)
             );
-			/*} else {
-				File localSamOutput = new File(this.bwaInterpreter.getOutputFile());
-				Files.copy(Paths.get(localSamOutput.getPath()), Paths.get(outputDir, localSamOutput.getName()));
-			}*/
         } catch (IOException e) {
             e.printStackTrace();
             this.LOG.error(e.toString());
@@ -136,13 +131,12 @@ public class AlignmentMethodBase implements Serializable {
         File tmpSamFullFile = new File(this.toolWrapper.getOutputFile());
         tmpSamFullFile.delete();
 
-        returnedValues.add(outputDir + "/" + outputSamFileName);
+        returnedValues.add(this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
 
         return returnedValues;
     }
 
     /**
-     *
      * @param readBatchID Identification for the sam file
      * @return A String for the sam file name
      */

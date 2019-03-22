@@ -1,5 +1,7 @@
 package org.bgi.flexlab.metas.profiling;
 
+import org.apache.spark.HashPartitioner;
+import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
@@ -51,20 +53,32 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
      * TODO: 提供内容控制参数，控制输出结果所包含的内容。
      * TODO: ReadsName 的连接方法尝试使用 jointer 或者 SpringBuilder
      *
-     * @param readMetasSamPairRDD 键是对应的 SamPair 的 read name，值 SamPairRecord 聚合了该 read name
+     * @param readMetasSamPairRDD 键是对应的 SamPair 的 "sampleID\tread name"，值 SamPairRecord 聚合了该 read name
      *                            对应的所有有效的 MetasSamRecord 信息。
      * @return
      */
     @Override
-    public JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD){
+    public JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner){
 
         if (this.doInsRecalibration && this.sequencingMode.equals(SequencingMode.PAIREND)){
             this.insertSizeFilter.training(readMetasSamPairRDD);
         }
 
-        return readMetasSamPairRDD.flatMapToPair(readSamPairRec -> this.computeReadCount(readSamPairRec._2))
-                .filter(tuple -> tuple._2._1() > 0)
-                .reduceByKey((a, b) -> new Tuple3<>(a._1()+b._1(), a._2()+b._2(), a._3()+b._3()))
+        if (partitioner == null){
+            partitioner = new HashPartitioner(200);
+        }
+
+        /*
+        Input:
+         key: sampleID\treadName
+         value: MetasSamPairRecord
+
+        After flatMapToPair:
+         key: sampleID\tclusterName
+         value: Tuple3<raw read count (uncorrected), corrected read count, merged read>
+         */
+        return readMetasSamPairRDD.flatMapToPair(tupleKeyValue -> this.computeReadCount(tupleKeyValue))
+                .reduceByKey(partitioner, (a, b) -> new Tuple3<>(a._1()+b._1(), a._2()+b._2(), a._3()+b._3()))
                 .map(rawResultPair -> this.profilingResultGenerator(rawResultPair));
     }
 
@@ -88,43 +102,43 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
      *     ProfilingAnalysisLevel.SPECIES mode, the two reference genes may belong to the same species.
      *     In later situation, the read count of the species should add 1.
      *
-     * @param samPairRecord The object that store the properly mapped MetasSamRecords for both single-end
-     *                      and paired-end sequencing mode.
+     * @param tupleKeyValue The object that store the sampleID_readName (key) and properly mapped
+     *                      MetasSamRecords (value) for both single-end and paired-end sequencing mode.
      * @return Iterator of scala.Tuple2<> where the 1st element is reference name, the 2nd element is a
      *     scala.Tuple3<> containing raw read count (uncorrected), corrected read count and merged read
      *     names (form: "read1/1|read1/2|read2/1|read3/2|...|").
      */
-    private Iterator<Tuple2<String, Tuple3<Integer, Double, String>>> computeReadCount (MetasSamPairRecord samPairRecord){
+    private Iterator<Tuple2<String, Tuple3<Integer, Double, String>>> computeReadCount (Tuple2<String, MetasSamPairRecord> tupleKeyValue){
 
         ArrayList<Tuple2<String, Tuple3<Integer, Double, String>>> readCountTupleList = new ArrayList<>(2);
 
-        MetasSamRecord samRecord1 = samPairRecord.getFirstRecord();
-        MetasSamRecord samRecord2 = samPairRecord.getSecondRecord();
+        String sampleID = tupleKeyValue._1.split("\t")[0];
+        MetasSamRecord samRecord1 = tupleKeyValue._2.getFirstRecord();
+        MetasSamRecord samRecord2 = tupleKeyValue._2.getSecondRecord();
 
 
-        if (samPairRecord.isProperPaired()){
+        if (tupleKeyValue._2.isPairedMode()){
 
-            readCountTupleList.add(this.pairedCountTupleGenerator(samRecord1, samRecord2));
-
-        } else if (samPairRecord.isPairedMode()){
-            if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
+            if (tupleKeyValue._2.isProperPaired()) {
+                readCountTupleList.add(this.pairedCountTupleGenerator(sampleID, samRecord1, samRecord2));
+            } else if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
                     this.isPairedAtSpeciesLevel(samRecord1, samRecord2)) {
-                readCountTupleList.add(this.pairedCountTupleGenerator(samRecord1, samRecord2));
+                readCountTupleList.add(this.pairedCountTupleGenerator(sampleID, samRecord1, samRecord2));
             } else {
                 assert this.sequencingMode.equals(SequencingMode.PAIREND);
                 if (samRecord1 != null) {
                     if (this.insertSizeFilter.filter(samRecord1)) {
-                        readCountTupleList.add(this.pairedCountTupleGenerator(samRecord1, null));
+                        readCountTupleList.add(this.pairedCountTupleGenerator(sampleID, samRecord1, null));
                     }
                 }
                 if (samRecord2 != null) {
                     if (this.insertSizeFilter.filter(samRecord2)) {
-                        readCountTupleList.add(this.pairedCountTupleGenerator(null, samRecord2));
+                        readCountTupleList.add(this.pairedCountTupleGenerator(sampleID, null, samRecord2));
                     }
                 }
             }
         } else {
-            readCountTupleList.add(this.singleCountTupleGenerator(samRecord1));
+            readCountTupleList.add(this.singleCountTupleGenerator(sampleID, samRecord1));
         }
 
         return readCountTupleList.iterator();
@@ -136,7 +150,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
         );
     }
 
-    private Tuple2<String, Tuple3<Integer, Double, String>> singleCountTupleGenerator(MetasSamRecord record){
+    private Tuple2<String, Tuple3<Integer, Double, String>> singleCountTupleGenerator(String sampleID,
+                                                                                      MetasSamRecord record){
 
         String clusterName;
         Integer rawReadCount;
@@ -152,18 +167,17 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
                 this.referenceInformation.getReferenceGCContent(record.getReferenceName()));
         readNameLine = record.getReadName() + "|";
 
-        return new Tuple2<>(clusterName, new Tuple3<>(rawReadCount, correctedReadCount, readNameLine));
+        return new Tuple2<>(sampleID + "\t" + clusterName, new Tuple3<>(rawReadCount, correctedReadCount, readNameLine));
     }
 
-    private Tuple2<String, Tuple3<Integer, Double, String>> pairedCountTupleGenerator(MetasSamRecord record1,
+    private Tuple2<String, Tuple3<Integer, Double, String>> pairedCountTupleGenerator(String sampleID,
+                                                                                      MetasSamRecord record1,
                                                                                       MetasSamRecord record2){
         final String clusterName;
         final Integer rawReadCount;
         final Double correctedReadCount;
 
-        final String readName1;
-        final String readName2;
-        final String readNameLine;
+        StringBuilder readNameLine = new StringBuilder();
 
         if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES)){
             clusterName = this.referenceInformation.getReferenceSpeciesName((record1 != null)? record1.getReferenceName():record2.getReferenceName());
@@ -175,11 +189,14 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
         correctedReadCount = this.gcBiasCorrectionModel.correctedCountForPair(record1.getGCContent(),
                 record2.getGCContent(), this.referenceInformation.getReferenceGCContent(clusterName));
 
-        readName1 = (record1 != null)? record1.getReadName() + "|" : "";
-        readName2 = (record2 != null)? record2.getReadName() + "|" : "";
-        readNameLine = readName1 + readName2;
+        if (record1 != null){
+            readNameLine.append(record1.getReadName()).append("|");
+        }
+        if (record2 != null){
+            readNameLine.append(record2.getReadName()).append("|");
+        }
 
-        return new Tuple2<>(clusterName, new Tuple3<>(rawReadCount, correctedReadCount, readNameLine));
+        return new Tuple2<>(sampleID + "\t" + clusterName, new Tuple3<>(rawReadCount, correctedReadCount, readNameLine.toString()));
     }
 
 }

@@ -44,7 +44,7 @@ public class SingleAlignmentMethod extends AlignmentMethodBase implements Serial
 
         String fastqFileName1;
 
-        if(this.tmpDir.lastIndexOf("/") == this.tmpDir.length()-1) {
+        if(this.tmpDir.endsWith("/")) {
             fastqFileName1 = this.tmpDir + this.appId + "-RDD" + arg0 + "_1";
 
         }

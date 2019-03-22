@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.profiling;
 
+import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
@@ -55,6 +56,6 @@ public abstract class ProfilingMethodBase {
      * ProfilingResultRecord contains cluster name (marker gene, species name or read group id), read count
      * of cluster, corrected abundance, and name list of all mapped reads(ProfilingAnalysisLevel.ESTIMATE).
      */
-    public abstract JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD);
+    public abstract JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner);
 
 }

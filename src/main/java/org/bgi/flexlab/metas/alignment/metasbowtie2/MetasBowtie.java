@@ -20,6 +20,11 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private boolean isShortIndex;
+    private boolean isTab5Mode = false;
+
+    private ArrayList<String> readGroup = null;
+    private String readGourpID = null;
+
     private String extraArguments;
 
     public MetasBowtie(MetasOptions options){
@@ -33,11 +38,19 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
         this.setTmpDir(options.getAlignmentTmpDir());
 
         this.setSequencingMode(options.getSequencingMode());
+
+        this.readGourpID = options.getReadGroupID();
+        this.readGroup = options.getReadGroup();
     }
 
     private boolean isShortFileSuffix(String indexFilePath){
         return indexFilePath.endsWith("bt2");
     }
+
+    public void setTab5Mode(){
+        this.isTab5Mode = true;
+    }
+
 
     /**
      * Parse all arguments as String array.
@@ -57,7 +70,9 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
                 "--un","--un-gz","--un-bz2","--un-lz4",
                 "--al","--al-gz","--al-bz2","--al-lz4",
                 "--un-conc","--un-conc-gz","--un-conc-bz2","--un-conc-lz4",
-                "--al-conc","--al-conc-gz","--al-conc-bz2","--al-conc-lz4"
+                "--al-conc","--al-conc-gz","--al-conc-bz2","--al-conc-lz4",
+                "--tab5", "--tab6",
+                "--rg", "--rg-id"
         ));
 
         // The first argument should be the name of executor as the main function (bowtie()) of
@@ -78,7 +93,7 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
             for( int i = 0; i < numBwaArgs; i++) {
                 if (omissionArgs.contains(arrayBwaArgs[i])){
-                    i++;
+                    i++; // skip the next arg
                     continue;
                 }
                 arguments.add(arrayBwaArgs[i]);
@@ -95,8 +110,23 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
         arguments.add(this.getIndexPath());
 
+        if (this.readGourpID != null && this.readGourpID.length() > 0){
+            arguments.add("--rg-id");
+            arguments.add(this.readGourpID);
+        }
+
+        if (this.readGroup != null && this.readGroup.size() > 0){
+            for(String rg: this.readGroup){
+                arguments.add("--rg");
+                arguments.add(rg);
+            }
+        }
+
         // Add input file.
-        if (this.isPairedReads()){
+        if (this.isTab5Mode){
+            arguments.add("--tab5");
+            arguments.add(this.getInputFile());
+        }else if (this.isPairedReads()){
             arguments.add("-1");
             arguments.add(this.getInputFile());
             arguments.add("-2");

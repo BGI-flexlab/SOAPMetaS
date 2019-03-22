@@ -2,6 +2,7 @@ package org.bgi.flexlab.metas.profiling;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
@@ -11,6 +12,8 @@ import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.ProfilingPipelineMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
+
+import java.util.List;
 
 
 /**
@@ -23,6 +26,7 @@ import scala.Tuple2;
 public class ProfilingProcess {
 
     private MetasOptions metasOpt;
+    private JavaSparkContext jscontext;
 
     private SequencingMode seqMode;
     private ProfilingAnalysisMode analysisMode;
@@ -34,8 +38,9 @@ public class ProfilingProcess {
 
     private MetasSamRecordIdentityFilter identityFilter;
 
-    public ProfilingProcess(final MetasOptions options){
+    public ProfilingProcess(final MetasOptions options, final JavaSparkContext context){
         this.metasOpt = options;
+        this.jscontext = context;
         this.processInitialize();
     }
 
@@ -50,6 +55,7 @@ public class ProfilingProcess {
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
         this.identityFilter = new MetasSamRecordIdentityFilter();
     }
+
 
     /**
      * Runs profiling. All options should have been set.
@@ -91,14 +97,14 @@ public class ProfilingProcess {
         JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
                 .mapToPair(record -> new Tuple2<>(this.pUtil.samRecordNameModifier(record), record))
                 .groupByKey()
-                .mapToPair(readSamGroup -> new Tuple2<>(readSamGroup._1, this.pUtil.readSamListToSamPair(readSamGroup._2)))
+                .mapValues(new SamRecordListMergeFunction(this.seqMode))
                 .filter(item -> (item._2 != null));
 
 
         /**
          * TODO: 后续输入要改成 sample-ref 模式的键，record 都有 sample tag，需要对不同的 sample 进行聚合处理
          */
-        JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = profilingMethod.runProfiling(readMetasSamPairRDD);
+        JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = profilingMethod.runProfiling(readMetasSamPairRDD, null);
 
 
 

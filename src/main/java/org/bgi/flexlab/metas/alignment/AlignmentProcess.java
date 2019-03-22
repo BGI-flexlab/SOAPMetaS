@@ -8,7 +8,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -26,7 +25,7 @@ import java.util.List;
 
 /**
  * ClassName: AlignmentProcess
- * Description: Wrapper class for the process of alignment. The script is based on
+ * Description: Control mapping process. The script is based on
  * com.github.sparkbwa.AlignmentProcess class. All changes are interpreted in comments with
  * "*Changes" label.
  *
@@ -37,14 +36,14 @@ import java.util.List;
 
 public class AlignmentProcess {
 
-    private static final Log 				LOG = LogFactory.getLog(AlignmentProcess.class); // The LOG
-    private SparkConf 						sparkConf; 								// The Spark Configuration to use
-    private JavaSparkContext 				ctx;									// The Java Spark Context
-    private Configuration 					conf;									// Global Configuration
-    private long 							totalInputLength;
-    private long 							blocksize;
-    private MetasOptions 					options;								// *Changes: original is options for BWA.
-    private String 							inputTmpFileName;
+    private static final Log LOG = LogFactory.getLog(AlignmentProcess.class); // The LOG
+    private SparkConf sparkConf; 								// The Spark Configuration to use
+    private JavaSparkContext jscontext;									// The Java Spark Context
+    private Configuration conf;									// Global Configuration
+    //private long totalInputLength;
+    //private long blocksize;
+    private MetasOptions options;								// *Changes: original is options for BWA.
+    //private String inputTmpFileName;
 
 
     /**
@@ -52,14 +51,14 @@ public class AlignmentProcess {
      * AlignmentProcess object from the Spark shell, the MetasOptions and the Spark Context objects need
      * to be passed as argument.
      *
-     * @param optionsFromShell The MetasOptions object initialized with the user options
+     * @param options The MetasOptions object initialized with the user options
      * @param context The Spark Context from the Spark Shell. Usually "sc"
      * @return The AlignmentProcess object with its options initialized.
      */
-    public AlignmentProcess(MetasOptions optionsFromShell, SparkContext context) {
+    public AlignmentProcess(MetasOptions options, JavaSparkContext context) {
 
-        this.options = optionsFromShell;
-        this.ctx = new JavaSparkContext(context);
+        this.options = options;
+        this.jscontext = context;
         this.initProcess();
     }
 
@@ -75,15 +74,6 @@ public class AlignmentProcess {
     public AlignmentProcess(String[] args) {
 
         this.options = new MetasOptions(args);
-        this.initProcess();
-    }
-
-    /**
-     * Constructor to build AlignmentProcess object from MetasOptions object.
-     * @param options
-     */
-    public AlignmentProcess(MetasOptions options){
-        this.options = options;
         this.initProcess();
     }
 
@@ -111,7 +101,7 @@ public class AlignmentProcess {
             }
 
             // Total size. Depends on paired or single reads
-            this.totalInputLength = lengthFile1 + lengthFile2;
+            //this.totalInputLength = lengthFile1 + lengthFile2;
             fs.close();
         } catch (IOException e) {
             LOG.error(e.toString());
@@ -151,12 +141,12 @@ public class AlignmentProcess {
 
     /**
      * Function to load a FASTQ file from HDFS into a JavaPairRDD<Long, String>
-     * @param ctx The JavaSparkContext to use
+     * @param jscontext The JavaSparkContext to use
      * @param pathToFastq The path to the FASTQ file
      * @return A JavaPairRDD containing <Long Read ID, String Read>
      */
-    public static JavaPairRDD<Long, String> loadFastq(JavaSparkContext ctx, String pathToFastq) {
-        JavaRDD<String> fastqLines = ctx.textFile(pathToFastq);
+    public static JavaPairRDD<Long, String> loadFastq(JavaSparkContext jscontext, String pathToFastq) {
+        JavaRDD<String> fastqLines = jscontext.textFile(pathToFastq);
 
         // Determine which FASTQ record the line belongs to.
         JavaPairRDD<Long, Tuple2<String, Long>> fastqLinesByRecordNum = fastqLines.zipWithIndex()
@@ -182,7 +172,7 @@ public class AlignmentProcess {
         LOG.info("["+this.getClass().getName()+"] :: Not sorting in HDFS. Timing: " + startTime);
 
         // Read the FASTQ file from HDFS using the FastqInputFormat class
-        JavaPairRDD<Long, String> singleReadsKeyVal = loadFastq(this.ctx, this.options.getInputFastqPath());
+        JavaPairRDD<Long, String> singleReadsKeyVal = loadFastq(this.jscontext, this.options.getInputFastqPath());
 
         // Sort in memory with no partitioning
         if ((options.getPartitionNumber() == 0) && (options.isSortFastqReads())) {
@@ -254,8 +244,8 @@ public class AlignmentProcess {
         LOG.info("["+this.getClass().getName()+"] ::Not sorting in HDFS. Timing: " + startTime);
 
         // Read the two FASTQ files from HDFS using the loadFastq method. After that, a Spark join operation is performed
-        JavaPairRDD<Long, String> datasetTmp1 = loadFastq(this.ctx, options.getInputFastqPath());
-        JavaPairRDD<Long, String> datasetTmp2 = loadFastq(this.ctx, options.getInputFastqPath2());
+        JavaPairRDD<Long, String> datasetTmp1 = loadFastq(this.jscontext, options.getInputFastqPath());
+        JavaPairRDD<Long, String> datasetTmp2 = loadFastq(this.jscontext, options.getInputFastqPath2());
         JavaPairRDD<Long, Tuple2<String, String>> pairedReadsRDD = datasetTmp1.join(datasetTmp2);
 
         datasetTmp1.unpersist();
@@ -453,10 +443,14 @@ public class AlignmentProcess {
 
     /**
      * Procedure to initiate the AlignmentProcess configuration parameters
+     *
+     * TODO: Pay attention to the initiation of new spark context.
+     * TODO: What is the intention of sorting?
+     *
      */
     public void initProcess() {
-        //If ctx is null, this procedure is being called from the Linux console with Spark
-        if (this.ctx == null) {
+        //If jscontext is null, this procedure is being called from the Linux console with Spark
+        if (this.jscontext == null) {
 
             String sorting;
 
@@ -479,25 +473,25 @@ public class AlignmentProcess {
                     + "-"
                     + sorting);
 
-            //The ctx is created from scratch
-            this.ctx = new JavaSparkContext(this.sparkConf);
+            //The jscontext is created from scratch
+            this.jscontext = new JavaSparkContext(this.sparkConf);
 
         }
         //Otherwise, the procedure is being called from the Spark shell
         else {
 
-            this.sparkConf = this.ctx.getConf();
+            this.sparkConf = this.jscontext.getConf();
         }
 
         //The Hadoop configuration is obtained
-        this.conf = this.ctx.hadoopConfiguration();
+        this.conf = this.jscontext.hadoopConfiguration();
 
         //The block size
-        this.blocksize = this.conf.getLong("dfs.blocksize", 134217728);
+        //this.blocksize = this.conf.getLong("dfs.blocksize", 134217728);
 
         createOutputFolder();
-        setTotalInputLength();
+        //setTotalInputLength();
 
-        //ContextCleaner cleaner = this.ctx.sc().cleaner().get();
+        //ContextCleaner cleaner = this.jscontext.sc().cleaner().get();
     }
 }

@@ -13,28 +13,28 @@ public class MetasSamPairRecord {
     private MetasSamRecord record1 = null;
     private MetasSamRecord record2 = null;
 
+    //private boolean exact1 = true;
+    //private boolean exact2 = true;
+
     private boolean pairedMode = false;
     private boolean properPaired = false;
 
-    public MetasSamPairRecord(){
-        super();
-    }
+    //public boolean isExact1() {
+    //    return exact1;
+    //}
+    //public boolean isExact2() {
+    //    return exact2;
+    //}
+    //public void setMultiAlign1() {
+    //    this.exact1 = false;
+    //}
+    //public void setMultiAlign2() {
+    //    this.exact2 = false;
+    //}
 
     public MetasSamPairRecord(MetasSamRecord record1, MetasSamRecord record2){
         this.record1 = record1;
         this.record2 = record2;
-    }
-
-    public MetasSamPairRecord(MetasSamRecord record){
-        if (record.getReadPairedFlag()){
-            if (record.getFirstOfPairFlag()){
-                this.record1 = record;
-            } else {
-                this.record2 = record;
-            }
-        } else {
-            this.record1 = record;
-        }
     }
 
     public void setProperPaired(boolean properPaired){
@@ -61,4 +61,11 @@ public class MetasSamPairRecord {
         return this.record2;
     }
 
+    public MetasSamRecord getRecord(){
+        if(isPairedMode()){
+            return null;
+        } else{
+            return this.getFirstRecord();
+        }
+    }
 }

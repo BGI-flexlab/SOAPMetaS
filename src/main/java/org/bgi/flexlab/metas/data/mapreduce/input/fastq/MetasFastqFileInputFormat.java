@@ -13,7 +13,15 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 
-public class FqText extends FileInputFormat<Text, Text> {
+/**
+ * The class is based on org.bgi.flexlab.gaealib.input.fastq.FqText.
+ *
+ * *Changes:
+ *  + Rename class as "MetasFastqFileInputFormat".
+ *  + Change the type of "key" from type Text to type IntWritable.
+ */
+
+public class MetasFastqFileInputFormat extends FileInputFormat<Text, Text> {
     protected boolean isSplitable(JobContext context, Path file) {
         CompressionCodec codec = new CompressionCodecFactory(
                 context.getConfiguration()).getCodec(file);
@@ -30,8 +38,7 @@ public class FqText extends FileInputFormat<Text, Text> {
         if (null != delimiter)
             recordDelimiterBytes = delimiter.getBytes();
 
-        return new GZFastqReader(
-                job, (FileSplit) genericSplit, recordDelimiterBytes);
+        return new MetasGZFastqReader(job, (FileSplit) genericSplit, recordDelimiterBytes);
     }
 
 }

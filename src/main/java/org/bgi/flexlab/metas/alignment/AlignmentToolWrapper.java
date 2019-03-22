@@ -16,10 +16,12 @@ public abstract class AlignmentToolWrapper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String inputFile = "";
-    private String inputFile2 = "";
-    private String outputFile = "alignment.outputTmp";
+    private String inputFile;
+    private String inputFile2;
+    private String outputFile;
     private String alignmentIndexPath;
+
+    private String readGroupID = null;
 
     private String samOutputHdfsDir;
 
@@ -163,6 +165,13 @@ public abstract class AlignmentToolWrapper implements Serializable {
         this.tmpDirectory = tmpPath;
     }
 
+    public void setReadGroupID(String readGroupID) {
+        this.readGroupID = readGroupID;
+    }
+
+    public String getReadGroupID() {
+        return readGroupID;
+    }
 
     /**
      *

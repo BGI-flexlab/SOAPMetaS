@@ -44,7 +44,7 @@ public class PairedAlignmentMethod extends AlignmentMethodBase implements Serial
         String fastqFileName1;
         String fastqFileName2;
 
-        if(this.tmpDir.lastIndexOf("/") == this.tmpDir.length()-1) {
+        if(this.tmpDir.endsWith("/")) {
             fastqFileName1 = this.tmpDir + this.appId + "-RDD" + arg0 + "_1";
             fastqFileName2 = this.tmpDir + this.appId + "-RDD" + arg0 + "_2";
         }

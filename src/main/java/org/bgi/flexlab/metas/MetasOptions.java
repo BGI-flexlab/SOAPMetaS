@@ -7,6 +7,7 @@ import org.bgi.flexlab.metas.util.ProfilingPipelineMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * ClassName: MetasOptions
@@ -44,7 +45,14 @@ public class MetasOptions {
     private boolean sortFastqReadsHdfs 	= false;
     private boolean mergeOutputSamBySample = false;
 
+    private String readGroupID = null;
+    private ArrayList<String> readGroup = null;
     private String extraAlignmentArguments = "";
+
+    // Fastq InputFormat arguments and configures group.
+    private String multiSampleList = "";
+    //// Partition number of each sample. The final partition number is partNumEachSample*NumberOfSample
+    private int numPartitionEachSample = 5;
 
     // GCBias correction arguments group.
     private String gcBiasCorrectionModelType = "default";
@@ -182,7 +190,7 @@ public class MetasOptions {
     }
 
     public int getPartitionNumber() {
-        return this.partitionNumber;
+        return Math.abs(this.partitionNumber);
     }
 
     public boolean isSortFastqReads() {
@@ -207,5 +215,25 @@ public class MetasOptions {
 
     public String getAlignmentTmpDir() {
         return alignmentTmpDir;
+    }
+
+    /*
+    Fastq InputFormat related arguments and configures group.
+     */
+
+    public String getMultiSampleList() {
+        return multiSampleList;
+    }
+
+    public int getNumPartitionEachSample() {
+        return Math.abs(numPartitionEachSample);
+    }
+
+    public ArrayList<String> getReadGroup() {
+        return readGroup;
+    }
+
+    public String getReadGroupID() {
+        return readGroupID;
     }
 }

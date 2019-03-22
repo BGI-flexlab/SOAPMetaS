@@ -7,17 +7,31 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.util.LineReader;
+import org.bgi.flexlab.metas.data.structure.fastq.FastqMultiSampleList;
+import org.bgi.flexlab.metas.data.structure.fastq.FastqSampleList;
 
 import java.io.IOException;
 
-public class GZFastqReader implements RecordReader<Text, Text> {
-	protected static final Log LOG = LogFactory.getLog(GZFastqReader.class
-			.getName());
+/**
+ * The Class is based on org.bgi.flexlab.gaealib.input.fastq.GZFastqReader.
+ *
+ * *Changes:
+ *  + Rename class as "MetasGZFastqReader"
+ *  + Modify the assignment of sampleID in constructor. The default samapleID without sampleList
+ *  file is the hashcode of file split's path.
+ *  + Change the type of "key" from Text to IntWritable.
+ *  + Add readGroupID field.
+ *  + The default readGroupID without sampleList file is the file path name(file.getName()).
+ *  + Add readGrouID to the value for each record.
+ *
+ */
+
+public class MetasGZFastqReader implements RecordReader<Text, Text> {
+	protected static final Log LOG = LogFactory.getLog(MetasGZFastqReader.class.getName());
 
 	protected CompressionCodecFactory compressionCodecs = null;
 	protected long start;
@@ -27,7 +41,10 @@ public class GZFastqReader implements RecordReader<Text, Text> {
 	protected int maxLineLength;
 	protected byte[] recordDelimiterBytes;
 	protected String firstLine = "";
-	protected String sampleID;
+	protected int sampleID;
+	protected String readGroupID;
+	protected int recordCount = 0;
+	protected long fileLength;
 
 	public void getFirstFastqLine() throws IOException {
 		Text tmpline = new Text();
@@ -42,52 +59,61 @@ public class GZFastqReader implements RecordReader<Text, Text> {
 		}
 	}
 
-	public GZFastqReader(Configuration job, FileSplit split,
-                         byte[] recordDelimiter) throws IOException {
-		this.maxLineLength = job.getInt("mapred.linerecordreader.maxlength",
-				Integer.MAX_VALUE);
+	public MetasGZFastqReader(Configuration jobConf, FileSplit split, byte[] recordDelimiter) throws IOException {
+
+		final Path file = split.getPath();
+		compressionCodecs = new CompressionCodecFactory(jobConf);
+
+		if (compressionCodecs.getCodec(file) != null) {
+			LOG.error(this.getClass().toString() + " Fastq File Codec Error. Please decompress input file.");
+			pos = end;
+		}
+
+		this.maxLineLength = jobConf.getInt("mapred.linerecordreader.maxlength", Integer.MAX_VALUE);
 		start = split.getStart();
 		end = start + split.getLength();
-		final Path file = split.getPath();
-		compressionCodecs = new CompressionCodecFactory(job);
-		final CompressionCodec codec = compressionCodecs.getCodec(file);
+
+		FileSystem fs = file.getFileSystem(jobConf);
+		fileLength = fs.getFileStatus(file).getLen();
+
+		if (null != recordDelimiter) {
+			this.recordDelimiterBytes = recordDelimiter;
+		}
 
 		// System.err.println("split:" + split.getPath().toString());
-		String multiSampleList = job.get("multiSampleList");
-		if (multiSampleList != null && !multiSampleList.equals("")) {
-			MultiSampleList samplelist;
-			samplelist = new MultiSampleList(multiSampleList, false);
-			SampleList slist = samplelist.getID(split.getPath().toString());
+		String sampleListPath = jobConf.get("metas.data.mapreduce.input.multisamplelist");
+		if (sampleListPath != null && !sampleListPath.equals("")) {
+			FastqMultiSampleList fastqMultiSampleList;
+			fastqMultiSampleList = new FastqMultiSampleList(sampleListPath, true, false);
+			FastqSampleList slist = fastqMultiSampleList.getSampleList(split.getPath().toString());
 			if (slist != null) {
-				sampleID = String.valueOf(slist.getId());
+				sampleID = slist.getSampleID();
+				readGroupID = slist.getRgID();
 			} else {
-				sampleID = "+";
+				LOG.error("Please provide multisample information for " + file.toString() +
+						" . Pr the partitioning may be uncontrollable.");
+				sampleID = fastqMultiSampleList.getSampleCount() + 1;
+				readGroupID = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
 			}
+		} else {
+			LOG.error("Please provide multisample information list, or the partitioning may be uncontrollable.");
+			sampleID = 1;
+			readGroupID = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
 		}
 
 		// open the file and seek to the start of the split
-		FileSystem fs = file.getFileSystem(job);
 		FSDataInputStream fileIn = fs.open(split.getPath());
 		boolean skipFirstLine = false;
-		if (codec != null) {
-			if (null == this.recordDelimiterBytes) {
-				in = new LineReader(codec.createInputStream(fileIn), job);
-			} else {
-				in = new LineReader(codec.createInputStream(fileIn), job,
-						this.recordDelimiterBytes);
-			}
-			end = Long.MAX_VALUE;
+
+		if (start != 0) {
+			skipFirstLine = true;
+			--start;
+			fileIn.seek(start);
+		}
+		if (null == this.recordDelimiterBytes) {
+			in = new LineReader(fileIn, jobConf);
 		} else {
-			if (start != 0) {
-				skipFirstLine = true;
-				--start;
-				fileIn.seek(start);
-			}
-			if (null == this.recordDelimiterBytes) {
-				in = new LineReader(fileIn, job);
-			} else {
-				in = new LineReader(fileIn, job, this.recordDelimiterBytes);
-			}
+			in = new LineReader(fileIn, jobConf, this.recordDelimiterBytes);
 		}
 		if (skipFirstLine) { // skip first line and re-establish "start".
 			start += in.readLine(new Text(), 0,
@@ -135,6 +161,7 @@ public class GZFastqReader implements RecordReader<Text, Text> {
 		}
 		int newSize = 0;
 		boolean iswrongFq = false;
+
 		while (pos < end) {
 			Text tmp = new Text();
 			String[] st = new String[4];
@@ -188,23 +215,24 @@ public class GZFastqReader implements RecordReader<Text, Text> {
 							throw new RuntimeException("error fq format at reads:"
 								+ st[0]);
 
-						st[0] = splitTmp[0] + "_1" + splitTmp[1].substring(1) + "/"
-							+ ch;
+						st[0] = splitTmp[0] + "__" + splitTmp[1].substring(1) + "/" + ch;
 					}
 					index = st[0].lastIndexOf("/");
 				}
 				String tempkey = st[0].substring(1, index).trim();
 				char keyIndex = st[0].charAt(index + 1);
 
-				if (sampleID == null || sampleID.equals("") || sampleID.equals("+")) {
-					key.set(">" + st[2]);
-					value.set(tempkey + "\t" + keyIndex + "\t" + st[1] + "\t"
-							+ st[3]);
-				} else {
-					key.set(">" + sampleID);
-					value.set(tempkey + "\t" + keyIndex + "\t" + st[1] + "\t"
-							+ st[3]);
-				}
+				// key: sampleID#readName. example: <Text>
+				// value: mateIndex(1 or 2)##sampleID	pos	filelength##readGroupID##sequence	quality
+				//key.set(sampleID + "#" +tempkey);
+				//value.set(keyIndex + "##" + sampleID + "\t" + pos + "\t" + fileLength + "##" + readGroupID + "##" + st[1] + "\t" + st[3]);
+
+				// new key: sampleID	readName
+				// new value: mateIndex(1 or 2)##readGroupID##sequence	quality
+				key.set(sampleID + "\t" + tempkey);
+				value.set(keyIndex + "##" + readGroupID + "##" + st[1] + "\t" + st[3]);
+
+				recordCount++;
 			} else {
 				LOG.warn("wrong fastq reads:blank line among fq file or end of file!");
 			}

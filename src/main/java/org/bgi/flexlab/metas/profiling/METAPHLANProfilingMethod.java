@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.profiling;
 
+import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
@@ -26,7 +27,7 @@ public class METAPHLANProfilingMethod extends ProfilingMethodBase {
      * @return
      */
     @Override
-    public JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD){
+    public JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner){
         return null;
     }
 
