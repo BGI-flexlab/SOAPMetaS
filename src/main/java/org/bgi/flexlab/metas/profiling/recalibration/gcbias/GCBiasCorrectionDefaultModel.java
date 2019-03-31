@@ -16,13 +16,13 @@ import java.util.List;
  * platform. New model coefficients should be trained for data from different platform. The default model is
  * created with reference to <https://doi.org/10.1371/journal.pone.0165015> .
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase {
 
-    public GCBiasCorrectionDefaultModel(File inputCoefficientsFile){
-        this.inputCoefficients(inputCoefficientsFile);
+    public GCBiasCorrectionDefaultModel(String inputCoefficientsFilePath){
+        this.inputCoefficients(inputCoefficientsFilePath);
     }
 
     public GCBiasCorrectionDefaultModel(){
@@ -59,10 +59,10 @@ public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase {
     /**
      * The method is used to save coefficients to file so that the model could be reused.
      *
-     * @param outputFile Output stream.
+     * @param outputFilePath Output stream.
      */
-    public void outputCoefficients(File outputFile){
-        try (JsonWriter jsonWriter = new JsonWriter(new FileWriter(outputFile))){
+    public void outputCoefficients(String outputFilePath){
+        try (JsonWriter jsonWriter = new JsonWriter(new FileWriter(outputFilePath))){
             jsonWriter.setIndent("    ");
             jsonWriter.beginObject();
 
@@ -79,11 +79,11 @@ public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase {
     /**
      * The method is used to read the saved model file.
      *
-     * @param inputFile Input stream.
+     * @param inputFilePath Input stream.
      */
-    public void inputCoefficients(File inputFile){
+    public void inputCoefficients(String inputFilePath){
 
-        try (JsonReader jsonReader = new JsonReader(new FileReader(inputFile));){
+        try (JsonReader jsonReader = new JsonReader(new FileReader(inputFilePath))){
             jsonReader.beginObject();
 
             while (jsonReader.hasNext()){

@@ -4,7 +4,7 @@ package org.bgi.flexlab.metas.alignment;
  * ClassName: PairedAlignmentMethod
  * Description: The script is based on com.github.sparkbwa.BwaPairedAlignment.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 import org.apache.spark.SparkContext;

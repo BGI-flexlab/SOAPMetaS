@@ -2,12 +2,9 @@ package org.bgi.flexlab.metas.profiling;
 
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
-import org.bgi.flexlab.metas.data.structure.reference.ReferenceInformation;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
-import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
@@ -17,7 +14,7 @@ import org.bgi.flexlab.metas.util.SequencingMode;
  * ClassName: ProfilingMethodBase
  * Description: 基本的profiling功能抽象。
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public abstract class ProfilingMethodBase {
@@ -26,17 +23,11 @@ public abstract class ProfilingMethodBase {
     protected ProfilingAnalysisLevel profilingAnalysisLevel;
     protected SequencingMode sequencingMode;
 
-    protected ReferenceInformation referenceInformation;
-
-    protected GCBiasCorrectionModelFactory gcBiasCorrectionModelFactory;
 
     public ProfilingMethodBase(MetasOptions options){
         this.profilingAnalysisMode = options.getProfilingAnalysisMode();
         this.profilingAnalysisLevel = options.getProfilingAnalysisLevel();
         this.sequencingMode = options.getSequencingMode();
-
-        this.referenceInformation = new ReferenceInformation(options.getReferenceMatrixFilePath());
-        this.profilingAnalysisLevel = options.getProfilingAnalysisLevel();
     }
 
     /**
@@ -56,6 +47,6 @@ public abstract class ProfilingMethodBase {
      * ProfilingResultRecord contains cluster name (marker gene, species name or read group id), read count
      * of cluster, corrected abundance, and name list of all mapped reads(ProfilingAnalysisLevel.ESTIMATE).
      */
-    public abstract JavaRDD<ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner);
+    public abstract JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner);
 
 }

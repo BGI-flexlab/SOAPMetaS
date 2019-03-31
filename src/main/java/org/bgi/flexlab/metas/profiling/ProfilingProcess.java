@@ -9,7 +9,6 @@ import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
-import org.bgi.flexlab.metas.util.ProfilingPipelineMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 
@@ -20,7 +19,7 @@ import java.util.List;
  * ClassName: ProfilingProcess
  * Description: Control the profiling process.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class ProfilingProcess {
@@ -30,7 +29,7 @@ public class ProfilingProcess {
 
     private SequencingMode seqMode;
     private ProfilingAnalysisMode analysisMode;
-    private ProfilingPipelineMode pipelineMode;
+    private String pipeline;
 
     private ProfilingUtils pUtil;
 
@@ -48,12 +47,14 @@ public class ProfilingProcess {
 
         this.seqMode = this.metasOpt.getSequencingMode();
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
-        this.pipelineMode = this.metasOpt.getProfilingPipelineMode();
+        this.pipeline = this.metasOpt.getProfilingPipeline();
 
         this.pUtil = new ProfilingUtils(this.metasOpt);
 
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
-        this.identityFilter = new MetasSamRecordIdentityFilter();
+        if (this.doIdentityFiltering) {
+            this.identityFilter = new MetasSamRecordIdentityFilter(this.metasOpt.getMinIdentity());
+        }
     }
 
 
@@ -64,7 +65,7 @@ public class ProfilingProcess {
      * @return The RDD of ProfilingResultRecord, which stores the data of all the profiling result and
      *     and other necessary information.
      */
-    public JavaRDD<ProfilingResultRecord> runProfilingProcess(JavaRDD<MetasSamRecord> metasSamRecordRDD){
+    public JavaPairRDD<String, ProfilingResultRecord> runProfilingProcess(JavaPairRDD<String, MetasSamRecord> metasSamRecordRDD){
 
         ProfilingMethodBase profilingMethod = getProfilingMethod();
 
@@ -72,8 +73,8 @@ public class ProfilingProcess {
          * Note: filter() operation of rdd will return a new RDD containing only the elements that
          * makes the filter return true.
          */
-        JavaRDD<MetasSamRecord> cleanMetasSamRecordRDD = metasSamRecordRDD
-                .filter(rec -> ! rec.getReadUnmappedFlag());
+        JavaPairRDD<String, MetasSamRecord>  cleanMetasSamRecordRDD = metasSamRecordRDD
+                .filter(tuple -> ! tuple._2.getReadUnmappedFlag());
 
         if (this.doIdentityFiltering){
             cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
@@ -89,22 +90,21 @@ public class ProfilingProcess {
          * The results generated from bowtie2 may lose the "/1/2" suffix of read name, so it is important
          * to check the sequencing mode in the spark mapToPair(the 2nd of following) step for samPairRecord.
          *
+         * TODO: 注意多样本模式下bowtie中的readname已经不包含末尾的/1/2后缀。在读取fastq的时候就已经去除后缀。因此完全依赖CIGAR来判断pair信息。
+         *
          * TODO: groupByKey方法考虑用其他的bykey方法替换，参考 https://databricks.gitbooks.io/databricks-spark-knowledge-base/content/best_practices/prefer_reducebykey_over_groupbykey.html
          *
          * TODO: 注意在最后输出结果时计算相对丰度
          *
          */
         JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
-                .mapToPair(record -> new Tuple2<>(this.pUtil.samRecordNameModifier(record), record))
+                .mapToPair(tuple -> new Tuple2<>(this.pUtil.samRecordNameModifier(tuple._2), tuple._2))
                 .groupByKey()
                 .mapValues(new SamRecordListMergeFunction(this.seqMode))
                 .filter(item -> (item._2 != null));
 
 
-        /**
-         * TODO: 后续输入要改成 sample-ref 模式的键，record 都有 sample tag，需要对不同的 sample 进行聚合处理
-         */
-        JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = profilingMethod.runProfiling(readMetasSamPairRDD, null);
+        JavaPairRDD<String, ProfilingResultRecord> profilingResultRecordRDD = profilingMethod.runProfiling(readMetasSamPairRDD, null);
 
 
 
@@ -127,10 +127,10 @@ public class ProfilingProcess {
      */
     public ProfilingMethodBase getProfilingMethod(){
         try {
-            if(this.pipelineMode.equals(ProfilingPipelineMode.METAPHLAN)){
-                return new METAPHLANProfilingMethod(this.metasOpt);
-            } else if (this.pipelineMode.equals(ProfilingPipelineMode.COMG)){
+            if(this.pipeline.equals("metaphlan")){
                 return new COMGProfilingMethod(this.metasOpt);
+            } else if (this.pipeline.equals("comg")){
+                return new METAPHLANProfilingMethod(this.metasOpt);
             }
         } catch (final NullPointerException e){
             e.printStackTrace();

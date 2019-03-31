@@ -5,7 +5,7 @@ package org.bgi.flexlab.metas.alignment;
  * ClassName: SingleAlignmentMethod
  * Description: The script is based on com.github.sparkbwa.BwaSingleAlignment.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 import org.apache.spark.SparkContext;

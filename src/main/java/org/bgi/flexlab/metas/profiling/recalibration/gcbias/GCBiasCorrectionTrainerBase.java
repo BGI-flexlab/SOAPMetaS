@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * ClassName: GCBiasCorrectionTrainerBase
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public abstract class GCBiasCorrectionTrainerBase {

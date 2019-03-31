@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.data.mapreduce;
+package org.bgi.flexlab.metas.data.mapreduce.partitioner;
 
 import org.apache.spark.Partitioner;
 import org.apache.spark.util.Utils;
@@ -8,7 +8,7 @@ import org.apache.spark.util.Utils;
  * Description: Customized partitioner for PairRDD of which the key format is
  *  r"sampleID\treadRecordCount", note that sampleID must be integer.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class SampleIDReadNamePartitioner extends Partitioner {
@@ -27,11 +27,10 @@ public class SampleIDReadNamePartitioner extends Partitioner {
 
     /**
      * PairRDD to be partitioned:
-     * new key: sampleID	readName
      *
      * Note: sampleID begins from 0.
      *
-     * @param key String. r"sampleID\treadRecordCount"
+     * @param key String. r"sampleID\t(readName/clusterName)"
      * @return
      */
     @Override

@@ -1,22 +1,27 @@
 package org.bgi.flexlab.metas.data.structure.profiling;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 /**
  * ClassName: ProfilingResultRecord
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class ProfilingResultRecord implements Serializable {
 
-    protected String clusterName;
-    protected Integer rawReadCount;
-    protected Double correctedReadCount;
-    protected Double abundance; // correctedReadCount divided by marker length
-    //protected Double relativeAbun;
-    //protected Byte readNameString; //后续需要考虑采用更合适的方式来存储read name字符串
+    public static final long serialVersionUID = 1L;
+
+    private String readGroupID;
+    private String clusterName;
+    private Integer rawReadCount;
+    private Double correctedReadCount;
+    private Double abundance; // correctedReadCount divided by marker length
+    private byte[] readNameStringBytes; //后续需要考虑采用更合适的方式来存储read name字符串
 
     public void setClusterName(String name){
         this.clusterName = name;
@@ -50,12 +55,24 @@ public class ProfilingResultRecord implements Serializable {
         return this.correctedReadCount;
     }
 
-    //public void setRelativeAbun(Double relativeAbun){
-    //    this.relativeAbun = relativeAbun;
-    //}
+    public void setReadGroupID(String readGroupID) {
+        this.readGroupID = readGroupID;
+    }
 
-    //public Double getRelativeAbun(){
-    //    return this.relativeAbun;
-    //}
+    public String getReadGroupID() {
+        return readGroupID;
+    }
+
+    public void setReadNameString(byte[] readNameStringBytes) {
+        this.readNameStringBytes = readNameStringBytes;
+    }
+
+    public String getReadNameString() {
+        if (this.readNameStringBytes != null){
+            return new String(this.readNameStringBytes, StandardCharsets.UTF_8);
+        } else {
+            return "";
+        }
+    }
 
 }

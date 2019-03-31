@@ -14,7 +14,7 @@ import java.util.Iterator;
  * ClassName: BowtieTabAlignmentMethod
  * Description: The class is used for alignment of bowtie2 tab5 format (para: --tab5).
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class BowtieTabAlignmentMethod extends AlignmentMethodBase implements Serializable, Function2<Integer, Iterator<Tuple2<String, String>>, Iterator<String>> {
@@ -28,12 +28,12 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase implements Ser
 
     private ArrayList<String> runMultiSampleAlignment(String readGroupID, String tab5FileName, String outSamFileName){
         this.toolWrapper.setInputFile(tab5FileName);
-        this.toolWrapper.setOutputFile(outSamFileName);
+        this.toolWrapper.setOutputFile(this.tmpDir + "/" + outSamFileName);
         this.toolWrapper.setReadGroupID(readGroupID);
 
         this.toolWrapper.run();
 
-        return this.copyResults(outSamFileName);
+        return this.copyResults(outSamFileName, readGroupID);
     }
 
     /**
@@ -61,15 +61,8 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase implements Ser
         element = elementIter.next();
         readGroupID = element._1;
 
-        if(this.tmpDir.endsWith("/")) {
-            tab5FileName = this.tmpDir + this.appId + "-RDDPart" + index + "-" + readGroupID + ".tab5";
-            outSamFileName = this.tmpDir + this.appId + "-RDDPart" + index + "-" + readGroupID + ".sam";
-        }
-        else {
-            tab5FileName = this.tmpDir + "/" + this.appId + "-RDDPart" + index + "-" + readGroupID + ".tab5";
-            outSamFileName = this.tmpDir + "/" + this.appId + "-RDDPart" + index + "-" + readGroupID + ".sam";
-
-        }
+        tab5FileName = this.tmpDir + "/" + this.appId + "-RDDPart" + index + "-" + readGroupID + ".tab5";
+        outSamFileName = this.appId + "-RDDPart" + index + "-" + readGroupID + ".sam";
 
         LOG.info("["+this.getClass().getName()+"] :: Writing file: " + tab5FileName);
 

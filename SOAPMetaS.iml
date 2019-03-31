@@ -129,7 +129,6 @@
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-common:2.6.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-annotations:2.6.5" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:11.0.2" level="project" />
-    <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.2" level="project" />
     <orderEntry type="library" name="Maven: xmlenc:xmlenc:0.52" level="project" />
     <orderEntry type="library" name="Maven: commons-httpclient:commons-httpclient:3.1" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.4" level="project" />
@@ -225,6 +224,9 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-jexl:2.1.1" level="project" />
     <orderEntry type="library" name="Maven: org.tukaani:xz:1.5" level="project" />
     <orderEntry type="library" name="Maven: gov.nih.nlm.ncbi:ngs-java:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.seqdoop:hadoop-bam:7.10.0" level="project" />
+    <orderEntry type="library" name="Maven: com.github.jsr203hadoop:jsr203hadoop:1.0.3" level="project" />
     <orderEntry type="library" name="Maven: cz.adamh.utils:native-utils:1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.2" level="project" />
   </component>
 </module>

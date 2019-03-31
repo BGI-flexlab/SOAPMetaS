@@ -9,7 +9,7 @@ import org.bgi.flexlab.metas.util.SequencingMode;
  * ClassName: SamRecordListMergeFunction
  * Description: samrecord 列表 到 sampairrecord 的转换方法。
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRecord>, MetasSamPairRecord> {
@@ -68,7 +68,7 @@ public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRec
     }
 
     /**
-     * TODO: 关于insertsize的过滤需要确认是在此步完成还是在后续步骤，因为需要用到marker length数据。cOMG原流程中insertsize+100的100是为了容错，insertsize本身包含end+gap+end的区域。
+     * TODO: 注意cOMG原流程中insertsize+100的100是为了容错，insertsize本身包含end+gap+end的区域。
      * Generator of MetasSamPairRecord for paired-end sequencing data, both "record1" and "record2" fields
      * will be set. There are several status of the paired records:
      * + Both reads are unmapped. This kind of pairs will have been filtered out in the first operation of RDD.

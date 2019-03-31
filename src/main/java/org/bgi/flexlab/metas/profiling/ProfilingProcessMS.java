@@ -2,28 +2,37 @@ package org.bgi.flexlab.metas.profiling;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.storage.StorageLevel;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.data.mapreduce.SampleIDReadNamePartitioner;
+import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
+import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
+import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSamInputFormat;
+import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSamRecordWritable;
+import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingResultWriteFunction;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
-import org.bgi.flexlab.metas.util.ProfilingPipelineMode;
+import scala.Tuple2;
 
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ClassName: ProfilingProcessMS
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class ProfilingProcessMS {
@@ -33,16 +42,17 @@ public class ProfilingProcessMS {
     private MetasOptions metasOpt;
     private JavaSparkContext jscontext;
 
-    private ProfilingPipelineMode pipelineMode;
+    private String pipeline;
+    private ProfilingAnalysisMode analysisMode;
 
     private int numPartitionEachSample;
     private int sampleCount;
 
-    private ProfilingUtils pUtil;
-
     private boolean doIdentityFiltering = false;
     private MetasSamRecordIdentityFilter identityFilter;
 
+    private String tmpDir;
+    private String outputHdfsDir;
 
 
     public ProfilingProcessMS(final MetasOptions options, final JavaSparkContext context){
@@ -51,49 +61,126 @@ public class ProfilingProcessMS {
         this.processInitialize();
     }
 
+    /**
+     * TODO: Add createOutputDirectory method if needed.
+     */
     private void processInitialize(){
 
         this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartitionEachSample(), 1);
 
-        this.pipelineMode = this.metasOpt.getProfilingPipelineMode();
-
-        this.pUtil = new ProfilingUtils(this.metasOpt);
+        this.pipeline = this.metasOpt.getProfilingPipeline();
+        this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
 
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
-        this.identityFilter = new MetasSamRecordIdentityFilter();
-    }
-
-    public JavaRDD<ProfilingResultRecord> runProfilingProcess(List<String> samFileList){
-
-        this.sampleCount = samFileList.size();
-
-        this.jscontext;
-
-        /**
-         * Note: filter() operation of rdd will return a new RDD containing only the elements that
-         * makes the filter return true.
-         */
-        JavaRDD<MetasSamRecord> cleanMetasSamRecordRDD = metasSamRecordRDD
-                .filter(rec -> ! rec.getReadUnmappedFlag());
-
-        if (this.doIdentityFiltering){
-            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
+        if (this.doIdentityFiltering) {
+            this.identityFilter = new MetasSamRecordIdentityFilter(this.metasOpt.getMinIdentity());
         }
 
-        sampleCount
+        this.tmpDir = this.jscontext.getLocalProperty("spark.local.dir");
+
+        //We set the tmp dir
+        if ((this.tmpDir == null || this.tmpDir == "null")
+                && this.metasOpt.getProfilingTmpDir() != null
+                && !this.metasOpt.getProfilingTmpDir().isEmpty()) {
+
+            this.tmpDir = this.metasOpt.getProfilingTmpDir();
+        }
+
+        if (this.tmpDir == null || this.tmpDir == "null") {
+            this.tmpDir = jscontext.hadoopConfiguration().get("hadoop.tmp.dir");
+        }
+
+        if (this.tmpDir.startsWith("file:")) {
+            this.tmpDir = this.tmpDir.replaceFirst("file:", "");
+        }
+
+        File tmpFileDir = new File(this.tmpDir);
+
+        if(!tmpFileDir.isDirectory() || !tmpFileDir.canWrite()) {
+            this.tmpDir = "/tmp/";
+        }
+
+        this.outputHdfsDir = this.metasOpt.getProfilingOutputHdfsDir();
+        createOutputFolder(this.jscontext.hadoopConfiguration(), this.outputHdfsDir);
+
     }
 
-    public JavaRDD<ProfilingResultRecord> runProfilingProcess(String multiSAMFileList){
+    private void createOutputFolder(Configuration hadoopConf, String directoryPath) {
+        try {
+            FileSystem fs = FileSystem.get(hadoopConf);
+
+            // Path variable
+            Path outputDir = new Path(directoryPath);
+
+            // Directory creation
+            if (!fs.exists(outputDir)) {
+                fs.mkdirs(outputDir);
+            }
+            else {
+                fs.delete(outputDir, true);
+                fs.mkdirs(outputDir);
+            }
+
+            fs.close();
+        }
+        catch (IOException e) {
+            LOG.error("Fail to create SAM output directory.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     *
+     * @param samFileList Paths string list. Format: ReadGroupID\tPath
+     * @return Output file paths string.
+     */
+    public List<String> runProfilingProcess(List<String> samFileList){
+        String multiSamListFile = this.tmpDir + "/" + "MultipleSampleSAMListFile";
+
+        File samList = new File(multiSamListFile);
+        FileOutputStream fos1;
+        BufferedWriter bw1;
 
         try {
-            SAMMultiSampleList samMultiSampleList = new SAMMultiSampleList(multiSAMFileList, true, true);
+            fos1 = new FileOutputStream(samList);
+            bw1 = new BufferedWriter(new OutputStreamWriter(fos1));
+
+            for (int i = 0; i < samFileList.size(); i++) {
+                bw1.write(samFileList.get(i));
+                bw1.newLine();
+            }
+
+            bw1.close();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+            LOG.error("[" + this.getClass().getName() + "] :: MultiSampleFileList not found. " + e.toString());
+        } catch (IOException e){
+            e.printStackTrace();
+            LOG.error("[" + this.getClass().getName() + "] :: MultiSampleFileList IO error. " + e.toString());
+        }
+
+        return runProfilingProcess(multiSamListFile);
+    }
+
+    public List<String> runProfilingProcess(String multiSamListFile){
+
+        JavaPairRDD<String, MetasSamRecord> cleanMetasSamRecordRDD = null;
+
+        try {
+            SAMMultiSampleList samMultiSampleList = new SAMMultiSampleList(multiSamListFile, true, true);
+            Configuration conf = this.jscontext.hadoopConfiguration();
+            conf.set("metas.data.mapreduce.input.sammultisamplelist", this.metasOpt.getMultiSampleList());
+
 
             /**
              * Note: filter() operation of rdd will return a new RDD containing only the elements that
              * makes the filter return true.
              */
-            JavaRDD<MetasSamRecord> cleanMetasSamRecordRDD = metasSamRecordRDD
-                    .filter(rec -> ! rec.getReadUnmappedFlag());
+            cleanMetasSamRecordRDD = this.jscontext
+                    .newAPIHadoopFile(samMultiSampleList.getAllSAMFilePath(), MetasSamInputFormat.class,
+                            Text.class, MetasSamRecordWritable.class, conf)
+                    .filter(tup -> tup._2 != null)
+                    .mapToPair(tup -> new Tuple2<>(tup._1.toString(), tup._2.get()));
 
 
             if (this.doIdentityFiltering){
@@ -101,11 +188,13 @@ public class ProfilingProcessMS {
             }
 
             this.sampleCount = samMultiSampleList.getSampleCount();
+
         } catch (IOException e){
             LOG.error("Portable error: Multi-sample SAM file list can't be loaded.");
             e.printStackTrace();
         }
 
+        return runProfilingProcess(cleanMetasSamRecordRDD);
     }
 
     /**
@@ -115,53 +204,99 @@ public class ProfilingProcessMS {
      * @return The RDD of ProfilingResultRecord, which stores the data of all the profiling result and
      *     and other necessary information.
      */
-    private JavaRDD<ProfilingResultRecord> runProfilingProcess(JavaPairRDD<String, MetasSamRecord> metasSamRecordRDD){
+    private List<String> runProfilingProcess(JavaPairRDD<String, MetasSamRecord> metasSamRecordRDD){
 
 
         // Add one more partition for files without sample information.
         int numPartition = this.numPartitionEachSample * this.sampleCount + 1;
-        SampleIDReadNamePartitioner sampleIDPartitioner = new SampleIDReadNamePartitioner(numPartition,
+        SampleIDReadNamePartitioner sampleIDClusterNamePartitioner = new SampleIDReadNamePartitioner(numPartition,
                 this.numPartitionEachSample);
+        SampleIDPartitioner sampleIDPartitioner = new SampleIDPartitioner(this.sampleCount + 1);
+
         /*
-        Creating readname-metasSamRecord pair.
-        In paired end sequencing mode, the read name has no "/1" or "/2" suffix.
-        In single end sequencing mode, the read name remains unchanged.
+        InputRDD:
+         key: sampleID\treadName
+         value: MetasSamRecord
+         partition: defaultPartition
 
-        The method is currently designed for read name in the form of "@readname/1 @readname/2" and
-        not compatible with other forms.
+        After groupByKey:
+         key: sampleID\treadName
+         value: Interable<MetasSamRecord>
+         partition: sampleID + clusterName
 
-        The results generated from bowtie2 may lose the "/1/2" suffix of read name, so it is important
-        to check the sequencing mode in the spark mapToPair(the 2nd of following) step for samPairRecord.
-
-        TODO: 注意在最后输出结果时计算相对丰度
-
-        After mapToPair && filter:
+        After mapValues && filter:
          key: sampleID\treadName
          value: MetasSamPairRecord
+         partition: sampleID + clusterName
         */
         JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD = metasSamRecordRDD
-                .groupByKey(sampleIDPartitioner)
+                .groupByKey(sampleIDClusterNamePartitioner)
                 .mapValues(new SamRecordListMergeFunction(this.metasOpt.getSequencingMode()))
                 .filter(item -> (item._2 != null));
 
+        readMetasSamPairRDD.persist(StorageLevel.MEMORY_ONLY_SER());
 
         /*
-        Since clusterName functions similarly as readName does, so we use
+        Since clusterName functions similarly as readName does, so we use the same partitioner.
+
+        After runProfiling:
+         key: sampleID
+         value: ProfilingResultRecord (Tuple3<raw read count (uncorrected), corrected read count, merged read>)
+         partition: sampleID + clusterName
+
+        Note: Result Record doesn't contains relative abundance. And the RDD has been partitioned
+         according to the sampleID and clusterName.hash.
         */
-        JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = getProfilingMethod().runProfiling(readMetasSamPairRDD, sampleIDPartitioner);
+        JavaPairRDD<String, ProfilingResultRecord> profilingResultRecordRDD = getProfilingMethod()
+                .runProfiling(readMetasSamPairRDD, sampleIDClusterNamePartitioner);
 
 
+        profilingResultRecordRDD.persist(StorageLevel.MEMORY_AND_DISK());
+        readMetasSamPairRDD.unpersist();
 
-        //NOTE: 相对丰度的计算不应该放在profiling result结果中，因为它是全局相关的，在输出结果的时候进行计算最好
-        //Double totalAbundance = rawProfilingRecordRDD.map(resultRec -> resultRec.getAbundance()).reduce((a,b) -> a+b);
-        //JavaRDD<ProfilingResultRecord> profilingResultRecordRDD = rawProfilingRecordRDD
-        //        .map(resultRecord -> {
-        //            ProfilingResultRecord updatedResultRecord = resultRecord;
-        //            updatedResultRecord.setRelativeAbun(this.pUtil.computeRelativeAbundance(resultRecord.getAbundance(), totalAbundance));
-        //            return updatedResultRecord;
-        //        });
+        /*
+        Input:
+         key: sampleID
+         value: ProfilingResultRecord
+         partition: sampleID + clusterName
 
-        return profilingResultRecordRDD;
+        After mapToPair:
+         key: sampleID
+         value: (Double) abundance
+         partition: sampleID + clusterName
+
+        After reduceByKey:
+         key: sampleID
+         value: (Double) sampleTotalAbundance
+         partition: sampleID
+         */
+        Map<String, Double> sampleTotalAbundanceMap = profilingResultRecordRDD
+                .mapValues(v -> v.getAbundance())
+                .reduceByKey(sampleIDPartitioner, (abun1, abun2) -> abun1+abun2)
+                .collectAsMap();
+
+
+        /*
+        Input:
+         key: sampleID
+         value: ProfilingResultRecord (no relative abundance)
+         partition: sampleID + clusterName
+
+        After partitionBy:
+         key: sampleID
+         value: ProfilingResultRecord (no relative abundance)
+         partition: sampleID
+
+        After mapPartitions:
+         outputHDFSDir/profiling/<appID>-Profiling-<readGroupID>.abundance[.evaluation]
+         */
+        List<String> outputFilePathsList = profilingResultRecordRDD
+                .partitionBy(sampleIDPartitioner)
+                .mapPartitions(new ProfilingResultWriteFunction(profilingResultRecordRDD.context(), this.outputHdfsDir, sampleTotalAbundanceMap, this.analysisMode), true)
+                .collect();
+
+        profilingResultRecordRDD.unpersist();
+        return outputFilePathsList;
     }
 
     /**
@@ -171,10 +306,10 @@ public class ProfilingProcessMS {
      */
     public ProfilingMethodBase getProfilingMethod(){
         try {
-            if(this.pipelineMode.equals(ProfilingPipelineMode.METAPHLAN)){
-                return new METAPHLANProfilingMethod(this.metasOpt);
-            } else if (this.pipelineMode.equals(ProfilingPipelineMode.COMG)){
+            if(this.pipeline.equals("metaphlan")){
                 return new COMGProfilingMethod(this.metasOpt);
+            } else if (this.pipeline.equals("comg")){
+                return new METAPHLANProfilingMethod(this.metasOpt);
             }
         } catch (final NullPointerException e){
             e.printStackTrace();
@@ -183,4 +318,6 @@ public class ProfilingProcessMS {
         }
         return null;
     }
+
+
 }

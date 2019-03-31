@@ -8,14 +8,13 @@ import htsjdk.samtools.util.SequenceUtil;
 /**
  * ClassName: MetasSamRecord
  * Description:
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class MetasSamRecord extends SAMRecord {
 
-    public static final long serialVersionUID = 2L;
+    public static final long serialVersionUID = 1L;
     //private Double identity;
-    private String truncatedReadName = null;
 
     public MetasSamRecord(SAMFileHeader header) {
         super(header);

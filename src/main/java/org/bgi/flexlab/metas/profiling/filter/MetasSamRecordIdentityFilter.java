@@ -2,6 +2,7 @@ package org.bgi.flexlab.metas.profiling.filter;
 
 import org.apache.spark.api.java.function.Function;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
+import scala.Tuple2;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -12,12 +13,21 @@ import java.util.regex.Pattern;
  * ClassName: MetasSamRecordIdentityFilter
  * Description: Filter SAM by the identity of mapping result.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
-public class MetasSamRecordIdentityFilter implements MetasSamRecordFilter, Function<MetasSamRecord, Boolean> {
+public class MetasSamRecordIdentityFilter
+        implements MetasSamRecordFilter, Function<Tuple2<String, MetasSamRecord>, Boolean> {
 
-    private double minimumIdentity = 0;
+    private double minimumIdentity;
+
+    public MetasSamRecordIdentityFilter(){
+        this.minimumIdentity = 50;
+    }
+
+    public MetasSamRecordIdentityFilter(double minIdentity){
+        this.minimumIdentity = minIdentity;
+    }
 
     /**
      * @param record MetasSamRecord to be evaluated.
@@ -31,8 +41,8 @@ public class MetasSamRecordIdentityFilter implements MetasSamRecordFilter, Funct
 
 
     @Override
-    public Boolean call(MetasSamRecord record){
-        if (this.filter(record)){
+    public Boolean call(Tuple2<String, MetasSamRecord> tuple){
+        if (this.filter(tuple._2)){
             return false;
         }
         return true;

@@ -3,7 +3,7 @@ package org.bgi.flexlab.metas.profiling.filter;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.bgi.flexlab.metas.data.structure.reference.ReferenceInformation;
+import org.bgi.flexlab.metas.data.structure.reference.ReferenceGeneTable;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.profiling.ProfilingUtils;
@@ -24,9 +24,9 @@ import java.util.List;
  * be filtered out.
  *
  * TODO: 根据实际测序数据分析，ins的分布并不是标准的正态分布模式，所以fitter需要重新考虑。
- * TODO: 注意insert size的基本目的，是为了判断比对边界问题对在PE测序模式下带来的影响。边界问题其实不用在意R2序列一半比对上一半比不上的情况（如果真的有一半，那也就不会被视为未必对上）。
+ * TODO: 注意insert size的基本目的，是为了判断比对边界问题对在PE测序模式下带来的影响。边界问题其实不用在意R2序列一半比对上一半比不上的情况（如果真的有一半，那也就不会被视为未比对上）。
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
@@ -39,11 +39,11 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
 
     private boolean doTraining = false;
 
-    private ReferenceInformation referenceInformation;
+    private ReferenceGeneTable referenceGeneTable;
 
-    public MetasSamRecordInsertSizeFilter(int insertSize, ReferenceInformation refInfo){
+    public MetasSamRecordInsertSizeFilter(int insertSize, ReferenceGeneTable refInfo){
         this.meanInsertSize = insertSize;
-        this.referenceInformation = refInfo;
+        this.referenceGeneTable = refInfo;
     }
 
     @Override
@@ -109,7 +109,7 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
         if (samRecord.getReadNegativeStrandFlag()){
             return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + this.insTolerance);
         } else {
-            return (this.referenceInformation.getReferenceLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
+            return (this.referenceGeneTable.getGeneLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
                     < (this.meanInsertSize + this.insTolerance);
         }
     }
@@ -126,7 +126,7 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
         if (samRecord.getReadNegativeStrandFlag()){
             return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + 2 * this.insertSizeSD);
         } else {
-            return (this.referenceInformation.getReferenceLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
+            return (this.referenceGeneTable.getGeneLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
                     < (this.meanInsertSize + 2 * this.insertSizeSD);
         }
     }

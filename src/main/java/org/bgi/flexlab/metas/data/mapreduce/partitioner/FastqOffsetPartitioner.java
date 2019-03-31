@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.data.mapreduce;
+package org.bgi.flexlab.metas.data.mapreduce.partitioner;
 
 import org.apache.spark.Partitioner;
 
@@ -11,7 +11,7 @@ import org.apache.spark.Partitioner;
  *  key: readName. example: <Text>
  * 	value: mateIndex(1 or 2)##sampleID	readRecordCount##readGroupID##sequence	quality
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class FastqOffsetPartitioner extends Partitioner {

@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Description: Tools wrapper for bowtie/bwa (or others if needed). The basic class for MetasBowtie.java
  * and Bwa.java of SparkBWA. The script is abstracted from com.github.sparkbwa.Bwa
  *
- * @author: heshixu@genomicsw.cn
+ * @author heshixu@genomics.cn
  */
 
 public abstract class AlignmentToolWrapper implements Serializable {

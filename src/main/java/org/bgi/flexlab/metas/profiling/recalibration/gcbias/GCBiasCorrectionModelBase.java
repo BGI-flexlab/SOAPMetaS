@@ -1,10 +1,6 @@
 package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 
-import org.bgi.flexlab.metas.MetasOptions;
-
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * ClassName: GCBiasCorrectionModelBase
@@ -13,7 +9,7 @@ import java.io.OutputStream;
  * Pay attention that some classic models for CNV analysis of human genome don't need coefficients training,
  * and application of these models needs more consideration.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public abstract class GCBiasCorrectionModelBase {
@@ -51,16 +47,16 @@ public abstract class GCBiasCorrectionModelBase {
     /**
      * The method is used to save coefficients to file so that the model could be reused.
      *
-     * @param outFile Output file target to save coefficients.
+     * @param outFilePath Output file target to save coefficients.
      */
-    public abstract void outputCoefficients(File outFile);
+    public abstract void outputCoefficients(String outFilePath);
 
     /**
      * The method is used to read the saved model file.
      *
-     * @param inFile Input file target to load coefficients.
+     * @param inFilePath Input file target to load coefficients.
      */
-    public abstract void inputCoefficients(File inFile);
+    public abstract void inputCoefficients(String inFilePath);
 
     /**
      * Setter for coefficients, from saved file or trainer.

@@ -1,8 +1,6 @@
 package org.bgi.flexlab.metas.profiling;
 
-import org.apache.spark.api.java.function.Function2;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
@@ -10,7 +8,7 @@ import org.bgi.flexlab.metas.util.SequencingMode;
  * ClassName: ProfilingUtils
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public final class ProfilingUtils {

@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.data.mapreduce.input.fastq;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -59,9 +60,9 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 		}
 	}
 
-	public MetasGZFastqReader(Configuration jobConf, FileSplit split, byte[] recordDelimiter) throws IOException {
+	public MetasGZFastqReader(Configuration jobConf, FileSplit fileSplit, byte[] recordDelimiter) throws IOException {
 
-		final Path file = split.getPath();
+		final Path file = fileSplit.getPath();
 		compressionCodecs = new CompressionCodecFactory(jobConf);
 
 		if (compressionCodecs.getCodec(file) != null) {
@@ -70,8 +71,8 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 		}
 
 		this.maxLineLength = jobConf.getInt("mapred.linerecordreader.maxlength", Integer.MAX_VALUE);
-		start = split.getStart();
-		end = start + split.getLength();
+		start = fileSplit.getStart();
+		end = start + fileSplit.getLength();
 
 		FileSystem fs = file.getFileSystem(jobConf);
 		fileLength = fs.getFileStatus(file).getLen();
@@ -81,11 +82,11 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 		}
 
 		// System.err.println("split:" + split.getPath().toString());
-		String sampleListPath = jobConf.get("metas.data.mapreduce.input.multisamplelist");
+		String sampleListPath = jobConf.get("metas.data.mapreduce.input.fqmultisamplelist");
 		if (sampleListPath != null && !sampleListPath.equals("")) {
 			FastqMultiSampleList fastqMultiSampleList;
 			fastqMultiSampleList = new FastqMultiSampleList(sampleListPath, true, false);
-			FastqSampleList slist = fastqMultiSampleList.getSampleList(split.getPath().toString());
+			FastqSampleList slist = fastqMultiSampleList.getSampleList(fileSplit.getPath().toString());
 			if (slist != null) {
 				sampleID = slist.getSampleID();
 				readGroupID = slist.getRgID();
@@ -102,7 +103,7 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 		}
 
 		// open the file and seek to the start of the split
-		FSDataInputStream fileIn = fs.open(split.getPath());
+		FSDataInputStream fileIn = fs.open(fileSplit.getPath());
 		boolean skipFirstLine = false;
 
 		if (start != 0) {
@@ -204,7 +205,7 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 			if (!iswrongFq) {
 				int index = st[0].lastIndexOf("/");
 				if (index < 0) {
-					String[] splitTmp = st[0].split(" ");
+					String[] splitTmp = StringUtils.split(st[0], " ");
 					char ch;
 					if(splitTmp.length == 1) {
 						ch = '1';

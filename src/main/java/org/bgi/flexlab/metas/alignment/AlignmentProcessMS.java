@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.alignment;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
@@ -11,12 +12,12 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.alignment.metasbowtie2.BowtieTabAlignmentMethod;
 import org.bgi.flexlab.metas.alignment.metasbowtie2.MetasBowtie;
-import org.bgi.flexlab.metas.data.mapreduce.SampleIDReadNamePartitioner;
+import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
 import org.bgi.flexlab.metas.data.mapreduce.input.fastq.MetasFastqFileInputFormat;
 import org.bgi.flexlab.metas.data.structure.fastq.FastqMultiSampleList;
 import scala.Tuple2;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ import java.util.List;
  * 4. The input file path passed to the tool must be identical with that in list file.
  *
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class AlignmentProcessMS {
@@ -45,6 +46,7 @@ public class AlignmentProcessMS {
     private int numPartitionEachSample = 1;
 
     private String samOutputHdfsDir;
+    private String tmpDir;
 
 
     /**
@@ -53,7 +55,6 @@ public class AlignmentProcessMS {
      *
      * @param options The MetasOptions object initialized with the user options
      * @param context The Spark Context from the Spark Shell. Usually "sc"
-     * @return The AlignmentProcess object with its options initialized.
      */
     public AlignmentProcessMS(MetasOptions options, JavaSparkContext context) {
         this.options = options;
@@ -68,7 +69,6 @@ public class AlignmentProcessMS {
      *  + Change BwaOption to MetasOptions.
      *
      * @param args Arguments got from Linux console when launching MetaS with Spark
-     * @return The AlignmentProcess object with its options initialized.
      */
     public AlignmentProcessMS(String[] args) {
         this.options = new MetasOptions(args);
@@ -80,23 +80,53 @@ public class AlignmentProcessMS {
      * Procedure to initiate the AlignmentProcess configuration parameters
      *
      */
-    public void initProcess() {
+    private void initProcess() {
 
         this.numPartitionEachSample = Math.max(this.options.getNumPartitionEachSample(), 1);
 
         this.samOutputHdfsDir = this.options.getSamOutputHdfsDir();
 
+        //We set the tmp dir
+        if ((this.tmpDir == null || this.tmpDir == "null")
+                && this.options.getProfilingTmpDir() != null
+                && !this.options.getProfilingTmpDir().isEmpty()) {
+
+            this.tmpDir = this.options.getProfilingTmpDir();
+        }
+
+        if (this.tmpDir == null || this.tmpDir == "null") {
+            this.tmpDir = jscontext.hadoopConfiguration().get("hadoop.tmp.dir");
+        }
+
+        if (this.tmpDir.startsWith("file:")) {
+            this.tmpDir = this.tmpDir.replaceFirst("file:", "");
+        }
+
+        File tmpFileDir = new File(this.tmpDir);
+
+        if(!tmpFileDir.isDirectory() || !tmpFileDir.canWrite()) {
+            this.tmpDir = "/tmp/";
+        }
+
+        createOutputFolder();
+
+        String multilistFile;
+        if (this.options.isSingleSample()){
+            multilistFile = generateMultiSampleList(this.options.getInputFastqPath(), this.options.getInputFastqPath2());
+        } else {
+            multilistFile = this.options.getMultiSampleList();
+        }
+
         // Multiple Sample information list
         try {
-            this.fastqMultiSampleList = new FastqMultiSampleList(this.options.getMultiSampleList(), true, true);
+            this.fastqMultiSampleList = new FastqMultiSampleList(multilistFile, true, true);
         } catch (IOException e){
-            LOG.error("can't load multisample list file.");
+            LOG.error("Fail to load multisample list file.");
             e.printStackTrace();
         }
 
-        this.jscontext.hadoopConfiguration().set("metas.data.mapreduce.input.multisamplelist", this.options.getMultiSampleList());
+        this.jscontext.hadoopConfiguration().set("metas.data.mapreduce.input.fqmultisamplelist", this.options.getMultiSampleList());
 
-        createOutputFolder();
     }
 
     /**
@@ -124,9 +154,44 @@ public class AlignmentProcessMS {
             fs.close();
         }
         catch (IOException e) {
-            LOG.error(e.toString());
+            LOG.error("Fail to create SAM output directory.");
             e.printStackTrace();
         }
+    }
+
+    private String generateMultiSampleList(String fastqPath1, String fastqPath2){
+        String[] fq1Array = StringUtils.split(fastqPath1, ',');
+        String[] fq2Array = null;
+        if (fastqPath2 != null && !fastqPath2.isEmpty()){
+            fq2Array = StringUtils.split(fastqPath2, ',');
+            assert fq1Array.length == fq2Array.length: "Numbers of paired fastq files are not equal.";
+        }
+
+        String outputMultiSampleList = this.tmpDir + "/tmp-multiSampleFastqList";
+        File sampleList = new File(outputMultiSampleList);
+
+        try (BufferedWriter bfr = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(sampleList)))){
+
+            if (fq2Array.length > 0) {
+                for (int i = 0; i < fq1Array.length; i++) {
+                    bfr.write(i + "\t" + fq1Array[i] + "\t" + fq2Array);
+                    bfr.newLine();
+                }
+            } else {
+                for (int i = 0; i < fq1Array.length; i++) {
+                    bfr.write(i + "\t" + fq1Array[i]);
+                    bfr.newLine();
+                }
+            }
+        } catch (FileNotFoundException e){
+            LOG.error("[" + this.getClass().getName() + "] :: Can't create multiple sample fastq list file.");
+            e.printStackTrace();
+        } catch (IOException e){
+            LOG.error("[" + this.getClass().getName() + "] :: Can't write multiple sample fastq list file.");
+            e.printStackTrace();
+        }
+        return outputMultiSampleList;
     }
 
 
@@ -248,8 +313,8 @@ public class AlignmentProcessMS {
                 .hadoopFile(filePath, MetasFastqFileInputFormat.class,
                         Text.class, Text.class)
                 .reduceByKey(sampleIDPartitioner, (v1, v2) -> {
-                            String[] values1 = v1.toString().split("##");
-                            String[] values2 = v2.toString().split("##");
+                            String[] values1 = StringUtils.split(v1.toString(), "##");
+                            String[] values2 = StringUtils.split(v2.toString(), "##");
                             int mate1 = Integer.parseInt(values1[0]);
                             int mate2 = Integer.parseInt(values2[0]);
                             StringBuilder newsr = new StringBuilder();
@@ -273,11 +338,10 @@ public class AlignmentProcessMS {
                 .filter(record -> record._2 != null)
                 .mapToPair(record -> {
                     String[] values = record._2.toString().split("##");
-                    Tuple2<String, String> returned = new Tuple2<>(
+                    return new Tuple2<>(
                             values[1],
-                            record._1.toString().split("\t")[1] + "\t" + values[2]
+                            StringUtils.split(record._1.toString(), '\t')[1] + "\t" + values[2]
                     );
-                    return returned;
                 });
 
         return partitionedTab5RDD;
@@ -295,7 +359,7 @@ public class AlignmentProcessMS {
      *
      * TODO: Method of "merge by sample". A new class for merging SAM file is needed.
      *
-     * @brief This function runs BWA with the input data selected and with the options also selected
+     * Note: This function runs BWA with the input data selected and with the options also selected
      *     by the user.
      */
     public List<String> runAlignment() {
@@ -306,7 +370,16 @@ public class AlignmentProcessMS {
 
         JavaPairRDD<String, String> partitionedTab5RDD = handleMultiSampleReads();
 
-        // Returned list of mapping results files' paths.
+        /*
+        Returned list of mapping results files' paths.
+
+        Input:
+         key: readGroupID
+         value: readName   seq1    qual1[    seq2    qual2]
+
+        After mapPartitionsWithIndex:
+         readGroupID    outputHDFSDir/<appId>-RDDPart<index>-<readGroupID>.sam
+         */
         List<String> returnedValues = partitionedTab5RDD
                 .mapPartitionsWithIndex(new BowtieTabAlignmentMethod(partitionedTab5RDD.context(), alignmentToolWrapper), true)
                 .collect();
@@ -322,30 +395,19 @@ public class AlignmentProcessMS {
      * *Changes:
      *  + The method is newly created method for generation of wrapper object.
      *
-     * @return
+     * @return Wrapped instance of alignment tools
      */
     private AlignmentToolWrapper getAlignmentTool(String toolName){
 
-        AlignmentToolWrapper toolWrapper;
-
-        switch (toolName){
-            case "bowtie": {
-                toolWrapper = new MetasBowtie(this.options);
-                break;
-            }
-            /*
-            case "bwa": {
-                toolWrapper = new Bwa(this.options);
-                break;
-            }
-            */
-            default:{
-                toolWrapper = new MetasBowtie(this.options);
-                break;
-            }
+        if (toolName.equals("bowtie")){
+            return new MetasBowtie(this.options);
+        } else if (toolName.equals("bwa")) {
+            //return new Bwa(this.options);
+            LOG.error("Bwa not support in this version. Switch to bowtie.");
+            return new MetasBowtie(this.options);
+        } else {
+            return new MetasBowtie(this.options);
         }
-
-        return toolWrapper;
     }
 
 }

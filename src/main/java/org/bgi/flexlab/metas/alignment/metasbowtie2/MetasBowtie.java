@@ -12,7 +12,7 @@ import java.util.HashSet;
  * ClassName: MetasBowtie
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class MetasBowtie extends AlignmentToolWrapper implements Serializable {

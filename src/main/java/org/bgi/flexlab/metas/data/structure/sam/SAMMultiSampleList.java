@@ -1,11 +1,14 @@
 package org.bgi.flexlab.metas.data.structure.sam;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 
 /**
  * ClassName: SAMMultiSampleList
@@ -15,19 +18,23 @@ import java.util.HashSet;
  * 1. multiple sample SAM file list format: (all path must be absolute path)
  *  SampleTag samfilePath1_1
  *  SampleTag samfilePath1_2
+ *  SampleTag samfilePath1_3
+ *  ...
  *  SampleTag2 samfilePath2
  *  ...
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class SAMMultiSampleList {
-    private HashMap<String, Integer> samPathIDMap = new HashMap<>();
+
+    protected static final Log LOG = LogFactory.getLog(SAMMultiSampleList.class.getName());
+    private Map<String, Integer> samPathIDMap = new HashMap<>(100);
     private int sampleCount = 0;
     private StringBuilder filePath;
 
     public SAMMultiSampleList(String list, boolean isLocal, boolean recordPath) throws IOException {
-        HashMap<String, Integer> tagSamCount = new HashMap<>();
+        HashMap<String, Integer> tagSamCount = new HashMap<>(100);
 
         File file = new File(list);
         BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -57,14 +64,19 @@ public class SAMMultiSampleList {
             if (recordPath) {
                 filePath.append(items[1]).append(",");
             }
-
         }
+
         filePath.trimToSize();
         reader.close();
     }
 
     public int getSampleID(String filePath){
-        return samPathIDMap.getOrDefault(filePath, sampleCount);
+        if (samPathIDMap.containsKey(filePath)){
+            return samPathIDMap.get(filePath);
+        } else {
+            LOG.error("[" + this.getClass().getName() + "] :: SAM file " + filePath + " has no sampleID, set default ID: " + sampleCount);
+            return sampleCount;
+        }
     }
 
     public int getSampleCount() {

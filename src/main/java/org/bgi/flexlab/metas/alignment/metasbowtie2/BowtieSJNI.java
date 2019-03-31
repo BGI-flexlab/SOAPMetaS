@@ -8,7 +8,7 @@ import java.io.IOException;
  * ClassName: BowtieSJNI
  * Description: JNI wrapper for bowtie-align-s.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class BowtieSJNI {

@@ -31,7 +31,7 @@ import java.util.List;
  *
  * GNU License.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class AlignmentProcess {
@@ -347,7 +347,6 @@ public class AlignmentProcess {
      *  + Change Bwa instance to AlignmentToolWrapper instance.
      *  + Log content
      *
-     * TODO: Method of "merge by sample".
      *
      * @brief This function runs BWA with the input data selected and with the options also selected
      *     by the user.

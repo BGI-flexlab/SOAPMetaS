@@ -5,7 +5,7 @@ package org.bgi.flexlab.metas.data.structure.sam;
  * Description: 由于存在paired-end测序的数据，所以需要构建针对pair信息的特殊数据类型，方便对pair信息的封装。为了方便
  * 流程的整合，针对single-end数据也进行同样的处理，并提供了判断pair 状态的适当接口。
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class MetasSamPairRecord {

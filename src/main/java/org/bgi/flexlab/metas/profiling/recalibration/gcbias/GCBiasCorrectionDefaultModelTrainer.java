@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * ClassName: GCBiasCorrectionDefaultModelTrainer
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class GCBiasCorrectionDefaultModelTrainer extends GCBiasCorrectionTrainerBase {

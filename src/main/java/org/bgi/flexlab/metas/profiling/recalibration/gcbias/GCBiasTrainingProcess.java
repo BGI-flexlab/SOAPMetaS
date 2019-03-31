@@ -7,7 +7,6 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import scala.Tuple2;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,7 +14,7 @@ import java.util.List;
  * ClassName: GCBiasTrainingProcess
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class GCBiasTrainingProcess {
@@ -26,7 +25,7 @@ public class GCBiasTrainingProcess {
 
     private int scanWindowSize;
 
-    private File trainingResultFile;
+    private String trainingResultFile;
 
     /**
      * TODO: trainer可以考虑提供工厂类，用于针对不同的model选取不同的trainer。
@@ -37,16 +36,25 @@ public class GCBiasTrainingProcess {
         this.metaOpt = options;
         this.scanWindowSize = this.metaOpt.getScanWindowSize();
         this.trainer = new GCBiasCorrectionDefaultModelTrainer();
-        this.trainingResultFile = this.metaOpt.getGcBiasTrainingTargetCoefficientsFile();
+        this.trainingResultFile = this.metaOpt.getGcBiasTrainingOutputFile();
     }
 
     /**
-     * The main algorithm is based on the GCBiasUtils and GCBiasMetricsCollector class from Picard library. Unlike what the article
-     * <https://doi.org/10.1371/journal.pone.0165015> describes (number of read starts divided by number of bac species), in order to
-     * calculate the norm_cov of a single bacterium, we grouped the SamRecords and calculated values by the key of species name.
+     * The main algorithm is based on the GCBiasUtils and GCBiasMetricsCollector class from Picard
+     * library and article https://doi.org/10.1371/journal.pone.0165015.
      *
-     * @param metasSamRecordRDD
-     * @param refSeq
+     * Another computation for totalReads of each species:
+     * Unlike what the article describes (number of read starts divided by number of bac species),
+     * in order to calculate the norm_cov of a single bacterium, we grouped the SamRecords and
+     * calculated values by the key of species name.
+     *
+     * TODO: 这里的 MetasSamRecord 还是要考虑一下 PE 和 SE 数据的差异。
+     * TODO: runTrainingProcess方法的输入参数 ReferenceSequence 可能需要单独根据species数据来创建
+     * TODO: 不确定两种计算totalReads的方法对最后建模结果以及校正效果的影响。
+     *
+     * @param metasSamRecordRDD RDD created from SAM output of alignment process. Note that the alignment is between
+     *                          reads and species genome.
+     * @param refSeq Genome sequence of each reference species used in training process.
      */
     public void runTrainingProcess(JavaRDD<MetasSamRecord> metasSamRecordRDD, HashMap<String, ReferenceSequence> refSeq){
 
@@ -57,12 +65,15 @@ public class GCBiasTrainingProcess {
         }
 
         List<Tuple2<String, Integer>> recordPosList = metasSamRecordRDD.filter(rec -> !rec.getReadUnmappedFlag())
-                .map(rec -> new Tuple2<>(rec.getReferenceName(), rec.getReadNegativeStrandFlag() ? rec.getAlignmentEnd() - this.scanWindowSize : rec.getAlignmentStart()))
+                .map(rec -> new Tuple2<>(rec.getReferenceName(),
+                        rec.getReadNegativeStrandFlag() ? rec.getAlignmentEnd() - this.scanWindowSize : rec.getAlignmentStart()))
                 .collect();
 
         for (Tuple2<String, Integer> tup: recordPosList){
             speciesGCMap.get(tup._1).addRead(tup._2);
         }
+
+        double totalReads = recordPosList.size()/speciesGCMap.size();
 
         for (String species: speciesGCMap.keySet()){
 
@@ -71,7 +82,6 @@ public class GCBiasTrainingProcess {
             final double refGCRate = speciesGCMap.get(species).getSpeGCRate();
 
             final double totalWindows = sum(windowByGC);
-            final double totalReads = sum(readsByGC);
             final double meanReadsPerWindow = totalReads / totalWindows;
 
             assert totalReads > 0;

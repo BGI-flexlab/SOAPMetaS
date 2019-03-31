@@ -4,7 +4,7 @@ package org.bgi.flexlab.metas.alignment;
  * ClassName: AlignmentMethodBase
  * Description: Basic abstract class of single/paired end alignment method.
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 import org.apache.commons.logging.Log;
@@ -108,7 +108,7 @@ public class AlignmentMethodBase implements Serializable {
      * @param outputSamFileName The output where the final results will be stored
      * @return An ArrayList containing all the file locations
      */
-    public ArrayList<String> copyResults(String outputSamFileName) {
+    public ArrayList<String> copyResults(String outputSamFileName, String readGroupID) {
         ArrayList<String> returnedValues = new ArrayList<>();
 
         this.LOG.info("["+this.getClass().getName()+"] :: " + this.appId + " - " + this.appName + " Copying files...");
@@ -131,7 +131,11 @@ public class AlignmentMethodBase implements Serializable {
         File tmpSamFullFile = new File(this.toolWrapper.getOutputFile());
         tmpSamFullFile.delete();
 
-        returnedValues.add(this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+        if (readGroupID != null) {
+            returnedValues.add(readGroupID + "\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+        } else {
+            returnedValues.add("#\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+        }
 
         return returnedValues;
     }
@@ -157,6 +161,6 @@ public class AlignmentMethodBase implements Serializable {
         this.alignReads(outputSamFileName, fastqFileName1, fastqFileName2);
 
         // Copy the result to HDFS
-        return this.copyResults(outputSamFileName);
+        return this.copyResults(outputSamFileName, null);
     }
 }

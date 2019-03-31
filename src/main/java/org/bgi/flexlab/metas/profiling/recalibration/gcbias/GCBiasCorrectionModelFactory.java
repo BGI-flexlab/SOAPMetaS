@@ -6,16 +6,16 @@ import java.io.File;
  * ClassName: GCBiasCorrectionModelFactory
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
 public class GCBiasCorrectionModelFactory {
 
     private String modelName;
 
-    private File inputCoefficientsFile;
+    private String inputCoefficientsFile;
 
-    public GCBiasCorrectionModelFactory(String modelName, File coefficientsFile) {
+    public GCBiasCorrectionModelFactory(String modelName, String coefficientsFile) {
         this.modelName = modelName;
         this.inputCoefficientsFile = coefficientsFile;
     }
