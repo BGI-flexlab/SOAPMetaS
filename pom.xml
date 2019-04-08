@@ -58,12 +58,6 @@
         </dependency>
 
         <!-- Supplementary dependencies -->
-        <dependency>
-            <groupId>cz.adamh.utils</groupId>
-            <artifactId>native-utils</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
 
         <!-- Other Utilities -->
         <dependency>
@@ -90,6 +84,9 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
                 </configuration>
             </plugin>
         </plugins>
