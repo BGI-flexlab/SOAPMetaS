@@ -82,7 +82,7 @@ public final class ProfilingUtils {
 //
     //    @Override
     //    public MetasSamPairRecord call(MetasSamPairRecord metasSamPairRecord, MetasSamPairRecord metasSamPairRecord2) throws Exception {
-    //        if (this.seqMode.equals(SequencingMode.PAIREND)){
+    //        if (this.seqMode.equals(SequencingMode.PAIREDEND)){
     //            this.pairedModeMerge(metasSamPairRecord, metasSamPairRecord2);
     //        } else {
     //            this.singleModeMerge(metasSamPairRecord, metasSamPairRecord2);

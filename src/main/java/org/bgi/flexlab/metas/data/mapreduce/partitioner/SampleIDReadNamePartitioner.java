@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.data.mapreduce.partitioner;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.Partitioner;
 import org.apache.spark.util.Utils;
 
@@ -38,7 +39,7 @@ public class SampleIDReadNamePartitioner extends Partitioner {
         if (key == null){
             return this.numPartitions - 1;
         }
-        String[] keyItem = key.toString().split("\t");
+        String[] keyItem = StringUtils.split(key.toString(), '\t');
         if (keyItem.length != 2){
             return this.numPartitions - 1;
         }

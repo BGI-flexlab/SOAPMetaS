@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.data.mapreduce.partitioner;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.Partitioner;
 
 /**
@@ -41,7 +42,7 @@ public class FastqOffsetPartitioner extends Partitioner {
     @Override
     public int getPartition(Object key) {
         if (key instanceof String) {
-            String[] paras = ((String) key).split("\t");
+            String[] paras = StringUtils.split(((String) key), '\t');
             int sampleIDPartRange = Integer.parseInt(paras[0]) * this.samplePartNum;
             long pos = Math.abs(Long.parseLong(paras[1]));
             long filelength = Math.abs(Long.parseLong(paras[2]));

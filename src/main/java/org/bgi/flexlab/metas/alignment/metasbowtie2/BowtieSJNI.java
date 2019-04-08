@@ -1,6 +1,6 @@
 package org.bgi.flexlab.metas.alignment.metasbowtie2;
 
-import cz.adamh.utils.NativeUtils;
+import org.bgi.flexlab.metas.util.NativeUtils;
 
 import java.io.IOException;
 

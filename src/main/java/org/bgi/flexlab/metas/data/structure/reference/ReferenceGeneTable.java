@@ -41,7 +41,7 @@ public class ReferenceGeneTable {
             BufferedReader speciesBR = new BufferedReader(new InputStreamReader(speciesFR));
             String currentLine = null;
 
-            speciesBR.ready();
+            assert speciesBR.ready(): "Species GC file is not readable.";
 
             while ((currentLine = speciesBR.readLine()) != null) {
                 String[] lineSplit = StringUtils.split(currentLine, '\t');
@@ -53,7 +53,7 @@ public class ReferenceGeneTable {
             speciesBR.close();
 
         } catch (IOException e){
-            LOG.error("[" + this.getClass().getName() + "] :: Can't load species gc file.");
+            LOG.error("[SOAPMetas::" + ReferenceGeneTable.class.getName() + "] " + ReferenceGeneTable.class.getName() + "] Can't load species gc file.");
         }
 
         this.readMatrixFile(referenceMatrixFilePath, speciesRecordMap);
@@ -72,7 +72,7 @@ public class ReferenceGeneTable {
             BufferedReader matrixBR = new BufferedReader(new InputStreamReader(matrixFR));
             String currentLine = null;
 
-            matrixBR.ready();
+            assert matrixBR.ready(): "gene matrix file is not readable";
 
             while ((currentLine = matrixBR.readLine()) != null) {
                 String[] lineSplit = StringUtils.split(currentLine, '\t');
@@ -85,7 +85,7 @@ public class ReferenceGeneTable {
             matrixBR.close();
 
         } catch (IOException e){
-            LOG.error("[" + this.getClass().getName() + "] :: Can't load reference matrix file.");
+            LOG.error("[SOAPMetas::" + ReferenceGeneTable.class.getName() + "] " + ReferenceGeneTable.class.getName() + "] Can't load reference matrix file.");
         }
     }
 
@@ -96,7 +96,7 @@ public class ReferenceGeneTable {
     public double getGeneGCContent(String referenceName) {
         double gc = referenceRecordMap.get(referenceName).getGcContent();
         if (gc == 0){
-            LOG.error("No GC content for species of gene" + referenceName + ". Return 0.");
+            LOG.error("[SOAPMetas::" + ReferenceGeneTable.class.getName() + "] species of gene" + referenceName + ". Return 0.");
         }
         return gc;
     }
@@ -104,7 +104,7 @@ public class ReferenceGeneTable {
     public String getGeneSpeciesName(String referenceName) {
         String name = referenceRecordMap.get(referenceName).getSpeciesName();
         if (name == null){
-            LOG.error("No species information for gene" + referenceName + ". Return Unknown.");
+            LOG.error("[SOAPMetas::" + ReferenceGeneTable.class.getName() + "] gene" + referenceName + ". Return Unknown.");
             return "Unknown";
         }
         return name;

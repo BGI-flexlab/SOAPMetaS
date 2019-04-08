@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.data.structure.sam;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -41,7 +42,7 @@ public class SAMMultiSampleList {
 
         String line;
         while((line = reader.readLine()) != null) {
-            String[] items = line.split("\t");
+            String[] items = StringUtils.split(line, '\t');
 
             if (items.length != 2 ) {
                 continue;
@@ -74,7 +75,7 @@ public class SAMMultiSampleList {
         if (samPathIDMap.containsKey(filePath)){
             return samPathIDMap.get(filePath);
         } else {
-            LOG.error("[" + this.getClass().getName() + "] :: SAM file " + filePath + " has no sampleID, set default ID: " + sampleCount);
+            LOG.error("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] SAM file " + filePath + " has no sampleID, set default ID: " + sampleCount);
             return sampleCount;
         }
     }

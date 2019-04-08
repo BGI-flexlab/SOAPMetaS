@@ -7,11 +7,11 @@ package org.bgi.flexlab.metas.alignment;
  * @author heshixu@genomics.cn
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 
 import java.io.File;
@@ -23,7 +23,7 @@ public class AlignmentMethodBase implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected static final Log LOG = LogFactory.getLog(AlignmentMethodBase.class);
+    protected static final Logger LOG = LogManager.getLogger(AlignmentMethodBase.class);
 
     protected String appName;
     protected String appId;
@@ -44,33 +44,10 @@ public class AlignmentMethodBase implements Serializable {
 
         this.appId = context.applicationId();
         this.appName = context.appName();
-        this.tmpDir = context.getLocalProperty("spark.local.dir");
         this.toolWrapper = toolWrapper;
+        this.tmpDir = this.toolWrapper.getTmpDir();
 
-        //We set the tmp dir
-        if ((this.tmpDir == null || this.tmpDir == "null")
-                && this.toolWrapper.getTmpDir() != null
-                && !this.toolWrapper.getTmpDir().isEmpty()) {
-
-            this.tmpDir = this.toolWrapper.getTmpDir();
-        }
-
-        if (this.tmpDir == null || this.tmpDir == "null") {
-            this.tmpDir = context.hadoopConfiguration().get("hadoop.tmp.dir");
-        }
-
-        if (this.tmpDir.startsWith("file:")) {
-            this.tmpDir = this.tmpDir.replaceFirst("file:", "");
-        }
-
-        File tmpFileDir = new File(this.tmpDir);
-
-        if(!tmpFileDir.isDirectory() || !tmpFileDir.canWrite()) {
-            this.tmpDir = "/tmp/";
-        }
-
-
-        this.LOG.info("["+this.getClass().getName()+"] :: " + this.appId + " - " + this.appName);
+        this.LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName);
     }
 
     /**
@@ -87,13 +64,7 @@ public class AlignmentMethodBase implements Serializable {
             toolWrapper.setInputFile2(fastqFileName2);
         }
 
-        if(this.tmpDir.endsWith("/")) {
-            this.toolWrapper.setOutputFile(this.tmpDir + outputSamFileName);
-        }
-        else{
-            this.toolWrapper.setOutputFile(this.tmpDir + "/" +outputSamFileName);
-        }
-
+        this.toolWrapper.setOutputFile(this.tmpDir + "/" +outputSamFileName);
 
         //We run BWA with the corresponding options set
         this.toolWrapper.run();
@@ -111,7 +82,7 @@ public class AlignmentMethodBase implements Serializable {
     public ArrayList<String> copyResults(String outputSamFileName, String readGroupID) {
         ArrayList<String> returnedValues = new ArrayList<>();
 
-        this.LOG.info("["+this.getClass().getName()+"] :: " + this.appId + " - " + this.appName + " Copying files...");
+        this.LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName + " Copy output sam files to output directory.");
 
         try {
             //if (outputDir.startsWith("hdfs")) {
@@ -124,12 +95,12 @@ public class AlignmentMethodBase implements Serializable {
             );
         } catch (IOException e) {
             e.printStackTrace();
-            this.LOG.error(e.toString());
+            this.LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + e.toString());
         }
 
         // Delete the old results file
-        File tmpSamFullFile = new File(this.toolWrapper.getOutputFile());
-        tmpSamFullFile.delete();
+        File localSam = new File(this.toolWrapper.getOutputFile());
+        localSam.delete();
 
         if (readGroupID != null) {
             returnedValues.add(readGroupID + "\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);

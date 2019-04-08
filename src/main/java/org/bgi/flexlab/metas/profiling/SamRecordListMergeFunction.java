@@ -27,7 +27,7 @@ public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRec
 
     @Override
     public MetasSamPairRecord call(Iterable<MetasSamRecord> metasSamRecords) throws Exception {
-        if (this.sequencingMode.equals(SequencingMode.PAIREND)){
+        if (this.sequencingMode.equals(SequencingMode.PAIREDEND)){
             return pairedListToSamPair(metasSamRecords);
         } else if (this.sequencingMode.equals(SequencingMode.SINGLEEND)){
             return singleListToSamPair(metasSamRecords);

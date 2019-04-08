@@ -8,6 +8,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.RecordReader;
@@ -16,6 +17,7 @@ import org.bgi.flexlab.metas.data.structure.fastq.FastqMultiSampleList;
 import org.bgi.flexlab.metas.data.structure.fastq.FastqSampleList;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The Class is based on org.bgi.flexlab.gaealib.input.fastq.GZFastqReader.
@@ -34,18 +36,23 @@ import java.io.IOException;
 public class MetasGZFastqReader implements RecordReader<Text, Text> {
 	protected static final Log LOG = LogFactory.getLog(MetasGZFastqReader.class.getName());
 
-	protected CompressionCodecFactory compressionCodecs = null;
 	protected long start;
 	protected long pos;
 	protected long end;
 	protected LineReader in;
 	protected int maxLineLength;
-	protected byte[] recordDelimiterBytes;
 	protected String firstLine = "";
+
 	protected int sampleID;
 	protected String readGroupID;
-	protected int recordCount = 0;
-	protected long fileLength;
+
+	// 1 for read1 of paired-end, 2 for read2 of paired-end,
+	// 1 for all reads lacking sample info and /1/2 suffix in name are
+	// single-end: 1 for all.
+	protected int mate;
+
+	//protected int recordCount = 0;
+	//protected long fileLength;
 
 	public void getFirstFastqLine() throws IOException {
 		Text tmpline = new Text();
@@ -62,60 +69,82 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 
 	public MetasGZFastqReader(Configuration jobConf, FileSplit fileSplit, byte[] recordDelimiter) throws IOException {
 
-		final Path file = fileSplit.getPath();
-		compressionCodecs = new CompressionCodecFactory(jobConf);
-
-		if (compressionCodecs.getCodec(file) != null) {
-			LOG.error(this.getClass().toString() + " Fastq File Codec Error. Please decompress input file.");
-			pos = end;
-		}
-
-		this.maxLineLength = jobConf.getInt("mapred.linerecordreader.maxlength", Integer.MAX_VALUE);
+		this.maxLineLength = jobConf.getInt("mapreduce.input.linerecordreader.line.maxlength", Integer.MAX_VALUE);
 		start = fileSplit.getStart();
 		end = start + fileSplit.getLength();
 
+		final Path file = fileSplit.getPath();
+		CompressionCodec codec = new CompressionCodecFactory(jobConf).getCodec(file);
 		FileSystem fs = file.getFileSystem(jobConf);
-		fileLength = fs.getFileStatus(file).getLen();
-
-		if (null != recordDelimiter) {
-			this.recordDelimiterBytes = recordDelimiter;
-		}
+		//fileLength = fs.getFileStatus(file).getLen();
 
 		// System.err.println("split:" + split.getPath().toString());
-		String sampleListPath = jobConf.get("metas.data.mapreduce.input.fqmultisamplelist");
+		String sampleListPath = jobConf.get("metas.data.mapreduce.input.fqsamplelist");
+		LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Sample list file (in hadoop conf): " + sampleListPath);
 		if (sampleListPath != null && !sampleListPath.equals("")) {
-			FastqMultiSampleList fastqMultiSampleList;
-			fastqMultiSampleList = new FastqMultiSampleList(sampleListPath, true, false);
-			FastqSampleList slist = fastqMultiSampleList.getSampleList(fileSplit.getPath().toString());
+			FastqMultiSampleList fastqMultiSampleList = new FastqMultiSampleList(sampleListPath, true, true, false);
+			FastqSampleList slist = null;
+			String fqName = fileSplit.getPath().getName();
+			ArrayList<FastqSampleList> sampleIter = fastqMultiSampleList.getSampleList();
+
+			for (FastqSampleList sample: sampleIter){
+				LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Sample check for split. Split file: " +
+						fqName + " . Current sample in loop: " + sample.toString());
+				if (sample.getFastq1().contains(fqName)){
+					slist = sample;
+					mate = 1;
+					break;
+				}
+				if (sample.getFastq2().contains(fqName)){
+					slist = sample;
+					mate = 2;
+					break;
+				}
+			}
+			sampleIter = null;
+
 			if (slist != null) {
 				sampleID = slist.getSampleID();
 				readGroupID = slist.getRgID();
 			} else {
-				LOG.error("Please provide multisample information for " + file.toString() +
-						" . Pr the partitioning may be uncontrollable.");
+				LOG.fatal("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Please provide multisample " +
+						"information for " + file.toString() + " . Or the processing may be uncontrollable.");
 				sampleID = fastqMultiSampleList.getSampleCount() + 1;
 				readGroupID = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
+				mate = 1;
 			}
 		} else {
-			LOG.error("Please provide multisample information list, or the partitioning may be uncontrollable.");
+			LOG.fatal("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Please provide multisample " +
+					"information list, or the processing may be uncontrollable.");
 			sampleID = 1;
 			readGroupID = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
+			mate = 1;
 		}
 
 		// open the file and seek to the start of the split
 		FSDataInputStream fileIn = fs.open(fileSplit.getPath());
 		boolean skipFirstLine = false;
 
-		if (start != 0) {
-			skipFirstLine = true;
-			--start;
-			fileIn.seek(start);
-		}
-		if (null == this.recordDelimiterBytes) {
-			in = new LineReader(fileIn, jobConf);
+		if (codec != null) {
+			if (null == recordDelimiter){
+				in = new LineReader(codec.createInputStream(fileIn), jobConf);
+			} else {
+				in = new LineReader(codec.createInputStream(fileIn), jobConf, recordDelimiter);
+			}
+			end = Long.MAX_VALUE;
 		} else {
-			in = new LineReader(fileIn, jobConf, this.recordDelimiterBytes);
+			if (start != 0) {
+				skipFirstLine = true;
+				--start;
+				fileIn.seek(start);
+			}
+			if (null == recordDelimiter) {
+				in = new LineReader(fileIn, jobConf);
+			} else {
+				in = new LineReader(fileIn, jobConf, recordDelimiter);
+			}
 		}
+
 		if (skipFirstLine) { // skip first line and re-establish "start".
 			start += in.readLine(new Text(), 0,
 					(int) Math.min((long) Integer.MAX_VALUE, end - start));
@@ -154,12 +183,15 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 	}
 
 	public boolean next(Text key, Text value) throws IOException {
-		if (key == null) {
+
+		if (key == null){
 			key = new Text();
 		}
-		if (value == null) {
+
+		if (value == null){
 			value = new Text();
 		}
+
 		int newSize = 0;
 		boolean iswrongFq = false;
 
@@ -208,8 +240,7 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 					String[] splitTmp = StringUtils.split(st[0], " ");
 					char ch;
 					if(splitTmp.length == 1) {
-						ch = '1';
-						st[0] = splitTmp[0] + "/" + ch;
+						st[0] = splitTmp[0] + "/" + mate;
 					}else {
 						ch = splitTmp[1].charAt(0);
 						if (ch != '1' && ch != '2')
@@ -225,17 +256,21 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 
 				// key: sampleID#readName. example: <Text>
 				// value: mateIndex(1 or 2)##sampleID	pos	filelength##readGroupID##sequence	quality
-				//key.set(sampleID + "#" +tempkey);
-				//value.set(keyIndex + "##" + sampleID + "\t" + pos + "\t" + fileLength + "##" + readGroupID + "##" + st[1] + "\t" + st[3]);
+				//key.set(sampleID + "\t" + tempkey);
+				//value.set(keyIndex + "||" + sampleID + "\t" + pos + "\t" + fileLength + "||" + readGroupID + "||" + st[1] + "\t" + st[3]);
 
 				// new key: sampleID	readName
-				// new value: mateIndex(1 or 2)##readGroupID##sequence	quality
+				// new value: mateIndex(1 or 2 or 0)||readGroupID||sequence	quality||sampleID	readName
 				key.set(sampleID + "\t" + tempkey);
-				value.set(keyIndex + "##" + readGroupID + "##" + st[1] + "\t" + st[3]);
+				value.set(keyIndex + "||" + readGroupID + "||" + st[1] + "\t" + st[3] + "||" + sampleID + "\t" + tempkey);
 
-				recordCount++;
+				LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Reader returned record: " +
+						"sampleID: " + sampleID + " readName: " + tempkey + " index: " + keyIndex +
+						" readGroupID: " + readGroupID);
+				//recordCount++;
+				//LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Key: " + key.toString() + " Value: " + value.toString());
 			} else {
-				LOG.warn("wrong fastq reads:blank line among fq file or end of file!");
+				LOG.warn("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Wrong fastq reads:blank line among fq file or end of file!");
 			}
 			break;
 		}

@@ -226,7 +226,6 @@
     <orderEntry type="library" name="Maven: gov.nih.nlm.ncbi:ngs-java:2.9.0" level="project" />
     <orderEntry type="library" name="Maven: org.seqdoop:hadoop-bam:7.10.0" level="project" />
     <orderEntry type="library" name="Maven: com.github.jsr203hadoop:jsr203hadoop:1.0.3" level="project" />
-    <orderEntry type="library" name="Maven: cz.adamh.utils:native-utils:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.2" level="project" />
   </component>
 </module>

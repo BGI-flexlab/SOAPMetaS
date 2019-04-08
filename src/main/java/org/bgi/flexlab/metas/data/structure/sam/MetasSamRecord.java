@@ -4,6 +4,8 @@ import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.util.SequenceUtil;
 
+import java.io.Serializable;
+
 
 /**
  * ClassName: MetasSamRecord
@@ -11,7 +13,7 @@ import htsjdk.samtools.util.SequenceUtil;
  * @author heshixu@genomics.cn
  */
 
-public class MetasSamRecord extends SAMRecord {
+public class MetasSamRecord extends SAMRecord implements Serializable {
 
     public static final long serialVersionUID = 1L;
     //private Double identity;

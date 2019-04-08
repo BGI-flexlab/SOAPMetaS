@@ -1,7 +1,5 @@
 package org.bgi.flexlab.metas.data.structure.profiling;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 

@@ -78,7 +78,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
     @Override
     public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner){
 
-        if (this.doInsRecalibration && this.sequencingMode.equals(SequencingMode.PAIREND)){
+        if (this.doInsRecalibration && this.sequencingMode.equals(SequencingMode.PAIREDEND)){
             this.insertSizeFilter.training(readMetasSamPairRDD);
         }
 
@@ -146,7 +146,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
 
         ArrayList<Tuple2<String, Tuple4<String, Integer, Double, String>>> readCountTupleList = new ArrayList<>(2);
 
-        String sampleID = tupleKeyValue._1.split("\t")[0];
+        String sampleID = StringUtils.split(tupleKeyValue._1, '\t')[0];
         MetasSamRecord samRecord1 = tupleKeyValue._2.getFirstRecord();
         MetasSamRecord samRecord2 = tupleKeyValue._2.getSecondRecord();
 
@@ -159,7 +159,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase {
                     this.isPairedAtSpeciesLevel(samRecord1, samRecord2)) {
                 readCountTupleList.add(this.pairedCountTupleGenerator(sampleID, samRecord1, samRecord2));
             } else {
-                assert this.sequencingMode.equals(SequencingMode.PAIREND);
+                assert this.sequencingMode.equals(SequencingMode.PAIREDEND);
                 if (samRecord1 != null) {
                     if (this.insertSizeFilter.filter(samRecord1)) {
                         readCountTupleList.add(this.pairedCountTupleGenerator(sampleID, samRecord1, null));

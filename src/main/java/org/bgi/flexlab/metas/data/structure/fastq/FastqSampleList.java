@@ -87,4 +87,9 @@ public class FastqSampleList {
 		}
 		return fastq1 + "," + fastq2 + ",";
 	}
+
+	@Override
+	public String toString() {
+		return this.rgID + "::" + this.fastq1 + "::"+ this.fastq2;
+	}
 }

@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.alignment.metasbowtie2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.bgi.flexlab.metas.alignment.AlignmentMethodBase;
@@ -17,7 +18,8 @@ import java.util.Iterator;
  * @author heshixu@genomics.cn
  */
 
-public class BowtieTabAlignmentMethod extends AlignmentMethodBase implements Serializable, Function2<Integer, Iterator<Tuple2<String, String>>, Iterator<String>> {
+public class BowtieTabAlignmentMethod extends AlignmentMethodBase
+        implements Serializable, Function2<Integer, Iterator<Tuple2<String, String>>, Iterator<String>> {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,13 +47,15 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase implements Ser
      */
     @Override
     public Iterator<String> call(Integer index, Iterator<Tuple2<String, String>> elementIter) throws Exception {
-        LOG.info("["+this.getClass().getName()+"] :: Tmp dir: " + this.tmpDir);
 
         String tab5FileName;
         String outSamFileName;
         String readGroupID;
 
+        LOG.trace("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Current Partition index: " + index);
+
         if (!elementIter.hasNext()){
+            LOG.trace("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Empty partition index: " + index);
             return new ArrayList<String>(0).iterator();
         }
 
@@ -64,7 +68,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase implements Ser
         tab5FileName = this.tmpDir + "/" + this.appId + "-RDDPart" + index + "-" + readGroupID + ".tab5";
         outSamFileName = this.appId + "-RDDPart" + index + "-" + readGroupID + ".sam";
 
-        LOG.info("["+this.getClass().getName()+"] :: Writing file: " + tab5FileName);
+        LOG.info("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Writing input file for bowtie2: " + tab5FileName);
 
         File tab5File = new File(tab5FileName);
         FileOutputStream fos1;
@@ -83,8 +87,8 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase implements Ser
                 element = elementIter.next();
 
                 if (!element._1.equals(readGroupID)){
-                    LOG.warn("[" + this.getClass().getName() + "] :: ReadGroup: " + readGroupID + ". Omit wrong partitioned sequence: "
-                            + element._2.split("\t")[0] + " of group " + element._1);
+                    LOG.warn("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] ReadGroup: " + readGroupID + ". Omit wrong partitioned sequence: "
+                            + StringUtils.split(element._2, '\t')[0] + " of group " + element._1);
                     continue;
                 }
 
@@ -101,11 +105,11 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase implements Ser
             returnedValues = this.runMultiSampleAlignment(readGroupID, tab5FileName, outSamFileName);
 
             // Delete the temporary file, as is have now been copied to the output directory
-            tab5File.delete();
+            //tab5File.delete();
 
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            LOG.error("["+this.getClass().getName()+"] "+e.toString());
+            LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] " + e.toString());
         }
 
         return returnedValues.iterator();

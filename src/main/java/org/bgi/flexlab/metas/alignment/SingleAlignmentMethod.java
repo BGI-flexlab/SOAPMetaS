@@ -40,7 +40,7 @@ public class SingleAlignmentMethod extends AlignmentMethodBase implements Serial
      */
     public Iterator<String> call(Integer arg0, Iterator<String> arg1) throws Exception {
 
-        LOG.info("["+this.getClass().getName()+"] :: Tmp dir: " + this.tmpDir);
+        LOG.info("[SOAPMetas::" + SingleAlignmentMethod.class.getName() + "] Tmp dir: " + this.tmpDir);
 
         String fastqFileName1;
 
@@ -53,7 +53,7 @@ public class SingleAlignmentMethod extends AlignmentMethodBase implements Serial
 
         }
 
-        LOG.info("["+this.getClass().getName()+"] :: Writing file: " + fastqFileName1);
+        LOG.info("[SOAPMetas::" + SingleAlignmentMethod.class.getName() + "] Writing file: " + fastqFileName1);
 
         File FastqFile1 = new File(fastqFileName1);
         FileOutputStream fos1;
@@ -87,7 +87,7 @@ public class SingleAlignmentMethod extends AlignmentMethodBase implements Serial
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            LOG.error("["+this.getClass().getName()+"] "+e.toString());
+            LOG.error("[SOAPMetas::" + SingleAlignmentMethod.class.getName() + "] "+e.toString());
         }
 
         return returnedValues.iterator();

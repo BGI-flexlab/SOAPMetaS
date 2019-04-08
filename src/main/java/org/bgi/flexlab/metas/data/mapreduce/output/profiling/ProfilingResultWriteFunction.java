@@ -61,7 +61,7 @@ public class ProfilingResultWriteFunction implements FlatMapFunction<Iterator<Tu
         } else if(this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
             outputProfilingFile = this.outputDir + "/" + this.appID + "-Profiling-" + readGroupID + ".abundance.evaluation";
         } else {
-            LOG.error("[" + this.getClass().getName() + "] :: Profiling Analysis Mode has wrong value");
+            LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Profiling Analysis Mode has wrong value");
             outputProfilingFile = this.outputDir + "/" + this.appID + "-Profiling-" + readGroupID + ".abundance";
         }
 
@@ -101,10 +101,10 @@ public class ProfilingResultWriteFunction implements FlatMapFunction<Iterator<Tu
                 }
 
             } else {
-                LOG.error("[" + this.getClass().getName() + "] :: Profiling Analysis Mode has wrong value.");
+                LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Profiling Analysis Mode has wrong value.");
                 bw.write("cluster name(marker/species),fragment number,corrected frag num,relative abundance");
                 bw.newLine();
-                bw.write("[" + this.getClass().getName() + "] :: Analysis mode wrong, no output");
+                bw.write("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Analysis mode wrong, no output");
                 bw.newLine();
             }
 
@@ -112,7 +112,7 @@ public class ProfilingResultWriteFunction implements FlatMapFunction<Iterator<Tu
             fos.close();
 
         } catch (FileNotFoundException e){
-            LOG.error("[" + this.getClass().getName() + "] :: Output File" + outputProfilingFile + " can't found. May not be absolute path.");
+            LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Output File" + outputProfilingFile + " can't found. May not be absolute path.");
             e.printStackTrace();
         }
 

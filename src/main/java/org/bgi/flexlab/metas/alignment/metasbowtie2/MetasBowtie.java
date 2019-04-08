@@ -1,7 +1,12 @@
 package org.bgi.flexlab.metas.alignment.metasbowtie2;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.alignment.AlignmentToolWrapper;
+import org.bgi.flexlab.metas.util.DataUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,17 +22,19 @@ import java.util.HashSet;
 
 public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
+    private static final Logger LOG = LogManager.getLogger(MetasBowtie.class);
+
     private static final long serialVersionUID = 1L;
 
     private boolean isShortIndex;
     private boolean isTab5Mode = false;
 
-    private ArrayList<String> readGroup = null;
-    private String readGourpID = null;
+    // The --rg argument of bowtie2. In bt2, --rg should be set multi-times, so we use an array here.
+    private ArrayList<String> rgArray;
 
     private String extraArguments;
 
-    public MetasBowtie(MetasOptions options){
+    public MetasBowtie(MetasOptions options, JavaSparkContext jsc){
 
         this.setIndexPath(options.getAlignmentIndexPath());
 
@@ -35,16 +42,15 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
         this.extraArguments = options.getExtraAlignmentArguments();
 
         this.setOutputHdfsDir(options.getSamOutputHdfsDir());
-        this.setTmpDir(options.getAlignmentTmpDir());
+
+
+        if (options.getAlignmentTmpDir() == null) {
+            this.setTmpDir(DataUtils.getTmpDir(jsc));
+        } else {
+            this.setTmpDir(options.getAlignmentTmpDir());
+        }
 
         this.setSequencingMode(options.getSequencingMode());
-
-        this.readGourpID = options.getReadGroupID();
-        this.readGroup = options.getReadGroup();
-    }
-
-    private boolean isShortFileSuffix(String indexFilePath){
-        return indexFilePath.endsWith("bt2");
     }
 
     public void setTab5Mode(){
@@ -77,18 +83,18 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
         // The first argument should be the name of executor as the main function (bowtie()) of
         // .cpp script will receive all commandline items.
-        if (this.isShortIndex && this.isShortFileSuffix(this.getIndexPath())){
-            // log.info("index file has small index suffix \".bt2\",  use bowtie2-align-s")
+        if (this.isShortIndex){
+            // log.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Index file has small index suffix \".bt2\",  use bowtie2-align-s")
             arguments.add("bowtie2-align-s");
         } else {
-            // log.info("index file doesn't has small index suffix, use as large idx \".bt2l\", use bowtie2-align-l")
+            // log.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Index file doesn't has small index suffix, use as large idx \".bt2l\", use bowtie2-align-l")
             arguments.add("bowtie2-align-l");
         }
 
         // Add extra arguments. All bowtie arguments excluding index file path, output file path,
         // special output files and input file paths.
         if (!this.extraArguments.isEmpty()) {
-            String[] arrayBwaArgs = this.extraArguments.split(" ");
+            String[] arrayBwaArgs = StringUtils.split(this.extraArguments, ' ');
             int numBwaArgs = arrayBwaArgs.length;
 
             for( int i = 0; i < numBwaArgs; i++) {
@@ -110,13 +116,14 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
         arguments.add(this.getIndexPath());
 
-        if (this.readGourpID != null && this.readGourpID.length() > 0){
+        String rgID = this.getReadGroupID();
+        if (!rgID.equals("NORGID")){
             arguments.add("--rg-id");
-            arguments.add(this.readGourpID);
+            arguments.add(rgID);
         }
 
-        if (this.readGroup != null && this.readGroup.size() > 0){
-            for(String rg: this.readGroup){
+        if (this.rgArray != null && this.rgArray.size() > 0){
+            for(String rg: this.rgArray){
                 arguments.add("--rg");
                 arguments.add(rg);
             }
@@ -148,18 +155,23 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
     public int run() {
         String[] arguments = this.parseArguments(0);
 
+        LOG.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 arguments: " + StringUtils.join(arguments, ' '));
+
         int returnCode;
 
-        if (this.isShortIndex && this.isShortFileSuffix(this.getIndexPath())){
+        if (this.isShortIndex){
             returnCode = new BowtieSJNI().bowtieJNI(arguments);
         } else {
             returnCode = new BowtieLJNI().bowtieJNI(arguments);
         }
 
-        if (returnCode != 0){
-            //Log.error("["+this.getClass().getName()+"] :: Bowtie2 exited with error code: " + String.valueOf(returnCode));
+        if (returnCode == 0){
+            LOG.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 runs successfully for input: " + arguments[arguments.length-1]);
+        } else {
+            LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 failed in running for input: " + arguments[arguments.length-1]);
         }
 
+        // 0 means successful execution.
         return returnCode;
     }
 }

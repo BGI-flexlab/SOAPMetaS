@@ -39,7 +39,7 @@ public class PairedAlignmentMethod extends AlignmentMethodBase implements Serial
     public Iterator<String> call(Integer arg0, Iterator<Tuple2<String, String>> arg1) throws Exception {
 
         // STEP 1: Input fastq reads tmp file creation
-        LOG.info("["+this.getClass().getName()+"] :: Tmp dir: " + this.tmpDir);
+        LOG.info("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] Tmp dir: " + this.tmpDir);
 
         String fastqFileName1;
         String fastqFileName2;
@@ -54,8 +54,8 @@ public class PairedAlignmentMethod extends AlignmentMethodBase implements Serial
         }
 
 
-        LOG.info("["+this.getClass().getName()+"] :: Writing file: " + fastqFileName1);
-        LOG.info("["+this.getClass().getName()+"] :: Writing file: " + fastqFileName2);
+        LOG.info("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] Writing file: " + fastqFileName1);
+        LOG.info("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] Writing file: " + fastqFileName2);
 
         File FastqFile1 = new File(fastqFileName1);
         File FastqFile2 = new File(fastqFileName2);
@@ -97,15 +97,15 @@ public class PairedAlignmentMethod extends AlignmentMethodBase implements Serial
             returnedValues = this.runAlignmentProcess(arg0, fastqFileName1, fastqFileName2);
 
             // Delete temporary files, as they have now been copied to the output directory
-            LOG.info("["+this.getClass().getName()+"] :: Deleting file: " + fastqFileName1);
+            LOG.info("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] " + PairedAlignmentMethod.class.getName() + "] Deleting file: " + fastqFileName1);
             FastqFile1.delete();
 
-            LOG.info("["+this.getClass().getName()+"] :: Deleting file: " + fastqFileName2);
+            LOG.info("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] " + PairedAlignmentMethod.class.getName() + "] Deleting file: " + fastqFileName2);
             FastqFile2.delete();
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            LOG.error("["+this.getClass().getName()+"] "+e.toString());
+            LOG.error("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] "+e.toString());
         }
 
         return returnedValues.iterator();

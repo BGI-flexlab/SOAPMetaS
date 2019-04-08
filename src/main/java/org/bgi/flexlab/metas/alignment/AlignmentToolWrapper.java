@@ -21,7 +21,7 @@ public abstract class AlignmentToolWrapper implements Serializable {
     private String outputFile;
     private String alignmentIndexPath;
 
-    private String readGroupID = null;
+    private String readGroupID;
 
     private String samOutputHdfsDir;
 
@@ -98,7 +98,7 @@ public abstract class AlignmentToolWrapper implements Serializable {
      * @return A boolean value that is true if paired reads are used or false otherwise
      */
     public boolean isPairedReads() {
-        return this.sequencingMode.equals(SequencingMode.PAIREND);
+        return this.sequencingMode.equals(SequencingMode.PAIREDEND);
     }
 
     /**

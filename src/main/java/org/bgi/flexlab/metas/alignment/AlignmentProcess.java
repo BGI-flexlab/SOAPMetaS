@@ -104,7 +104,7 @@ public class AlignmentProcess {
             //this.totalInputLength = lengthFile1 + lengthFile2;
             fs.close();
         } catch (IOException e) {
-            LOG.error(e.toString());
+            LOG.error("[SOAPMetas::" + AlignmentProcess.class.getName() + "] " + e.toString());
             e.printStackTrace();
         }
     }
@@ -134,7 +134,7 @@ public class AlignmentProcess {
             fs.close();
         }
         catch (IOException e) {
-            LOG.error(e.toString());
+            LOG.error("[SOAPMetas::" + AlignmentProcess.class.getName() + "] " + e.toString());
             e.printStackTrace();
         }
     }
@@ -169,7 +169,7 @@ public class AlignmentProcess {
 
         long startTime = System.nanoTime();
 
-        LOG.info("["+this.getClass().getName()+"] :: Not sorting in HDFS. Timing: " + startTime);
+        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Not sorting in HDFS. Timing: " + startTime);
 
         // Read the FASTQ file from HDFS using the FastqInputFormat class
         JavaPairRDD<Long, String> singleReadsKeyVal = loadFastq(this.jscontext, this.options.getInputFastqPath());
@@ -179,25 +179,25 @@ public class AlignmentProcess {
             // First, the join operation is performed. After that,
             // a sortByKey. The resulting values are obtained
             readsRDD = singleReadsKeyVal.sortByKey().values();
-            LOG.info("["+this.getClass().getName()+"] :: Sorting in memory without partitioning");
+            LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Sorting in memory without partitioning");
         }
 
         // Sort in memory with partitioning
         else if ((options.getPartitionNumber() != 0) && (options.isSortFastqReads())) {
             singleReadsKeyVal = singleReadsKeyVal.repartition(options.getPartitionNumber());
             readsRDD = singleReadsKeyVal.sortByKey().values();//.persist(StorageLevel.MEMORY_ONLY());
-            LOG.info("["+this.getClass().getName()+"] :: Repartition with sort");
+            LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition with sort");
         }
 
         // No Sort with no partitioning
         else if ((options.getPartitionNumber() == 0) && (!options.isSortFastqReads())) {
-            LOG.info("["+this.getClass().getName()+"] :: No sort and no partitioning");
+            LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] No sort and no partitioning");
             readsRDD = singleReadsKeyVal.values();
         }
 
         // No Sort with partitioning
         else {
-            LOG.info("["+this.getClass().getName()+"] :: No sort with partitioning");
+            LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] No sort with partitioning");
             int numPartitions = singleReadsKeyVal.partitions().size();
 
             /*
@@ -206,10 +206,10 @@ public class AlignmentProcess {
              * is used.
              */
             if ((numPartitions) <= options.getPartitionNumber()) {
-                LOG.info("["+this.getClass().getName()+"] :: Repartition with no sort");
+                LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition with no sort");
             }
             else {
-                LOG.info("["+this.getClass().getName()+"] :: Repartition(Coalesce) with no sort");
+                LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition(Coalesce) with no sort");
             }
 
             readsRDD = singleReadsKeyVal
@@ -220,8 +220,8 @@ public class AlignmentProcess {
         }
 
         long endTime = System.nanoTime();
-        LOG.info("["+this.getClass().getName()+"] :: End of sorting. Timing: " + endTime);
-        LOG.info("["+this.getClass().getName()+"] :: Total time: " + (endTime - startTime) / 1e9 / 60.0 + " minutes");
+        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] End of sorting. Timing: " + endTime);
+        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Total time: " + (endTime - startTime) / 1e9 / 60.0 + " minutes");
 
         //readsRDD.persist(StorageLevel.MEMORY_ONLY());
 
@@ -241,7 +241,7 @@ public class AlignmentProcess {
 
         long startTime = System.nanoTime();
 
-        LOG.info("["+this.getClass().getName()+"] ::Not sorting in HDFS. Timing: " + startTime);
+        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Not sorting in HDFS. Timing: " + startTime);
 
         // Read the two FASTQ files from HDFS using the loadFastq method. After that, a Spark join operation is performed
         JavaPairRDD<Long, String> datasetTmp1 = loadFastq(this.jscontext, options.getInputFastqPath());
@@ -254,24 +254,24 @@ public class AlignmentProcess {
         // Sort in memory with no partitioning
         if ((options.getPartitionNumber() == 0) && (options.isSortFastqReads())) {
             readsRDD = pairedReadsRDD.sortByKey().values();
-            LOG.info("["+this.getClass().getName()+"] :: Sorting in memory without partitioning");
+            LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Sorting in memory without partitioning");
         }
 
         // Sort in memory with partitioning
         else if ((options.getPartitionNumber() != 0) && (options.isSortFastqReads())) {
             pairedReadsRDD = pairedReadsRDD.repartition(options.getPartitionNumber());
             readsRDD = pairedReadsRDD.sortByKey().values();//.persist(StorageLevel.MEMORY_ONLY());
-            LOG.info("["+this.getClass().getName()+"] :: Repartition with sort");
+            LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition with sort");
         }
 
         // No Sort with no partitioning
         else if ((options.getPartitionNumber() == 0) && (!options.isSortFastqReads())) {
-            LOG.info("["+this.getClass().getName()+"] :: No sort and no partitioning");
+            LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] No sort and no partitioning");
         }
 
         // No Sort with partitioning
         else {
-            LOG.info("["+this.getClass().getName()+"] :: No sort with partitioning");
+            LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] No sort with partitioning");
             int numPartitions = pairedReadsRDD.partitions().size();
 
             /*
@@ -280,10 +280,10 @@ public class AlignmentProcess {
              * is used.
              */
             if ((numPartitions) <= options.getPartitionNumber()) {
-                LOG.info("["+this.getClass().getName()+"] :: Repartition with no sort");
+                LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition with no sort");
             }
             else {
-                LOG.info("["+this.getClass().getName()+"] :: Repartition(Coalesce) with no sort");
+                LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition(Coalesce) with no sort");
             }
 
             readsRDD = pairedReadsRDD
@@ -294,8 +294,8 @@ public class AlignmentProcess {
 
         long endTime = System.nanoTime();
 
-        LOG.info("["+this.getClass().getName()+"] :: End of sorting. Timing: " + endTime);
-        LOG.info("["+this.getClass().getName()+"] :: Total time: " + (endTime - startTime) / 1e9 / 60.0 + " minutes");
+        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] End of sorting. Timing: " + endTime);
+        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Total time: " + (endTime - startTime) / 1e9 / 60.0 + " minutes");
         //readsRDD.persist(StorageLevel.MEMORY_ONLY());
 
         return readsRDD;
@@ -353,14 +353,14 @@ public class AlignmentProcess {
      */
     public void runAlignment() {
 
-        LOG.info("["+this.getClass().getName()+"] :: Starting Alignment");
+        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Starting Alignment");
 
         AlignmentToolWrapper alignmentToolWrapper = getAlignmentTool(this.options.getAlignmentTool());
 
         // Returned list of mapping results files' paths.
         List<String> returnedValues;
 
-        if (this.options.getSequencingMode().equals(SequencingMode.PAIREND)) {
+        if (this.options.getSequencingMode().equals(SequencingMode.PAIREDEND)) {
             JavaRDD<Tuple2<String, String>> readsRDD = handlePairedReadsSorting();
             returnedValues = MapPairedMethod(alignmentToolWrapper, readsRDD);
         }
@@ -380,7 +380,7 @@ public class AlignmentProcess {
 
                 // We iterate over the resulting files in HDFS and agregate them into only one file.
                 for (int i = 0; i < returnedValues.size(); i++) {
-                    LOG.info("AlignmentProcess :: Returned file ::" + returnedValues.get(i));
+                    LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Returned file: " + returnedValues.get(i));
                     BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(new Path(returnedValues.get(i)))));
 
                     String line;
@@ -403,7 +403,7 @@ public class AlignmentProcess {
                 fs.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                LOG.error(e.toString());
+                LOG.error("[SOAPMetas::" + AlignmentProcess.class.getName() + "] " + e.toString());
             }
         }
     }
@@ -422,7 +422,7 @@ public class AlignmentProcess {
 
         switch (toolName){
             case "bowtie": {
-                toolWrapper = new MetasBowtie(this.options);
+                toolWrapper = new MetasBowtie(this.options, this.jscontext);
                 break;
             }
             /*
@@ -432,7 +432,7 @@ public class AlignmentProcess {
             }
             */
             default:{
-                toolWrapper = new MetasBowtie(this.options);
+                toolWrapper = new MetasBowtie(this.options, this.jscontext);
                 break;
             }
         }

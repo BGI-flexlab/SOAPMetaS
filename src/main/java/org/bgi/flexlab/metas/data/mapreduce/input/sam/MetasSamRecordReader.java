@@ -43,8 +43,8 @@ public class MetasSamRecordReader extends RecordReader<Text, MetasSamRecordWrita
 
     protected static final Log LOG = LogFactory.getLog(MetasSamRecordReader.class.getName());
 
-    private Text key = new Text();
-    private MetasSamRecordWritable record = new MetasSamRecordWritable();
+    private Text key;
+    private MetasSamRecordWritable record;
 
     private FSDataInputStream input;
     private SAMRecordIterator iterator;
@@ -77,14 +77,14 @@ public class MetasSamRecordReader extends RecordReader<Text, MetasSamRecordWrita
         final Path file = split.getPath();
         final FileSystem fs = file.getFileSystem(conf);
 
-        String samSampleListPath = conf.get("metas.data.mapreduce.input.sammultisamplelist");
+        String samSampleListPath = conf.get("metas.data.mapreduce.input.samsamplelist");
 
         if (samSampleListPath != null && !samSampleListPath.equals("")) {
             SAMMultiSampleList samMultiSampleList = new SAMMultiSampleList(samSampleListPath,
                     true, false);
             sampleID = samMultiSampleList.getSampleID(file.getName());
         } else {
-            LOG.error("Please provide multisample information list, or the partitioning may be uncontrollable.");
+            LOG.error("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] Please provide multisample information list, or the partitioning may be uncontrollable.");
             sampleID = 0;
         }
 
@@ -174,7 +174,7 @@ public class MetasSamRecordReader extends RecordReader<Text, MetasSamRecordWrita
         final MetasSamRecord r = (MetasSamRecord) iterator.next();
         key.set(sampleID + "\t" + r.getTruncatedReadName());
         if (r.getReadUnmappedFlag()){
-            record.set(null);
+            record = null;
         } else {
             record.set(r);
         }

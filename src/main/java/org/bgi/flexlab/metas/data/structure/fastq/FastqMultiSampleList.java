@@ -1,9 +1,10 @@
 package org.bgi.flexlab.metas.data.structure.fastq;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -21,13 +22,23 @@ import java.util.ArrayList;
 
 public class FastqMultiSampleList {
 
-	private ArrayList<FastqSampleList> fastqSampleList = new ArrayList<>();
+	protected static final Log LOG = LogFactory.getLog(FastqMultiSampleList.class.getName());
+
+	private ArrayList<FastqSampleList> sampleList = null;
 	private int sampleCount = 0;
 	private StringBuilder filePath;
 
-	public FastqMultiSampleList(String list, boolean isLocal, boolean recordPath) throws IOException {
-		File file = new File(list);
-		BufferedReader reader = new BufferedReader(new FileReader(file));
+	public FastqMultiSampleList(String listFile, boolean isLocal, boolean recordSample, boolean recordPath) throws IOException {
+		File file = new File(listFile);
+		FileInputStream fis = new FileInputStream(file);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+
+		if (recordSample){
+			sampleList = new ArrayList<>();
+		}
+		if (recordPath){
+			filePath = new StringBuilder();
+		}
 		
 		String line;
 		while((line = reader.readLine()) != null) {
@@ -35,9 +46,9 @@ public class FastqMultiSampleList {
 				continue;
 			}
 
-			String[] items = line.split("\t");
+			String[] items = StringUtils.split(line, '\t');
 
-			FastqSampleList slist = new FastqSampleList();;
+			FastqSampleList slist;
 
 			if (items.length == 3){
 				if (isLocal){
@@ -48,6 +59,7 @@ public class FastqMultiSampleList {
 						items[2] = "file://" + items[2];
 					}
 				}
+				slist = new FastqSampleList();
 				slist.setSampleList(items[0], items[1], items[2], sampleCount);
 				this.sampleCount++;
 			} else if (items.length == 2){
@@ -56,6 +68,7 @@ public class FastqMultiSampleList {
 						items[1] = "file://" + items[1];
 					}
 				}
+				slist = new FastqSampleList();
 				slist.setSampleList(items[0], items[1], null, sampleCount);
 				this.sampleCount++;
 			} else {
@@ -65,19 +78,30 @@ public class FastqMultiSampleList {
 
 			if (recordPath) {
 				filePath.append(slist.getFastqPathString());
+				LOG.trace("[SOAPMetas::" + FastqMultiSampleList.class.getName() + "] Save record path: " + slist.getFastqPathString());
 			}
+
+			if (recordSample) {
+				sampleList.add(slist);
+				LOG.trace("[SOAPMetas::" + FastqMultiSampleList.class.getName() + "] Save sample: " + slist.toString());
+			}
+
 		}
-		filePath.trimToSize();
+
+		if (recordPath) {
+			filePath.trimToSize();
+		}
+
+		if (recordSample) {
+			sampleList.trimToSize();
+		}
+
 		reader.close();
+		fis.close();
 	}
 	
-	public FastqSampleList getSampleList(String fqName) {
-		for(FastqSampleList slist : fastqSampleList) {
-			if(slist.getFastq1().contains(fqName) || slist.getFastq2().contains(fqName)) {
-				return slist;
-			}
-		}
-		return null;
+	public ArrayList<FastqSampleList> getSampleList() {
+		return sampleList;
 	}
 
 	public int getSampleCount() {

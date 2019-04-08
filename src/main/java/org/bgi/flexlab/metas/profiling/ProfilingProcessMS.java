@@ -3,23 +3,22 @@ package org.bgi.flexlab.metas.profiling;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.bgi.flexlab.metas.MetasOptions;
+import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSamRecordWritable;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
 import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSamInputFormat;
-import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSamRecordWritable;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingResultWriteFunction;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
+import org.bgi.flexlab.metas.util.DataUtils;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import scala.Tuple2;
 
@@ -75,58 +74,30 @@ public class ProfilingProcessMS {
         if (this.doIdentityFiltering) {
             this.identityFilter = new MetasSamRecordIdentityFilter(this.metasOpt.getMinIdentity());
         }
+        Configuration conf = this.jscontext.hadoopConfiguration();
 
-        this.tmpDir = this.jscontext.getLocalProperty("spark.local.dir");
-
-        //We set the tmp dir
-        if ((this.tmpDir == null || this.tmpDir == "null")
-                && this.metasOpt.getProfilingTmpDir() != null
-                && !this.metasOpt.getProfilingTmpDir().isEmpty()) {
-
-            this.tmpDir = this.metasOpt.getProfilingTmpDir();
-        }
-
-        if (this.tmpDir == null || this.tmpDir == "null") {
-            this.tmpDir = jscontext.hadoopConfiguration().get("hadoop.tmp.dir");
-        }
-
-        if (this.tmpDir.startsWith("file:")) {
-            this.tmpDir = this.tmpDir.replaceFirst("file:", "");
-        }
-
-        File tmpFileDir = new File(this.tmpDir);
-
-        if(!tmpFileDir.isDirectory() || !tmpFileDir.canWrite()) {
-            this.tmpDir = "/tmp/";
+        this.tmpDir = this.metasOpt.getProfilingTmpDir();
+        if (this.tmpDir == null) {
+            this.tmpDir = DataUtils.getTmpDir(this.jscontext);
+        } else {
+            try {
+                DataUtils.createFolder(conf, this.tmpDir);
+            } catch (IOException e){
+                LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling temp directory.");
+                e.printStackTrace();
+            }
         }
 
         this.outputHdfsDir = this.metasOpt.getProfilingOutputHdfsDir();
-        createOutputFolder(this.jscontext.hadoopConfiguration(), this.outputHdfsDir);
-
-    }
-
-    private void createOutputFolder(Configuration hadoopConf, String directoryPath) {
         try {
-            FileSystem fs = FileSystem.get(hadoopConf);
-
-            // Path variable
-            Path outputDir = new Path(directoryPath);
-
-            // Directory creation
-            if (!fs.exists(outputDir)) {
-                fs.mkdirs(outputDir);
-            }
-            else {
-                fs.delete(outputDir, true);
-                fs.mkdirs(outputDir);
-            }
-
-            fs.close();
-        }
-        catch (IOException e) {
-            LOG.error("Fail to create SAM output directory.");
+            DataUtils.createFolder(conf, this.outputHdfsDir);
+        } catch (IOException e){
+            LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling output directory.");
             e.printStackTrace();
         }
+
+        LOG.info("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Alignment process: Temp directory: " + this.tmpDir +
+                " Output Directpry: " + this.outputHdfsDir);
     }
 
     /**
@@ -135,7 +106,7 @@ public class ProfilingProcessMS {
      * @return Output file paths string.
      */
     public List<String> runProfilingProcess(List<String> samFileList){
-        String multiSamListFile = this.tmpDir + "/" + "MultipleSampleSAMListFile";
+        String multiSamListFile = this.outputHdfsDir + "/" + "tmp-multiSampleSAMList";
 
         File samList = new File(multiSamListFile);
         FileOutputStream fos1;
@@ -153,10 +124,10 @@ public class ProfilingProcessMS {
             bw1.close();
         } catch (FileNotFoundException e){
             e.printStackTrace();
-            LOG.error("[" + this.getClass().getName() + "] :: MultiSampleFileList not found. " + e.toString());
+            LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] MultiSampleFileList not found. " + e.toString());
         } catch (IOException e){
             e.printStackTrace();
-            LOG.error("[" + this.getClass().getName() + "] :: MultiSampleFileList IO error. " + e.toString());
+            LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] MultiSampleFileList IO error. " + e.toString());
         }
 
         return runProfilingProcess(multiSamListFile);
@@ -169,7 +140,7 @@ public class ProfilingProcessMS {
         try {
             SAMMultiSampleList samMultiSampleList = new SAMMultiSampleList(multiSamListFile, true, true);
             Configuration conf = this.jscontext.hadoopConfiguration();
-            conf.set("metas.data.mapreduce.input.sammultisamplelist", this.metasOpt.getMultiSampleList());
+            conf.set("metas.data.mapreduce.input.samsamplelist", this.metasOpt.getMultiSampleList());
 
 
             /**
@@ -180,8 +151,7 @@ public class ProfilingProcessMS {
                     .newAPIHadoopFile(samMultiSampleList.getAllSAMFilePath(), MetasSamInputFormat.class,
                             Text.class, MetasSamRecordWritable.class, conf)
                     .filter(tup -> tup._2 != null)
-                    .mapToPair(tup -> new Tuple2<>(tup._1.toString(), tup._2.get()));
-
+                    .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.get()));
 
             if (this.doIdentityFiltering){
                 cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
@@ -190,7 +160,7 @@ public class ProfilingProcessMS {
             this.sampleCount = samMultiSampleList.getSampleCount();
 
         } catch (IOException e){
-            LOG.error("Portable error: Multi-sample SAM file list can't be loaded.");
+            LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Portable error: Multi-sample SAM file list can't be loaded.");
             e.printStackTrace();
         }
 
