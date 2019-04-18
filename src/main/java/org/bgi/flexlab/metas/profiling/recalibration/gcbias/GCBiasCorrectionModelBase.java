@@ -1,6 +1,7 @@
 package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 
 import java.io.File;
+import java.io.Serializable;
 
 /**
  * ClassName: GCBiasCorrectionModelBase
@@ -12,7 +13,9 @@ import java.io.File;
  * @author heshixu@genomics.cn
  */
 
-public abstract class GCBiasCorrectionModelBase {
+public abstract class GCBiasCorrectionModelBase implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     /**
      * GcBias校正所需的非线性回归模型，当前类是抽象类，后续如果需要引入不同的回归模型来优化校正结果，则可以基于此模型进行扩展。

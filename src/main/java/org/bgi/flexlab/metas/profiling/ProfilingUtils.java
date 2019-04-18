@@ -1,7 +1,7 @@
 package org.bgi.flexlab.metas.profiling;
 
+import htsjdk.samtools.SAMRecord;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
 /**
@@ -23,7 +23,7 @@ public final class ProfilingUtils {
     }
 
 
-    public String samRecordNameModifier(MetasSamRecord record){
+    public String samRecordNameModifier(SAMRecord record){
         try {
             if(this.sequencingMode.equals(SequencingMode.SINGLEEND)){
                 return record.getReadName();
@@ -46,8 +46,8 @@ public final class ProfilingUtils {
      *
      * The method is copied from org.bgi.flexlab.gaea.util.GaeaSamPairUtil
      */
-    public static int computeInsertSize(final MetasSamRecord firstEnd,
-                                        final MetasSamRecord secondEnd) {
+    public static int computeInsertSize(final SAMRecord firstEnd,
+                                        final SAMRecord secondEnd) {
         if (firstEnd.getReadUnmappedFlag() || secondEnd.getReadUnmappedFlag()) {
             return 0;
         }
@@ -96,8 +96,8 @@ public final class ProfilingUtils {
 //
     //    private MetasSamPairRecord pairedModeMerge(MetasSamPairRecord pair1,
     //                                               MetasSamPairRecord pair2){
-    //        MetasSamRecord pair2Rec1 = pair2.getFirstRecord();
-    //        MetasSamRecord pair2Rec2 = pair2.getSecondRecord();
+    //        SAMRecord pair2Rec1 = pair2.getFirstRecord();
+    //        SAMRecord pair2Rec2 = pair2.getSecondRecord();
 //
     //        if (pair2.isExact1()){
 //

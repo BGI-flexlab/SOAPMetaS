@@ -6,6 +6,8 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 
+import java.io.Serializable;
+
 /**
  * ClassName: METAPHLANProfilingMethod
  * Description:
@@ -13,7 +15,9 @@ import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
  * @author heshixu@genomics.cn
  */
 
-public class METAPHLANProfilingMethod extends ProfilingMethodBase {
+public class METAPHLANProfilingMethod extends ProfilingMethodBase implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     public METAPHLANProfilingMethod(MetasOptions options){
         super(options);

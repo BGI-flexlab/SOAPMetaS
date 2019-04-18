@@ -61,8 +61,8 @@ public class ProfilingResultRecord implements Serializable {
         return readGroupID;
     }
 
-    public void setReadNameString(byte[] readNameStringBytes) {
-        this.readNameStringBytes = readNameStringBytes;
+    public void setReadNameString(String readNameStringBytes) {
+        this.readNameStringBytes = readNameStringBytes.getBytes(StandardCharsets.UTF_8);
     }
 
     public String getReadNameString() {
@@ -71,6 +71,13 @@ public class ProfilingResultRecord implements Serializable {
         } else {
             return "";
         }
+    }
+
+    @Override
+    public String toString(){
+        return new StringBuilder("RGID: ").append(readGroupID).append(" | ClusterName: ").append(clusterName)
+                .append(" | RawReadCount/CorrectedReadCount: ").append(rawReadCount).append('/').append(correctedReadCount)
+                .append(" | Abundance: ").append(abundance).toString();
     }
 
 }

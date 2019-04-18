@@ -82,7 +82,8 @@ public class AlignmentMethodBase implements Serializable {
     public ArrayList<String> copyResults(String outputSamFileName, String readGroupID) {
         ArrayList<String> returnedValues = new ArrayList<>();
 
-        this.LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName + " Copy output sam files to output directory.");
+        this.LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
+                this.appName + " Copy output sam files to output directory.");
 
         try {
             //if (outputDir.startsWith("hdfs")) {
@@ -105,7 +106,7 @@ public class AlignmentMethodBase implements Serializable {
         if (readGroupID != null) {
             returnedValues.add(readGroupID + "\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
         } else {
-            returnedValues.add("#\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+            returnedValues.add("NORGID\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
         }
 
         return returnedValues;
@@ -132,6 +133,6 @@ public class AlignmentMethodBase implements Serializable {
         this.alignReads(outputSamFileName, fastqFileName1, fastqFileName2);
 
         // Copy the result to HDFS
-        return this.copyResults(outputSamFileName, null);
+        return this.copyResults(outputSamFileName, "NORGID");
     }
 }

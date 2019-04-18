@@ -11,10 +11,12 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.alignment.metasbowtie2.BowtieTabAlignmentMethod;
 import org.bgi.flexlab.metas.alignment.metasbowtie2.MetasBowtie;
+import org.bgi.flexlab.metas.data.mapreduce.input.fastq.MetasFastqInputFormat;
+import org.bgi.flexlab.metas.data.mapreduce.input.fastq.MetasSEFastqInputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
-import org.bgi.flexlab.metas.data.mapreduce.input.fastq.MetasFastqFileInputFormat;
 import org.bgi.flexlab.metas.data.structure.fastq.FastqMultiSampleList;
 import org.bgi.flexlab.metas.util.DataUtils;
+import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 
 import java.io.*;
@@ -44,10 +46,7 @@ public class AlignmentProcessMS {
 
     private FastqMultiSampleList fastqMultiSampleList;
     private int numPartitionEachSample = 1;
-
-    private String samOutputHdfsDir;
-    private String tmpDir;
-
+    private SequencingMode seqMode;
 
     /**
      * Constructor to build the AlignmentProcess object from Metas Main program.
@@ -60,7 +59,7 @@ public class AlignmentProcessMS {
         this.options = options;
         this.jscontext = context;
         this.initProcess();
-        LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] AlignmentProcessMS Construction finished.");
+        //LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] AlignmentProcessMS Construction finished.");
     }
 
     /**
@@ -83,48 +82,39 @@ public class AlignmentProcessMS {
      */
     private void initProcess() {
 
+        this.seqMode = this.options.getSequencingMode();
+
         this.numPartitionEachSample = Math.max(this.options.getNumPartitionEachSample(), 1);
 
-        this.samOutputHdfsDir = this.options.getSamOutputHdfsDir();
+        String samOutputHdfsDir = this.options.getSamOutputHdfsDir();
 
         Configuration conf = this.jscontext.hadoopConfiguration();
 
         try {
-            DataUtils.createFolder(conf, this.samOutputHdfsDir);
+            DataUtils.createFolder(conf, samOutputHdfsDir);
         } catch (IOException e){
             LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to create SAM output directory.");
             e.printStackTrace();
         }
 
-        /*
-        Set temp directory
-         */
-        this.tmpDir = this.options.getAlignmentTmpDir();
-        if (this.tmpDir == null) {
-            this.tmpDir = DataUtils.getTmpDir(this.jscontext);
-        } else {
+        String tmpDir = this.options.getAlignmentTmpDir();
+        if (tmpDir != null) {
             try {
-                DataUtils.createFolder(conf, this.tmpDir);
+                DataUtils.createFolder(conf, tmpDir);
             } catch (IOException e){
                 LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to create alignment temp directory.");
                 e.printStackTrace();
             }
         }
 
-        LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Alignment process: Temp directory: " + this.tmpDir +
-                " Output Directpry: " + this.samOutputHdfsDir);
+        LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Alignment process output Directpry: "
+                + samOutputHdfsDir);
 
         /*
         Read multiple sample list file.
          */
-        String multilistFile;
         try {
-            if (this.options.isSingleSample()){
-                multilistFile = generateMultiSampleList(this.options.getInputFastqPath(), this.options.getInputFastqPath2());
-                LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Create multiSampleList file.");
-            } else {
-                multilistFile = this.options.getMultiSampleList();
-            }
+            String multilistFile = this.options.getMultiSampleList();
 
             conf.set("metas.data.mapreduce.input.fqsamplelist", multilistFile);
             LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Hadoop context configure " +
@@ -137,126 +127,40 @@ public class AlignmentProcessMS {
         }
     }
 
-    private String generateMultiSampleList(String fastqPath1, String fastqPath2){
-        String[] fq1Array = StringUtils.split(fastqPath1, ',');
-        String[] fq2Array = null;
-        String rgID = this.options.getReadGroupID();
-        if (fastqPath2 != null && !fastqPath2.isEmpty()){
-            fq2Array = StringUtils.split(fastqPath2, ',');
-            assert fq1Array.length == fq2Array.length: "Numbers of paired fastq files are not equal.";
-        }
-
-        String outputMultiSampleList = this.samOutputHdfsDir + "/tmp-multiSampleFastqList";
-        File sampleList = new File(outputMultiSampleList);
-
-        try (BufferedWriter bfr = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(sampleList)))){
-
-            if (fq2Array.length > 0) {
-                for (int i = 0; i < fq1Array.length; i++) {
-                    bfr.write(rgID + "\t" + fq1Array[i] + "\t" + fq2Array[i]);
-                    bfr.newLine();
-                }
-            } else {
-                for (int i = 0; i < fq1Array.length; i++) {
-                    bfr.write(rgID + "\t" + fq1Array[i]);
-                    bfr.newLine();
-                }
-            }
-        } catch (FileNotFoundException e){
-            LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Can't create multiple sample fastq list file.");
-            e.printStackTrace();
-        } catch (IOException e){
-            LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Can't write multiple sample fastq list file.");
-            e.printStackTrace();
-        }
-        return outputMultiSampleList;
-    }
-
-
-    ///**
-    // * Form input reads data.
-    // *
-    // * @return PairRDD. Key: readGroupID; value: bowtie_tab5_format
-    // */
-    //private JavaPairRDD<String, String> handleMultiSampleReads(){
+    //private String generateMultiSampleList(String fastqPath1, String fastqPath2){
+    //    String[] fq1Array = StringUtils.split(fastqPath1, ',');
+    //    String[] fq2Array = null;
+    //    String rgID = this.options.getReadGroupID();
+    //    if (fastqPath2 != null && !fastqPath2.isEmpty()){
+    //        fq2Array = StringUtils.split(fastqPath2, ',');
+    //        assert fq1Array.length == fq2Array.length: "Numbers of paired fastq files are not equal.";
+    //    }
 //
-    //    // Add one more partition for files without sample information.
-    //    int numPartition = this.numPartitionEachSample * this.fastqMultiSampleList.getSampleCount() + 1;
+    //    String outputMultiSampleList = this.samOutputHdfsDir + "/tmp-multiSampleFastqList";
+    //    File sampleList = new File(outputMultiSampleList);
 //
-    //    String filePath = this.fastqMultiSampleList.getAllFastqPath();
+    //    try (BufferedWriter bfr = new BufferedWriter(
+    //            new OutputStreamWriter(new FileOutputStream(sampleList)))){
 //
-    //    /*
-    //    Merge pair read and prepare RDD for repartition.
-//
-    //    After hadoopfile:
-    //     key: sampleID#readName <Text>
-    //     value: mateIndex(1 or 2)##sampleID	pos	filelength##readGroupID##sequence	quality
-//
-    //    After reduceByKey && filter:
-    //     key: sampleID#readName <Text>
-    //     value: mateIndex(3)##sampleID	pos filelength##readGroupID##seq1    qual1[    seq2    qual2]
-//
-    //    After mapToPair:
-    //     key: sampleID	pos filelength
-    //     value: readGroupID##readName   seq1    qual1[    seq2    qual2]
-    //     */
-    //    JavaPairRDD<String, String> tab5RDD = this.jscontext
-    //            .hadoopFile(filePath, MetasFastqFileInputFormat.class,
-    //                    Text.class, Text.class)
-    //            .reduceByKey(new SampleIDReadNamePartitioner(this.fastqMultiSampleList.getSampleCount()),
-    //                    (v1, v2) -> {
-    //                String[] values1 = v1.toString().split("##");
-    //                String[] values2 = v2.toString().split("##");
-    //                int mate1 = Integer.parseInt(values1[0]);
-    //                int mate2 = Integer.parseInt(values2[0]);
-    //                StringBuilder newsr = new StringBuilder();
-    //                if (mate1 == 1 && mate2 == 2){
-    //                    newsr.append(3).append("##")
-    //                            .append(values1[1]).append("##").append(values1[2]).append("##")
-    //                            .append(values1[3]).append("\t").append(values2[3]).trimToSize();
-    //                } else if (mate1 == 2 && mate2 == 1){
-    //                    newsr.append(3).append("##")
-    //                            .append(values2[1]).append("##").append(values2[2]).append("##")
-    //                            .append(values2[3]).append("\t").append(values1[3]).trimToSize();
-    //                } else {
-    //                    LOG.warn("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Ignore read name with three sequences. ReadGroupID: " + values1[2]
-    //                    + " Seq and qual: " + values1[3] + "\t" + values2[3]);
-    //                    return null;
-    //                }
-    //                Text newValue = new Text();
-    //                newValue.set(newsr.toString());
-    //                return newValue;
-    //            })
-    //            .filter(record -> record._2 != null)
-    //            .mapToPair(record -> {
-    //                String[] values = record._2.toString().split("##");
-    //                Tuple2<String, String> returned = new Tuple2<>(
-    //                        values[1],
-    //                        values[2] + "##" + record._1.toString().split("#")[1] + "\t" + values[3]
-    //                );
-    //                return returned;
-    //            });
-//
-    //    /*
-    //    Repartition RDD by sample.
-//
-    //    After partitionBy:
-    //     key: sampleID	pos filelength
-    //     value: readGroupID##readName   seq1    qual1    seq2    qual2
-//
-    //    After mapToPair:
-    //     key: readGroupID
-    //     value: readName   seq1    qual1    seq2    qual2
-    //     */
-    //    JavaPairRDD<String, String> partitionedTab5RDD = tab5RDD
-    //            .partitionBy(new FastqOffsetPartitioner(numPartition, this.options.getNumPartitionEachSample()))
-    //            .mapToPair(record -> {
-    //                String[] values = record._2.split("##");
-    //                return new Tuple2<>(values[0], values[1]);
-    //            });
-//
-    //    return partitionedTab5RDD;
+    //        if (fq2Array.length > 0) {
+    //            for (int i = 0; i < fq1Array.length; i++) {
+    //                bfr.write(rgID + "\t" + fq1Array[i] + "\t" + fq2Array[i]);
+    //                bfr.newLine();
+    //            }
+    //        } else {
+    //            for (int i = 0; i < fq1Array.length; i++) {
+    //                bfr.write(rgID + "\t" + fq1Array[i]);
+    //                bfr.newLine();
+    //            }
+    //        }
+    //    } catch (FileNotFoundException e){
+    //        LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Can't create multiple sample fastq list file.");
+    //        e.printStackTrace();
+    //    } catch (IOException e){
+    //        LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Can't write multiple sample fastq list file.");
+    //        e.printStackTrace();
+    //    }
+    //    return outputMultiSampleList;
     //}
 
     /**
@@ -274,21 +178,6 @@ public class AlignmentProcessMS {
         String filePath = this.fastqMultiSampleList.getAllFastqPath();
         LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Start handling multi-sample reads. " +
                 "Total partition number: " + numPartition + " Input fastq file: " + filePath);
-
-        //List<Tuple2<String, String>> testHadoopFile = this.jscontext.hadoopFile(filePath, MetasFastqFileInputFormat.class,
-        //                Text.class, Text.class)
-        //        .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.toString()))
-        //        .collect();
-        //try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File("/home/metal/TEST/temp.rdd"))))) {
-        //    for (Tuple2<String, String> rec : testHadoopFile) {
-        //        bw.write(rec._1);
-        //        bw.write(" -- ");
-        //        bw.write(rec._2);
-        //        bw.newLine();
-        //    }
-        //} catch (IOException e){
-        //    e.printStackTrace();
-        //}
 
         /*
         Merge pair read and prepare RDD for repartition.
@@ -310,17 +199,18 @@ public class AlignmentProcessMS {
          */
 
         JavaPairRDD<String, String> partitionedTab5RDD = this.jscontext
-                .hadoopFile(filePath, MetasFastqFileInputFormat.class,
+                .hadoopFile(filePath, MetasFastqInputFormat.class,
                         Text.class, Text.class)
                 .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.toString()))
                 .reduceByKey(sampleIDPartitioner, (v1, v2) -> {
                             if (v1 == null) return v2;
                             if (v2 == null) return v1;
+
                             String[] values1 = StringUtils.split(v1, "||");
                             String[] values2 = StringUtils.split(v2, "||");
-                            LOG.trace("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] value1: " +
-                                    values1[0] + " " + values1[1] + "\t" + values1[3] +
-                                    " |||| value2: " + values2[0] + " " + values2[1] + "\t" + values2[3]);
+                            //LOG.trace("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] value1: " +
+                            //        values1[0] + " " + values1[1] + "\t" + values1[3] +
+                            //        " |||| value2: " + values2[0] + " " + values2[1] + "\t" + values2[3]);
                             int mate1 = Integer.parseInt(values1[0]);
                             int mate2 = Integer.parseInt(values2[0]);
                             StringBuilder newsr = new StringBuilder();
@@ -340,9 +230,6 @@ public class AlignmentProcessMS {
                                         "\tmate1: " + mate1 + "\tSampleID_and_ReadName1: " + values1[3] +
                                         "\tReadGroupID2: " + values2[1] + "\tmate2: " + mate2 +
                                         "\tSampleID_and_ReadName2:" + values2[3]);
-                                if (mate1 == 3) return v1;
-                                if (mate2 == 3) return v2;
-                                if (v1.equals(v2)) return v1;
                                 return null;
                             }
                             return newsr.toString();
@@ -359,6 +246,120 @@ public class AlignmentProcessMS {
                     );
                 });
 
+        /*
+        Merge pair read and prepare RDD for repartition.
+
+        After hadoopfile && mapToPair:
+		 key: sampleID	readName
+		 value: mateIndex(1 or 2 or 0)||readGroupID||sequence	quality||sampleID   readName
+		 partition: default
+
+        After groupByKey && mapToPair:
+         key: sampleID  readName
+         value: mateIndex(3)||readGroupID##seq1    qual1[    seq2    qual2]||sampleID   readName
+         partition:  sampleID + readName
+
+        After filter && mapToPair:
+         key: readGroupID
+         value: readName   seq1    qual1[    seq2    qual2]
+         partition: sampleID + readName
+         */
+        //JavaPairRDD<String, String> partitionedTab5RDD = this.jscontext
+        //        .hadoopFile(filePath, MetasFastqInputFormat.class,
+        //                Text.class, Text.class)
+        //        .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.toString()))
+        //        .groupByKey(sampleIDPartitioner)
+        //        .mapToPair(rec -> {
+        //            String key = rec._1;
+        //            String value = null;
+        //            int count = 0;
+        //            String[] reads = new String[2];
+        //            for (String read: rec._2){
+        //                if (count == 2){
+        //                    LOG.warn("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] " +
+        //                            "Wrong mate number, Please check fastq file. Read key (sampleID readName): " + key);
+        //                    return new Tuple2<>(key, null);
+        //                }
+        //                reads[count] = read;
+        //                count++;
+        //            }
+        //            String[] values1 = StringUtils.split(reads[0], "||");
+        //            String[] values2 = StringUtils.split(reads[1], "||");
+        //            LOG.trace("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] value1: " +
+        //                    values1[0] + " " + values1[1] + "\t" + values1[3] +
+        //                    " |||| value2: " + values2[0] + " " + values2[1] + "\t" + values2[3]);
+        //            int mate1 = Integer.parseInt(values1[0]);
+        //            int mate2 = Integer.parseInt(values2[0]);
+        //            StringBuilder newsr = new StringBuilder();
+        //            if (mate1 == 1 && mate2 == 2){
+        //                value = newsr.append(3).append("||")
+        //                        .append(values1[1]).append("||").append(values1[2])
+        //                        .append("\t").append(values2[2])
+        //                        .append("||").append(values1[3]).toString();
+        //            } else if (mate1 == 2 && mate2 == 1){
+        //                value = newsr.append(3).append("||")
+        //                        .append(values2[1]).append("||").append(values2[2])
+        //                        .append("\t").append(values1[2])
+        //                        .append("||").append(values2[3]).toString();
+        //            } else {
+        //                LOG.warn("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] " +
+        //                        "Wrong mate number, Please check fastq file. ReadGroupID1: " + values1[1] +
+        //                        "\tmate1: " + mate1 + "\tSampleID_and_ReadName1: " + values1[3] +
+        //                        "\tReadGroupID2: " + values2[1] + "\tmate2: " + mate2 +
+        //                        "\tSampleID_and_ReadName2:" + values2[3]);
+        //                if (reads[0].equals(reads[1])) value = reads[0];
+        //            }
+        //            return new Tuple2<>(key, value);
+        //        })
+        //        .filter(record -> {
+        //            //LOG.trace("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Check for filtering. key: " + record._1);
+        //            return record._2 != null;
+        //        })
+        //        .mapToPair(record -> {
+        //            String[] values = StringUtils.split(record._2, "||");
+        //            return new Tuple2<>(
+        //                    values[1],
+        //                    StringUtils.split(record._1, '\t')[1] + "\t" + values[2]
+        //            );
+        //        });
+
+        return partitionedTab5RDD;
+    }
+
+    private JavaPairRDD<String, String> handleSingleEndReads(){
+
+        // Add one more partition for files without sample information.
+        int numPartition = this.numPartitionEachSample * this.fastqMultiSampleList.getSampleCount() + 1;
+        SampleIDReadNamePartitioner sampleIDPartitioner = new SampleIDReadNamePartitioner(numPartition,
+                this.numPartitionEachSample);
+
+        String filePath = this.fastqMultiSampleList.getAllFastqPath();
+        LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Start handling multi-sample reads. " +
+                "Total partition number: " + numPartition + " Input fastq file: " + filePath);
+
+        /*
+        Merge pair read and prepare RDD for repartition.
+
+        After newAPIHadoopFile && partitionBy
+		 key: sampleID	readName
+		 value: readGroupID||sequence	quality
+		 partition: sampleID + readName
+
+        After mapToPair
+         key: readGroupID
+         value: readName   seq1    qual1
+         partition: sampleID + readName
+         */
+        JavaPairRDD<String, String> partitionedTab5RDD = this.jscontext
+                .newAPIHadoopFile(filePath, MetasSEFastqInputFormat.class,
+                        Text.class, Text.class, this.jscontext.hadoopConfiguration())
+                .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.toString()))
+                .partitionBy(sampleIDPartitioner)
+                .mapToPair(rec -> {
+                    String[] keys =  StringUtils.split(rec._1, '\t');
+                    String[] values = StringUtils.split(rec._2, "||");
+                    return new Tuple2<>(values[0], keys[1] + '\t' + values[1]);
+                });
         return partitionedTab5RDD;
     }
 
@@ -383,7 +384,15 @@ public class AlignmentProcessMS {
 
         AlignmentToolWrapper alignmentToolWrapper = getAlignmentTool(this.options.getAlignmentTool());
 
-        JavaPairRDD<String, String> partitionedTab5RDD = handleMultiSampleReads();
+        JavaPairRDD<String, String> partitionedTab5RDD;
+
+        if (this.seqMode.equals(SequencingMode.PAIREDEND)) {
+            LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Handling input reads. Paired-end mode.");
+            partitionedTab5RDD = handleMultiSampleReads();
+        } else {
+            LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Handling input reads. Single-end mode.");
+            partitionedTab5RDD = handleSingleEndReads();
+        }
 
         /*
         Returned list of mapping results files' paths.

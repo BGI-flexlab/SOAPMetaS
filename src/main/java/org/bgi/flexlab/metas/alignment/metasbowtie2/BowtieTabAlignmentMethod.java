@@ -46,7 +46,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
      * @throws Exception
      */
     @Override
-    public Iterator<String> call(Integer index, Iterator<Tuple2<String, String>> elementIter) throws Exception {
+    public Iterator<String> call(Integer index, Iterator<Tuple2<String, String>> elementIter) {
 
         String tab5FileName;
         String outSamFileName;
@@ -59,7 +59,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             return new ArrayList<String>(0).iterator();
         }
 
-        ArrayList<String> returnedValues = new ArrayList<String>();
+        ArrayList<String> returnedValues = new ArrayList<>();
         Tuple2<String, String> element;
 
         element = elementIter.next();
@@ -86,7 +86,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             while (elementIter.hasNext()) {
                 element = elementIter.next();
 
-                if (!element._1.equals(readGroupID)){
+                if (!element._1.equals(readGroupID)) {
                     LOG.warn("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] ReadGroup: " + readGroupID + ". Omit wrong partitioned sequence: "
                             + StringUtils.split(element._2, '\t')[0] + " of group " + element._1);
                     continue;
@@ -104,12 +104,20 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             // This is where the actual local alignment takes place
             returnedValues = this.runMultiSampleAlignment(readGroupID, tab5FileName, outSamFileName);
 
-            // Delete the temporary file, as is have now been copied to the output directory
-            //tab5File.delete();
-
+            // Delete the temporary file, as results have been copied to the specified output directory
+            if (tab5File.delete()) {
+                LOG.debug("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Delete temp tab5 " +
+                        "file: " + tab5FileName);
+            } else {
+                LOG.warn("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Fail to delete " +
+                        "temp tab5 file: " + tab5FileName);
+            }
+        } catch (FileNotFoundException e){
+            LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Can't find temp tab5 file " +
+                    tab5FileName + " . " + e.toString());
         } catch (IOException e) {
-            e.printStackTrace();
-            LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] " + e.toString());
+            LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Fail to write temp tab5 " +
+                    "file: " + tab5FileName + " . " + e.toString());
         }
 
         return returnedValues.iterator();

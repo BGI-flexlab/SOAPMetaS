@@ -1,7 +1,6 @@
 package org.bgi.flexlab.metas.data.structure.reference;
 
-
-import htsjdk.samtools.util.StringUtil;
+import java.io.Serializable;
 
 /**
  * ClassName: ReferenceGeneRecord
@@ -10,45 +9,42 @@ import htsjdk.samtools.util.StringUtil;
  * @author: heshixu@genomics.cn
  */
 
-public class ReferenceGeneRecord {
+public class ReferenceGeneRecord implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private String markerName;
     private int geneLength;
     private double gcContent;
+    private String speciesName = null;
 
-    private ReferenceSpeciesRecord speciesRecord = null;
-
-    public ReferenceGeneRecord(String name, int geneLength, double gcContent){
-        this.construct(name, geneLength, gcContent);
+    public ReferenceGeneRecord(String name, int geneLength, String species){
+        this.construct(name, geneLength, species, 0);
+        this.speciesName = species;
     }
 
-    public ReferenceGeneRecord(String name, int geneLength, double gcContent, ReferenceSpeciesRecord species){
-        this.construct(name, geneLength, gcContent);
-        this.speciesRecord = species;
+    public ReferenceGeneRecord(String name, int geneLength, String species, double gcContent){
+        this.construct(name, geneLength, species, gcContent);
+
     }
 
-    private void construct(String name, int geneLength, double gcContent){
+    private void construct(String name, int geneLength, String species, double gcContent){
         this.markerName = name;
         this.geneLength = geneLength;
+        this.speciesName = species;
         this.gcContent = gcContent;
     }
 
-    public void setSpeciesRecord(ReferenceSpeciesRecord speciesRecord) {
-        this.speciesRecord = speciesRecord;
+
+    public String getMarkerName() {
+        return markerName;
     }
 
     public String getSpeciesName(){
-        if (this.speciesRecord == null){
-            return null;
+        if (this.speciesName == null){
+            return "Unknown";
         }
-        return this.speciesRecord.getSpeciesName();
-    }
-
-    public double getSpeciesGenomeGC(){
-        if (this.speciesRecord == null){
-            return 0;
-        }
-        return this.speciesRecord.getGenomeGCContent();
+        return this.speciesName;
     }
 
     public int getGeneLength() {

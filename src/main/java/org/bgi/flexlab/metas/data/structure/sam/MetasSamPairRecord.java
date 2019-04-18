@@ -1,5 +1,9 @@
 package org.bgi.flexlab.metas.data.structure.sam;
 
+import htsjdk.samtools.SAMRecord;
+
+import java.io.Serializable;
+
 /**
  * ClassName: MetasSamPairRecord
  * Description: 由于存在paired-end测序的数据，所以需要构建针对pair信息的特殊数据类型，方便对pair信息的封装。为了方便
@@ -8,15 +12,17 @@ package org.bgi.flexlab.metas.data.structure.sam;
  * @author heshixu@genomics.cn
  */
 
-public class MetasSamPairRecord {
+public class MetasSamPairRecord implements Serializable {
 
-    private MetasSamRecord record1 = null;
-    private MetasSamRecord record2 = null;
+    public static final long serialVersionUID = 1L;
+
+    private SAMRecord record1 = null;
+    private SAMRecord record2 = null;
 
     //private boolean exact1 = true;
     //private boolean exact2 = true;
 
-    private boolean pairedMode = false;
+    private boolean paired = false;
     private boolean properPaired = false;
 
     //public boolean isExact1() {
@@ -32,7 +38,7 @@ public class MetasSamPairRecord {
     //    this.exact2 = false;
     //}
 
-    public MetasSamPairRecord(MetasSamRecord record1, MetasSamRecord record2){
+    public MetasSamPairRecord(SAMRecord record1, SAMRecord record2){
         this.record1 = record1;
         this.record2 = record2;
     }
@@ -45,27 +51,38 @@ public class MetasSamPairRecord {
         return this.properPaired;
     }
 
-    public void setPairedMode(boolean pairedMode){
-        this.pairedMode = pairedMode;
+    public void setPaired(boolean paired){
+        this.paired = paired;
     }
 
-    public boolean isPairedMode(){
-        return this.pairedMode;
+    public boolean isPaired(){
+        return this.paired;
     }
 
-    public MetasSamRecord getFirstRecord() {
+    public SAMRecord getFirstRecord() {
         return this.record1;
     }
 
-    public MetasSamRecord getSecondRecord() {
+    public SAMRecord getSecondRecord() {
         return this.record2;
     }
 
-    public MetasSamRecord getRecord(){
-        if(isPairedMode()){
-            return null;
-        } else{
-            return this.getFirstRecord();
+    @Override
+    public String toString() {
+        StringBuilder name = new StringBuilder("rec1: ");
+        if (record1 == null) {
+            name.append("null");
+        } else {
+            name.append(record1.toString());
         }
+
+        name.append(" rec2: ");
+        if (record2 == null) {
+            name.append("null");
+        } else {
+            name.append(record2.toString());
+        }
+
+        return name.toString();
     }
 }

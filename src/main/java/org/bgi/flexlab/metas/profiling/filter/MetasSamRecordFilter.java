@@ -1,18 +1,18 @@
 package org.bgi.flexlab.metas.profiling.filter;
 
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
+import htsjdk.samtools.SAMRecord;
 
 /**
- * Basic APi for filtering MetasSamRecord instance.
+ * Basic APi for filtering SAMRecord instance.
  */
 public interface MetasSamRecordFilter {
 
     /**
-     * Whether the MetasSamRecord should be filtered out. "true" means the record should be filtered out.
+     * Whether the SAMRecord should be filtered out. "true" means the record should be filtered out.
      *
-     * @param record MetasSamRecord to be evaluated.
+     * @param record SAMRecord to be evaluated.
      * @return true if matches the filter, otherwise false.
      */
-    public boolean filter(MetasSamRecord record);
+    public boolean filter(SAMRecord record);
 
 }

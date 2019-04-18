@@ -3,6 +3,7 @@ package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.*;
 
@@ -19,14 +20,16 @@ import java.util.List;
  * @author heshixu@genomics.cn
  */
 
-public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase {
+public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase implements Serializable{
+
+    public static final long serialVersionUID = 1L;
 
     public GCBiasCorrectionDefaultModel(String inputCoefficientsFilePath){
         this.inputCoefficients(inputCoefficientsFilePath);
     }
 
     public GCBiasCorrectionDefaultModel(){
-        this.coefficients = new Double[8];
+        this.coefficients = new double[]{0.812093, 49.34331, 8.886807, 6.829778, 0.2642576, -0.005291173, 0.00003188492, -2.502158};
     }
 
     /**
@@ -50,6 +53,9 @@ public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase {
      * @return Double type number, corrected count of read/fragment.
      */
     public Double correctedCountForSingle(Double readGCContent, Double genomeGCContent){
+        if (genomeGCContent == 0){
+            return 1.0;
+        }
         assert this.isCoefficientsSet();
         return coefficients[0] * Math.exp(-0.5 * Math.pow((readGCContent-coefficients[1])/coefficients[2], 2) ) +
                 coefficients[3] + coefficients[4]*readGCContent + coefficients[5]*Math.pow(readGCContent,2) +
@@ -110,8 +116,8 @@ public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase {
 
     }
 
-    public Double[] readDoublesArray(JsonReader reader) throws IOException {
-        List<Double> doubles = new ArrayList<Double>(8);
+    public double[] readDoublesArray(JsonReader reader) throws IOException {
+        ArrayList<Double> doubles = new ArrayList<>(9);
 
         reader.beginArray();
         while (reader.hasNext()) {
@@ -119,18 +125,16 @@ public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase {
         }
         reader.endArray();
 
-        Double[] coe = new Double[doubles.size()];
+        doubles.trimToSize();
+        if (doubles.size() != 8){
 
-        coe = doubles.toArray(coe);
-
-        assert coe.length == 8;
-
-        return coe;
+        }
+        double[] coe = new double[8];
     }
 
-    public void writeDoublesArray(JsonWriter writer, Double[] doubles) throws IOException {
+    public void writeDoublesArray(JsonWriter writer, double[] doubles) throws IOException {
         writer.beginArray();
-        for (Double value : doubles) {
+        for (double value : doubles) {
             writer.value(value);
         }
         writer.endArray();
@@ -141,7 +145,7 @@ public class GCBiasCorrectionDefaultModel extends GCBiasCorrectionModelBase {
      *
      * @param coefficients The concrete value from training result or coefficients file.
      */
-    public void setCoefficients(Double[] coefficients){
+    public void setCoefficients(double[] coefficients){
         assert this.coefficients.length == coefficients.length;
         for (int i=0; i < this.coefficients.length; i++){
             this.coefficients[i] = coefficients[i];

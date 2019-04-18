@@ -3,8 +3,7 @@ package org.bgi.flexlab.metas.data.mapreduce.output.profiling;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function2;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import scala.Tuple2;
@@ -21,7 +20,10 @@ import java.util.Map;
  * @author heshixu@genomics.cn
  */
 
-public class ProfilingResultWriteFunction implements FlatMapFunction<Iterator<Tuple2<String, ProfilingResultRecord>>, String> {
+public class ProfilingResultWriteFunction implements Serializable,
+        Function2<Integer, Iterator<Tuple2<String, ProfilingResultRecord>>,  Iterator<String>> {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Log LOG = LogFactory.getLog(ProfilingResultWriteFunction.class); // The LOG
 
@@ -38,39 +40,47 @@ public class ProfilingResultWriteFunction implements FlatMapFunction<Iterator<Tu
     }
 
     @Override
-    public Iterator<String> call(Iterator<Tuple2<String, ProfilingResultRecord>> tuple2Iterator) throws Exception {
-        ArrayList<String> outputPaths = new ArrayList<>();
-        String outputProfilingFile;
-        File outputProfiling;
-        FileOutputStream fos;
-        BufferedWriter bw;
+    public Iterator<String> call(Integer index,
+                                 Iterator<Tuple2<String, ProfilingResultRecord>> tuple2Iterator) {
 
+        String sampleID;
         String readGroupID;
         Tuple2<String, ProfilingResultRecord> firstTuple;
-        Tuple2<String, ProfilingResultRecord> newTuple;
+
+        LOG.trace("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current Partition index: " + index);
 
         if (tuple2Iterator.hasNext()){
             firstTuple = tuple2Iterator.next();
+            sampleID = firstTuple._1;
             readGroupID = firstTuple._2.getReadGroupID();
         } else {
-            return null;
+            LOG.trace("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Empty partition index: " + index);
+            return new ArrayList<String>(0).iterator();
         }
 
+        ArrayList<String> outputPaths = new ArrayList<>(2);
+        Tuple2<String, ProfilingResultRecord> newTuple;
+        String outputProfilingFile;
+
         if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.PROFILE)) {
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Profiling-" + readGroupID + ".abundance";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-" + readGroupID + ".abundance";
         } else if(this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Profiling-" + readGroupID + ".abundance.evaluation";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-" + readGroupID + ".abundance.evaluation";
         } else {
             LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Profiling Analysis Mode has wrong value");
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Profiling-" + readGroupID + ".abundance";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-" + readGroupID + ".abundance";
         }
 
         outputPaths.add(outputProfilingFile);
 
-        try{
-            outputProfiling = new File(outputProfilingFile);
-            fos = new FileOutputStream(outputProfiling);
-            bw = new BufferedWriter(new OutputStreamWriter(fos));
+        File fileO = new File(outputProfilingFile);
+        FileOutputStream fileOS;
+        BufferedWriter bw;
+
+        try {
+
+            fileOS = new FileOutputStream(fileO);
+            bw = new BufferedWriter(new OutputStreamWriter(fileOS));
 
             if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.PROFILE)) {
 
@@ -79,23 +89,35 @@ public class ProfilingResultWriteFunction implements FlatMapFunction<Iterator<Tu
                 bw.write(outputFormatProfile(firstTuple));
                 bw.newLine();
 
-                while(tuple2Iterator.hasNext()){
+                while (tuple2Iterator.hasNext()) {
                     newTuple = tuple2Iterator.next();
-                    assert newTuple._2.getReadGroupID().equals(readGroupID);
+
+                    if (!newTuple._2.getReadGroupID().equals(readGroupID)) {
+                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current " +
+                                "ReadGroup: " + readGroupID + " . Omit wrong partitioned record of RG-" +
+                                newTuple._2.getReadGroupID() + ": " + newTuple._2.toString());
+                        continue;
+                    }
+
                     bw.write(outputFormatProfile(newTuple));
                     bw.newLine();
                 }
 
-            } else if(this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
+            } else if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
 
                 bw.write("cluster name(marker/species),fragment number,corrected frag num,relative abundance,read Name List");
                 bw.newLine();
                 bw.write(outputFormatEvaluation(firstTuple));
                 bw.newLine();
 
-                while(tuple2Iterator.hasNext()){
+                while (tuple2Iterator.hasNext()) {
                     newTuple = tuple2Iterator.next();
-                    assert newTuple._2.getReadGroupID().equals(readGroupID);
+                    if (!newTuple._2.getReadGroupID().equals(readGroupID)) {
+                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current " +
+                                "ReadGroup: " + readGroupID + " . Omit wrong partitioned record of RG-" +
+                                newTuple._2.getReadGroupID() + ": " + newTuple._2.toString());
+                        continue;
+                    }
                     bw.write(outputFormatEvaluation(newTuple));
                     bw.newLine();
                 }
@@ -109,12 +131,17 @@ public class ProfilingResultWriteFunction implements FlatMapFunction<Iterator<Tu
             }
 
             bw.close();
-            fos.close();
+            fileOS.close();
 
         } catch (FileNotFoundException e){
-            LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Output File" + outputProfilingFile + " can't found. May not be absolute path.");
-            e.printStackTrace();
+            LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Can't find file " +
+                    outputProfilingFile + " . " + e.toString());
+        } catch (IOException e){
+            LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Fail to write file " +
+                    outputProfilingFile + " . " + e.toString());
         }
+
+        tuple2Iterator = null;
 
         return outputPaths.iterator();
     }

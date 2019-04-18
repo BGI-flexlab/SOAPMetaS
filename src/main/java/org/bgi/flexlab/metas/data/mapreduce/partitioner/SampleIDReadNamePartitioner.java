@@ -46,7 +46,7 @@ public class SampleIDReadNamePartitioner extends Partitioner {
         int sampleIDPartRange = Integer.parseInt(keyItem[0]) * this.samplePartNum;
         int subPart = Utils.nonNegativeMod(keyItem[1].hashCode(), this.samplePartNum);
 
-        return Math.min(sampleIDPartRange + subPart, sampleIDPartRange);
+        return sampleIDPartRange + Math.min(subPart, this.samplePartNum - 1);
     }
 
     @Override

@@ -1,14 +1,15 @@
 package org.bgi.flexlab.metas.profiling.filter;
 
+import htsjdk.samtools.SAMRecord;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.bgi.flexlab.metas.data.structure.reference.ReferenceGeneTable;
+import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.profiling.ProfilingUtils;
 import scala.Tuple2;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -29,7 +30,9 @@ import java.util.List;
  * @author heshixu@genomics.cn
  */
 
-public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
+public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private int meanInsertSize;
 
@@ -39,15 +42,15 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
 
     private boolean doTraining = false;
 
-    private ReferenceGeneTable referenceGeneTable;
+    private ReferenceInfoMatrix referenceInfoMatrix;
 
-    public MetasSamRecordInsertSizeFilter(int insertSize, ReferenceGeneTable refInfo){
+    public MetasSamRecordInsertSizeFilter(int insertSize, ReferenceInfoMatrix refInfo){
         this.meanInsertSize = insertSize;
-        this.referenceGeneTable = refInfo;
+        this.referenceInfoMatrix = refInfo;
     }
 
     @Override
-    public boolean filter(MetasSamRecord record){
+    public boolean filter(SAMRecord record){
         if (this.doTraining){
             return this.insertSizeRangeCheck(record);
         } else {
@@ -101,15 +104,15 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
      *   ^boundary                                 ^boundary
      *
      *
-     * @param samRecord The instance of MetasSamRecord in pair-end sequencing mode which is not properly
+     * @param samRecord The instance of SAMRecord in pair-end sequencing mode which is not properly
      *                  mapped as pair.
      * @return True if the mate read is probably mapped to the sequence region outside around reference marker.
      */
-    private boolean satisfyInsertSizeThreshold(MetasSamRecord samRecord){
+    private boolean satisfyInsertSizeThreshold(SAMRecord samRecord){
         if (samRecord.getReadNegativeStrandFlag()){
             return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + this.insTolerance);
         } else {
-            return (this.referenceGeneTable.getGeneLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
+            return (this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
                     < (this.meanInsertSize + this.insTolerance);
         }
     }
@@ -119,14 +122,14 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter {
      * sequencing is not "certain"， we will use the mean insert size of all reads pair in the sample
      * and 2-sigma rule as the criterion.
      *
-     * @param samRecord MetasSamRecord instance of the single mapped end that is to be check.
+     * @param samRecord SAMRecord instance of the single mapped end that is to be check.
      * @return True if the unmapped end is located outside reference gene.
      */
-    private boolean insertSizeRangeCheck(MetasSamRecord samRecord){
+    private boolean insertSizeRangeCheck(SAMRecord samRecord){
         if (samRecord.getReadNegativeStrandFlag()){
             return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + 2 * this.insertSizeSD);
         } else {
-            return (this.referenceGeneTable.getGeneLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
+            return (this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
                     < (this.meanInsertSize + 2 * this.insertSizeSD);
         }
     }

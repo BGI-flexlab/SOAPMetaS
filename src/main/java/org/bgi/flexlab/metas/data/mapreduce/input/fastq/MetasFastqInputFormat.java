@@ -6,23 +6,17 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileSplit;
-import org.apache.hadoop.mapred.InputSplit;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RecordReader;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.*;
 
 /**
  * The class is based on org.bgi.flexlab.gaealib.input.fastq.FqText.
  *
  * *Changes:
- *  + Rename class as "MetasFastqFileInputFormat".
+ *  + Rename class as "MetasFastqInputFormat".
  *  + Change the type of "key" from type Text to type IntWritable.
  */
 
-public class MetasFastqFileInputFormat extends FileInputFormat<Text, Text> {
+public class MetasFastqInputFormat extends FileInputFormat<Text, Text> {
     protected boolean isSplitable(JobContext context, Path file) {
         CompressionCodec codec = new CompressionCodecFactory(
                 context.getConfiguration()).getCodec(file);

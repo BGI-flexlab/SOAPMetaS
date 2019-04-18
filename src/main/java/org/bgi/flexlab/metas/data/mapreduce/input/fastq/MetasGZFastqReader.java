@@ -88,8 +88,8 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 			ArrayList<FastqSampleList> sampleIter = fastqMultiSampleList.getSampleList();
 
 			for (FastqSampleList sample: sampleIter){
-				LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Sample check for split. Split file: " +
-						fqName + " . Current sample in loop: " + sample.toString());
+				//LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Sample check for split. Split file: " +
+				//		fqName + " . Current sample in loop: " + sample.toString());
 				if (sample.getFastq1().contains(fqName)){
 					slist = sample;
 					mate = 1;
@@ -264,9 +264,9 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 				key.set(sampleID + "\t" + tempkey);
 				value.set(keyIndex + "||" + readGroupID + "||" + st[1] + "\t" + st[3] + "||" + sampleID + "\t" + tempkey);
 
-				LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Reader returned record: " +
-						"sampleID: " + sampleID + " readName: " + tempkey + " index: " + keyIndex +
-						" readGroupID: " + readGroupID);
+				//LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Reader returned record: " +
+				//		"sampleID: " + sampleID + " readName: " + tempkey + " index: " + keyIndex +
+				//		" readGroupID: " + readGroupID);
 				//recordCount++;
 				//LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Key: " + key.toString() + " Value: " + value.toString());
 			} else {

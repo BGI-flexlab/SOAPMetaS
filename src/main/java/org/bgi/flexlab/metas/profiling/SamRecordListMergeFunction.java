@@ -1,9 +1,13 @@
 package org.bgi.flexlab.metas.profiling;
 
+import htsjdk.samtools.SAMRecord;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.Function;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.util.SequencingMode;
+
+import java.io.Serializable;
 
 /**
  * ClassName: SamRecordListMergeFunction
@@ -12,7 +16,11 @@ import org.bgi.flexlab.metas.util.SequencingMode;
  * @author heshixu@genomics.cn
  */
 
-public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRecord>, MetasSamPairRecord> {
+public class SamRecordListMergeFunction implements Serializable, Function<Iterable<SAMRecord>, MetasSamPairRecord> {
+
+    public static final long serialVersionUID = 1L;
+
+    private static final Logger LOG = LogManager.getLogger(SamRecordListMergeFunction.class);
 
     private SequencingMode sequencingMode;
 
@@ -26,7 +34,7 @@ public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRec
     }
 
     @Override
-    public MetasSamPairRecord call(Iterable<MetasSamRecord> metasSamRecords) throws Exception {
+    public MetasSamPairRecord call(Iterable<SAMRecord> metasSamRecords) {
         if (this.sequencingMode.equals(SequencingMode.PAIREDEND)){
             return pairedListToSamPair(metasSamRecords);
         } else if (this.sequencingMode.equals(SequencingMode.SINGLEEND)){
@@ -39,19 +47,19 @@ public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRec
 
     /**
      * Generator of MetasSamPairRecord for single-end sequencing data, the generated instance will have
-     * only one MetasSamRecord stored in "record1" field. If one read has multiple mapping, all info about
+     * only one SAMRecord stored in "record1" field. If one read has multiple mapping, all info about
      * the read will be abandoned.
      *
      * @param metasSamRecords Iterator of MetasSamRecords created by groupByKey() operation of RDD.
      * @return MetasSamPairRecord if the read is exactly mapped to one reference, else null.
      */
-    private MetasSamPairRecord singleListToSamPair(Iterable<MetasSamRecord> metasSamRecords){
+    private MetasSamPairRecord singleListToSamPair(Iterable<SAMRecord> metasSamRecords){
 
         MetasSamPairRecord pairRecord = null;
 
-        MetasSamRecord tempRecord = null;
+        SAMRecord tempRecord = null;
 
-        for (MetasSamRecord record: metasSamRecords){
+        for (SAMRecord record: metasSamRecords){
             if (record.isSecondaryAlignment()){
                 tempRecord = null;
                 break;
@@ -61,8 +69,10 @@ public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRec
 
         if (tempRecord != null){
             pairRecord = new MetasSamPairRecord(tempRecord, null);
-            pairRecord.setPairedMode(false);
+            pairRecord.setPaired(false);
         }
+
+        LOG.trace("[SOAPMetas::" + SamRecordListMergeFunction.class.getName() + "] Single-end SAMPair: " + pairRecord.toString());
 
         return pairRecord;
     }
@@ -89,23 +99,22 @@ public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRec
      * @return MetasSamPairRecord if the read is exactly mapped to one reference, else null.
      */
 
-    private MetasSamPairRecord pairedListToSamPair(Iterable<MetasSamRecord> metasSamRecords){
+    private MetasSamPairRecord pairedListToSamPair(Iterable<SAMRecord> metasSamRecords){
         MetasSamPairRecord pairRecord = null;
 
-        boolean exact1 = false;
-        boolean exact2 = false;
+        boolean exact1 = true;
+        boolean exact2 = true;
 
-        MetasSamRecord tempRec1 = null;
-        MetasSamRecord tempRec2 = null;
+        SAMRecord tempRec1 = null;
+        SAMRecord tempRec2 = null;
 
-        for (MetasSamRecord record: metasSamRecords){
+        for (SAMRecord record: metasSamRecords){
             if (record.getFirstOfPairFlag()){
                 if (record.isSecondaryAlignment()){
                     exact1 = false;
                     continue;
                 }
                 tempRec1 = record;
-                exact1 = true;
                 continue;
             }
 
@@ -115,15 +124,13 @@ public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRec
                     continue;
                 }
                 tempRec2 = record;
-                exact2 = true;
-                continue;
             }
         }
 
         if (exact1 && exact2){
 
             pairRecord = new MetasSamPairRecord(tempRec1, tempRec2);
-            pairRecord.setPairedMode(true);
+            pairRecord.setPaired(true);
 
             if (tempRec1.getReferenceName().equals(tempRec2.getReferenceName())){
                 pairRecord.setProperPaired(true);
@@ -131,13 +138,14 @@ public class SamRecordListMergeFunction implements Function<Iterable<MetasSamRec
 
         } else if (exact1) {
             pairRecord = new MetasSamPairRecord(tempRec1, null);
-            pairRecord.setPairedMode(true);
+            pairRecord.setPaired(false);
 
         } else if (exact2) {
-            pairRecord = new MetasSamPairRecord(null, tempRec2);
-            pairRecord.setPairedMode(true);
+            pairRecord = new MetasSamPairRecord(tempRec2, null);
+            pairRecord.setPaired(false);
         }
 
+        LOG.trace("[SOAPMetas::" + SamRecordListMergeFunction.class.getName() + "] Paired-end SAMPair: " + pairRecord.toString());
         return pairRecord;
     }
 }

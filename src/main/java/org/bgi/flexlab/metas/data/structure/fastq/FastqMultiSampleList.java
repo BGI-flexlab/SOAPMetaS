@@ -20,7 +20,9 @@ import java.util.ArrayList;
  *
  */
 
-public class FastqMultiSampleList {
+public class FastqMultiSampleList implements Serializable {
+
+	public static final long serialVersionUID = 1L;
 
 	protected static final Log LOG = LogFactory.getLog(FastqMultiSampleList.class.getName());
 
@@ -42,6 +44,7 @@ public class FastqMultiSampleList {
 		
 		String line;
 		while((line = reader.readLine()) != null) {
+			//LOG.trace("[SOAPMetas::" + FastqMultiSampleList.class.getName() + "] Sample line: " + line);
 			if(line.length() == 0) {
 				continue;
 			}

@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -12,6 +13,8 @@ import java.util.List;
 /**
  * ClassName: SOAPMetas
  * Description: Entry class of the Tool.
+ *
+ * TODO: 更改重要的 assert 语句。
  *
  * @author heshixu@genomics.cn
  */
@@ -30,21 +33,24 @@ public class SOAPMetas {
         // Options initialize
         MetasOptions metasOptions = new MetasOptions(args);
 
-        //Alignment process
-        LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing alignment process.");
-        AlignmentProcessMS alignmentMS = new AlignmentProcessMS(metasOptions, jsc);
+        List<String> alignmentOutputList = null;
 
-        LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start running alignment process.");
-        // Output list format:
-        // readGroupID    outputHDFSDir/alignment/<appId>-RDDPart<index>-<readGroupID>.sam
-        List<String> alignmentOutputList = alignmentMS.runAlignment();
-        LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete multiple sample alignment process.");
-        System.exit(0);
+        if (metasOptions.doAlignment()) {
+            //Alignment process
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing alignment process.");
+            AlignmentProcessMS alignmentMS = new AlignmentProcessMS(metasOptions, jsc);
 
-        if (metasOptions.isMergeOutputSamBySample()){
-            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Merging of sam is not supported in current version.");
-            //LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start merge SAM output.");
-            //LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete merging SAM output.");
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start running alignment process.");
+            // Output list format:
+            // readGroupID    outputHDFSDir/alignment/<appId>-RDDPart<index>-<readGroupID>.sam
+            alignmentOutputList = alignmentMS.runAlignment();
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete multiple sample alignment process.");
+
+            if (metasOptions.mergeSamBySample()) {
+                LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Merging of sam is not supported in current version.");
+                //LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start merge SAM output.");
+                //LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete merging SAM output.");
+            }
         }
 
         //GC Training control
@@ -52,27 +58,45 @@ public class SOAPMetas {
         if (metasOptions.isGCBiasTrainingMode()){
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start training GC bias correction model.");
 
-            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Comoplete training GC Bias correctiong model, the model file is " + metasOptions.getGcBiasTrainingOutputFile() + " . Exit program.");
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Comoplete training GC Bias correctiong model, " +
+                    "the model file is " + metasOptions.getGcBiasTrainingOutputFile() + " . Exit program.");
+            jsc.close();
+            System.exit(0);
         }
 
+        List<String> profilingOutputList;
 
-        //ProfilingProcess
-        LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing profiling process.");
-        ProfilingProcessMS profilingMS = new ProfilingProcessMS(metasOptions, jsc);
+        if (metasOptions.doProfiling()) {
+            //ProfilingProcess
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing profiling process.");
+            ProfilingProcessMS profilingMS = new ProfilingProcessMS(metasOptions, jsc);
+            // Output list format:
+            // outputHDFSDir/profiling/<appID>-Profiling-<readGroupID>.abundance[.evaluation]
+            if (alignmentOutputList != null) {
+                profilingMS.processInitialize(alignmentOutputList);
+            } else {
+                profilingMS.processInitialize(metasOptions.getSAMSampleList());
+            }
 
-        LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start running profiling process.");
-        // Output list format:
-        // outputHDFSDir/profiling/<appID>-Profiling-<readGroupID>.abundance[.evaluation]
-        List<String> profilingOutputList = profilingMS.runProfilingProcess(alignmentOutputList);
-        LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete profiling process.");
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start running profiling process.");
+            profilingOutputList = profilingMS.runProfilingProcess();
 
-        LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Output profiling results file is following:");
-        for (String outPath: profilingOutputList){
-            LOG.info("\t\tFile path: " + outPath);
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete profiling process.");
+
+            if (profilingOutputList == null){
+                LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] No output file list. Please " +
+                        "check log file and output directory.");
+            } else {
+                LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Output profiling result files are: " +
+                        StringUtils.join(profilingOutputList, ','));
+            }
         }
+
         LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete analysis.");
 
         // delete all temp file?
+
+        jsc.close();
         System.exit(0);
     }
 }

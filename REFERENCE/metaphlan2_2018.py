@@ -992,6 +992,8 @@ class TaxClade:
     def compute_abundance( self ):
         if self.abundance is not None: return self.abundance
         sum_ab = sum([c.compute_abundance() for c in self.children.values()])
+
+        ### SHIXU: rat_nreads: [(marker_len, reads_count), (len, count), (len, count), ...]
         rat_nreads = sorted([(self.markers2lens[m],n)
                                     for m,n in self.markers2nreads.items()],
                                             key = lambda x: x[1])
@@ -1170,10 +1172,13 @@ class TaxTree:
         {
             "gi|4839xxxx|ref|NZ_KB89xxxx.1|:2800xxxx-2801xxxx": {
                 'ext': {'GCF_xxxxx', 'GCF_xxxxx', ...}, 
-                'score': <float>, 'clade': 's_Species_Name', 'len': <int>, 
-                'taxon': 'k__xxx|p__xxx|...|s__Species_name'}
+                'score': <float>, 
+                'clade': 's_Species_Name', 
+                'len': <int>, 
+                'taxon': 'k__xxx|p__xxx|...|s__Species_name'
             },
-            "gi|xxxx|xxx": {},
+            "gi|xxxx|xxx": {...},
+            "GeneID:9861610": {...},
             ...
         }
     }

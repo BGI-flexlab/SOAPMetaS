@@ -25,7 +25,7 @@ public class GCBiasCorrectionModelFactory {
         GCBiasCorrectionDefaultModel model;
 
         switch (this.modelName){
-            case "default":{
+            case "builtin":{
               model = new GCBiasCorrectionDefaultModel(this.inputCoefficientsFile);
               break;
             }

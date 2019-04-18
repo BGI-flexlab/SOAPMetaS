@@ -9,6 +9,8 @@ import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
+import java.io.Serializable;
+
 
 /**
  * ClassName: ProfilingMethodBase
@@ -17,12 +19,13 @@ import org.bgi.flexlab.metas.util.SequencingMode;
  * @author heshixu@genomics.cn
  */
 
-public abstract class ProfilingMethodBase {
+public abstract class ProfilingMethodBase implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     protected ProfilingAnalysisMode profilingAnalysisMode;
     protected ProfilingAnalysisLevel profilingAnalysisLevel;
     protected SequencingMode sequencingMode;
-
 
     public ProfilingMethodBase(MetasOptions options){
         this.profilingAnalysisMode = options.getProfilingAnalysisMode();
@@ -47,6 +50,7 @@ public abstract class ProfilingMethodBase {
      * ProfilingResultRecord contains cluster name (marker gene, species name or read group id), read count
      * of cluster, corrected abundance, and name list of all mapped reads(ProfilingAnalysisLevel.ESTIMATE).
      */
-    public abstract JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner);
+    public abstract JavaPairRDD<String, ProfilingResultRecord> runProfiling(
+            JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner);
 
 }

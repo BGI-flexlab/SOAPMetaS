@@ -1,5 +1,7 @@
 package org.bgi.flexlab.metas.data.structure.fastq;
 
+import java.io.Serializable;
+
 /**
  * The Class is based on org.bgi.flexlab.gaealib.input.fastq.FastqSampleList
  *
@@ -8,7 +10,10 @@ package org.bgi.flexlab.metas.data.structure.fastq;
  *  + Add method "getPathString()" to get fastq
  */
 
-public class FastqSampleList {
+public class FastqSampleList implements Serializable {
+
+	public static final long serialVersionUID = 1L;
+
 	private int sampleID = 0;
 
 	private String rgID;

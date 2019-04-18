@@ -1,10 +1,10 @@
 package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 
+import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.reference.ReferenceSequence;
 import htsjdk.samtools.util.SequenceUtil;
 import org.apache.spark.api.java.JavaRDD;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import scala.Tuple2;
 
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class GCBiasTrainingProcess {
      * in order to calculate the norm_cov of a single bacterium, we grouped the SamRecords and
      * calculated values by the key of species name.
      *
-     * TODO: 这里的 MetasSamRecord 还是要考虑一下 PE 和 SE 数据的差异。
+     * TODO: 这里的 SAMRecord 还是要考虑一下 PE 和 SE 数据的差异。
      * TODO: runTrainingProcess方法的输入参数 ReferenceSequence 可能需要单独根据species数据来创建
      * TODO: 不确定两种计算totalReads的方法对最后建模结果以及校正效果的影响。
      *
@@ -56,7 +56,7 @@ public class GCBiasTrainingProcess {
      *                          reads and species genome.
      * @param refSeq Genome sequence of each reference species used in training process.
      */
-    public void runTrainingProcess(JavaRDD<MetasSamRecord> metasSamRecordRDD, HashMap<String, ReferenceSequence> refSeq){
+    public void runTrainingProcess(JavaRDD<SAMRecord> metasSamRecordRDD, HashMap<String, ReferenceSequence> refSeq){
 
         HashMap<String, SpeciesGC> speciesGCMap = null;
 

@@ -1,12 +1,12 @@
 package org.bgi.flexlab.metas.profiling;
 
+import htsjdk.samtools.SAMRecord;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamRecord;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
@@ -61,11 +61,11 @@ public class ProfilingProcess {
     /**
      * Runs profiling. All options should have been set.
      *
-     * @param metasSamRecordRDD The RDD of MetasSamRecord instances generated from SamReader.
+     * @param metasSamRecordRDD The RDD of SAMRecord instances generated from SamReader.
      * @return The RDD of ProfilingResultRecord, which stores the data of all the profiling result and
      *     and other necessary information.
      */
-    public JavaPairRDD<String, ProfilingResultRecord> runProfilingProcess(JavaPairRDD<String, MetasSamRecord> metasSamRecordRDD){
+    public JavaPairRDD<String, ProfilingResultRecord> runProfilingProcess(JavaPairRDD<String, SAMRecord> metasSamRecordRDD){
 
         ProfilingMethodBase profilingMethod = getProfilingMethod();
 
@@ -73,7 +73,7 @@ public class ProfilingProcess {
          * Note: filter() operation of rdd will return a new RDD containing only the elements that
          * makes the filter return true.
          */
-        JavaPairRDD<String, MetasSamRecord>  cleanMetasSamRecordRDD = metasSamRecordRDD
+        JavaPairRDD<String, SAMRecord>  cleanMetasSamRecordRDD = metasSamRecordRDD
                 .filter(tuple -> ! tuple._2.getReadUnmappedFlag());
 
         if (this.doIdentityFiltering){
@@ -81,7 +81,7 @@ public class ProfilingProcess {
         }
 
         /**
-         * Creating readname-metasSamRecord pair.
+         * Creating readname-SAMRecord pair.
          * In paired end sequencing mode, the read name has no "/1" or "/2" suffix.
          * In single end sequencing mode, the read name remains unchanged.
          *
