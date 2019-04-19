@@ -1,17 +1,15 @@
 package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 
-import java.util.ArrayList;
-
 /**
- * ClassName: GCBiasCorrectionTrainerBase
+ * ClassName: GCBiasModelTrainerBase
  * Description:
  *
  * @author heshixu@genomics.cn
  */
 
-public abstract class GCBiasCorrectionTrainerBase {
+public abstract class GCBiasModelTrainerBase {
 
-    protected GCBiasCorrectionModelBase model;
+    protected GCBiasModelBase model;
 
     // Set a single group of coverage and gc values as one point of training dataset.
     public abstract void setPointValue(double cov, double windowGC, double refGC);
@@ -23,7 +21,7 @@ public abstract class GCBiasCorrectionTrainerBase {
     public abstract void train();
 
     // Return trained model;
-    public GCBiasCorrectionModelBase getTrainedModel(){
+    public GCBiasModelBase getTrainedModel(){
         return this.model;
     }
 }

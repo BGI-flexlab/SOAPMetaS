@@ -7,6 +7,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.alignment.AlignmentProcessMS;
 import org.bgi.flexlab.metas.profiling.ProfilingProcessMS;
+import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasTrainingProcess;
 
 import java.util.List;
 
@@ -56,10 +57,19 @@ public class SOAPMetas {
         //GC Training control
         //if gc training, no profiling process (standard data)
         if (metasOptions.isGCBiasTrainingMode()){
+
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start training GC bias correction model.");
+            GCBiasTrainingProcess modelTraining = new GCBiasTrainingProcess(metasOptions);
+
+            if (alignmentOutputList == null){
+                modelTraining.trainGCBiasModel(jsc, metasOptions.getSAMSampleList());
+            } else {
+                modelTraining.trainGCBiasModel(jsc, alignmentOutputList.iterator());
+            }
+
 
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Comoplete training GC Bias correctiong model, " +
-                    "the model file is " + metasOptions.getGcBiasTrainingOutputFile() + " . Exit program.");
+                    "the model file is " + metasOptions.getGcBiasModelOutput() + " . Exit program.");
             jsc.close();
             System.exit(0);
         }

@@ -48,13 +48,13 @@ public class MetasOptions {
 
     // Recalibration arguments group.
     private String gcBiasCorrectionModelType = "builtin";
-    private String gcBiasCoefficientsTrainingOutput; // training coefficient output
-    private String gcBiasCoefficientsFilePath; // model coefficient input
+    private String gcBiasModelOutput; // training coefficient output
+    private String gcBiasModelInput; // model coefficient input
     private boolean gcBiasTrainingMode = false;
     private int scanWindowSize = 100;
     private boolean doGCBiasRecalibration = false;
 
-    private String gcBiasModelTrainRefFasta;
+    private String gcBiasTrainerRefFasta;
 
     private boolean doInsRecalibration;
 
@@ -403,17 +403,23 @@ public class MetasOptions {
             if (commandLine.hasOption("gc-cali")){
                 this.doGCBiasRecalibration = true;
                 this.gcBiasCorrectionModelType = commandLine.getOptionValue("gc-model-type", "builtin");
-                this.gcBiasCoefficientsFilePath = commandLine.getOptionValue("gc-model-file", null);
-                assert this.gcBiasCorrectionModelType.equals("builtin"): "GC bias correction model not support.";
-                assert this.speciesGenomeGCFilePath != null: "Please provide species genome information file.";
+                this.gcBiasModelInput = commandLine.getOptionValue("gc-model-file", null);
+                if (!this.gcBiasCorrectionModelType.equals("builtin")){
+                    throw new UnrecognizedOptionException("GC bias correction model not support in current version.");
+                }
+                if (this.speciesGenomeGCFilePath == null) {
+                    throw new MissingArgumentException("Please provide species genome information file.");
+                }
             }
 
             if (commandLine.hasOption("gc-model-train")){
                 this.gcBiasTrainingMode = true;
-                this.gcBiasCoefficientsTrainingOutput = commandLine.getOptionValue("gc-train-out", null);
+                this.gcBiasModelOutput = commandLine.getOptionValue("gc-train-out", null);
                 this.scanWindowSize = Integer.parseInt(commandLine.getOptionValue("gc-window-size", "100"));
-                this.gcBiasModelTrainRefFasta = commandLine.getOptionValue("spe-fq", null);
-                assert this.gcBiasModelTrainRefFasta != null: "Please provide species genome sequence fasta file.";
+                this.gcBiasTrainerRefFasta = commandLine.getOptionValue("spe-fa", null);
+                if (this.gcBiasTrainerRefFasta == null){
+                    throw new MissingArgumentException("Please provide species genome sequence fasta file.");
+                }
             }
 
             if (commandLine.hasOption("ins-cali")){
@@ -441,7 +447,8 @@ public class MetasOptions {
             }
             if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
                     this.speciesGenomeGCFilePath == null){
-                throw new ParseException("Please provide species genome information file.");
+                throw new MissingArgumentException("Please provide species genome information file " +
+                        "in \"species\" analysis level.");
             }
 
 
@@ -452,13 +459,13 @@ public class MetasOptions {
             if (commandLine.getOptionValue('o', null) == null) {
                 throw new MissingOptionException("Missing output directory option.");
             }
-            this.profilingOutputHdfsDir = commandLine.getOptionValue('o') + "/profiling";
-            this.samOutputHdfsDir = commandLine.getOptionValue('o') + "/alignment";
+            this.profilingOutputHdfsDir = commandLine.getOptionValue('o') + "/profiling/";
+            this.samOutputHdfsDir = commandLine.getOptionValue('o') + "/alignment/";
 
             if (commandLine.hasOption("tmp-dir")) {
                 String tmpDir = commandLine.getOptionValue("tmp-dir");
-                this.alignmentTmpDir = tmpDir + "/alignment";
-                this.profilingTmpDir = tmpDir + "/profiling";
+                this.alignmentTmpDir = tmpDir + "/alignment/";
+                this.profilingTmpDir = tmpDir + "/profiling/";
             }
 
             /*
@@ -487,6 +494,10 @@ public class MetasOptions {
             System.exit(1);
         } catch (MissingOptionException e) {
             LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] Required option missing error." + e.toString());
+            this.usage();
+            System.exit(1);
+        } catch (MissingArgumentException e){
+            LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] Required argument missing error. " + e.toString());
             this.usage();
             System.exit(1);
         } catch (ParseException e){
@@ -586,12 +597,16 @@ public class MetasOptions {
         return scanWindowSize;
     }
 
-    public String getGcBiasCoefficientsFilePath(){
-        return this.gcBiasCoefficientsFilePath;
+    public String getGcBiasModelInput(){
+        return this.gcBiasModelInput;
     }
 
-    public String getGcBiasTrainingOutputFile(){
-        return this.gcBiasCoefficientsTrainingOutput;
+    public String getGcBiasModelOutput(){
+        return this.gcBiasModelOutput;
+    }
+
+    public String getGcBiasTrainerRefFasta() {
+        return gcBiasTrainerRefFasta;
     }
 
     public boolean isGCBiasTrainingMode(){

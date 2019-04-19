@@ -10,7 +10,12 @@ import java.util.Map;
 
 /**
  * ClassName: ReferenceInfoMatrix
- * Description:
+ * Description: Related marker genes and correspond species genome information are stored in the instance
+ * of this class, which will then be utilized to calculate abundance.
+ *
+ * Note: The application will run normally if the marker gene information in reference matrix file is
+ * replaced with "genome" information, and this is functionally similar to species-level analysis. However,
+ * users must pay attention that the builtin GC bias correction model won't work as expected.
  *
  * @author heshixu@genomics.cn
  */
@@ -29,10 +34,10 @@ public class ReferenceInfoMatrix implements Serializable{
 
     /**
      * Reference matrix file format:
-     * geneID	geneName	geneLength	geneGC	species[	genus	phylum]
+     * geneID	geneName	geneLength	species[	genus	phylum  geneGC]
      *
      * species file format:
-     * s__Genusname_speciesname genomeLength    float
+     * s__Genusname_speciesname genomeLength    genomeGC
      *
      * @param referenceMatrixFilePath Information matrix of marker gene
      * @param speciesGCFilePath species GC content list
@@ -46,27 +51,29 @@ public class ReferenceInfoMatrix implements Serializable{
             try (FileInputStream speciesFR = new FileInputStream(new File(speciesGCFilePath))) {
 
                 BufferedReader speciesBR = new BufferedReader(new InputStreamReader(speciesFR));
-                String currentLine = null;
 
+                String currentLine;
                 while ((currentLine = speciesBR.readLine()) != null) {
                     LOG.trace("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Species GC file, current line: " + currentLine);
                     String[] lineSplit = StringUtils.split(currentLine, '\t');
-                    ReferenceSpeciesRecord speciesRecord = new ReferenceSpeciesRecord(lineSplit[0], Integer.parseInt(lineSplit[1]),
+                    ReferenceSpeciesRecord speciesRecord = new ReferenceSpeciesRecord(null, Integer.parseInt(lineSplit[1]),
                             Double.parseDouble(lineSplit[2]));
-                    this.refSpeciesRecordMap.put(lineSplit[1], speciesRecord);
+                    this.refSpeciesRecordMap.put(lineSplit[0], speciesRecord);
                 }
 
                 speciesBR.close();
 
+            } catch (NumberFormatException e){
+                LOG.error("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Wrong number format of species genome length or genome GC content.");
             } catch (IOException e) {
                 LOG.error("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Can't load species gc file: " + speciesGCFilePath);
             }
         }
     }
 
-    public ReferenceInfoMatrix(String referenceMatrixFilePath){
-        this.readMatrixFile(referenceMatrixFilePath);
-    }
+    //public ReferenceInfoMatrix(String referenceMatrixFilePath){
+    //    this.readMatrixFile(referenceMatrixFilePath);
+    //}
 
     /**
      * Reference matrix file format:
@@ -82,15 +89,15 @@ public class ReferenceInfoMatrix implements Serializable{
             this.markerRecordMap = new HashMap<>(MARKER_NUMBER); // Number of genes in IGC_9.9M_update.ref
 
             BufferedReader matrixBR = new BufferedReader(new InputStreamReader(matrixFR));
-            String currentLine = null;
 
+            String currentLine;
             while ((currentLine = matrixBR.readLine()) != null) {
                 String[] lineSplit = StringUtils.split(currentLine, '\t');
                 ReferenceGeneRecord geneRecord;
                 if (lineSplit.length == 4) {
                     geneRecord = new ReferenceGeneRecord(null, Integer.parseInt(lineSplit[2]),
                             lineSplit[3]);
-                } else if (lineSplit.length == 7){
+                } else if (lineSplit.length == 7) {
                     geneRecord = new ReferenceGeneRecord(null, Integer.parseInt(lineSplit[2]),
                             lineSplit[3], Double.parseDouble(lineSplit[6]));
                 } else {
@@ -103,7 +110,9 @@ public class ReferenceInfoMatrix implements Serializable{
 
             matrixBR.close();
 
-        } catch (IOException e){
+        } catch (NumberFormatException e){
+            LOG.error("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Wrong number format of gene length or gene GC content.");
+        } catch (IOException e) {
             LOG.error("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Can't load reference matrix file: " + matrixFilePath);
         }
     }

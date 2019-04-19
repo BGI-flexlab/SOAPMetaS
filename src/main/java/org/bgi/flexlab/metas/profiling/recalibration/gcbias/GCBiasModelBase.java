@@ -1,10 +1,13 @@
 package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.Serializable;
 
 /**
- * ClassName: GCBiasCorrectionModelBase
+ * ClassName: GCBiasModelBase
  * Description: The basic abstract class of GC bias correction model. Different model depends on different
  * correction function/method, such as LOWESS regression method or method in https://doi.org/10.1093/nar/gks001.
  * Pay attention that some classic models for CNV analysis of human genome don't need coefficients training,
@@ -13,7 +16,7 @@ import java.io.Serializable;
  * @author heshixu@genomics.cn
  */
 
-public abstract class GCBiasCorrectionModelBase implements Serializable {
+public abstract class GCBiasModelBase implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
@@ -22,7 +25,7 @@ public abstract class GCBiasCorrectionModelBase implements Serializable {
      */
 
     //coefficients list of the model，具体的模型要根据函数本身来确定系数数组的大小
-    protected Double[] coefficients;
+    protected double[] coefficients;
     protected boolean coefficientsState = false;
 
     //回归模型的函数表达式，此表达式用于R语言的nls回归和模型读写
@@ -66,7 +69,7 @@ public abstract class GCBiasCorrectionModelBase implements Serializable {
      *
      * @param coefficients The concrete value from training result or coefficients file.
      */
-    public abstract void setCoefficients(Double[] coefficients);
+    public abstract void setCoefficients(double[] coefficients);
 
     protected void setCoefficientsState(boolean state){
         this.coefficientsState = state;

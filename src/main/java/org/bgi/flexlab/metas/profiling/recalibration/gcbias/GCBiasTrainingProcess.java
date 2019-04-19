@@ -1,14 +1,21 @@
 package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 
-import htsjdk.samtools.SAMRecord;
+import htsjdk.samtools.reference.FastaSequenceFile;
 import htsjdk.samtools.reference.ReferenceSequence;
 import htsjdk.samtools.util.SequenceUtil;
-import org.apache.spark.api.java.JavaRDD;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
+import org.seqdoop.hadoop_bam.SAMInputFormat;
+import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import scala.Tuple2;
 
-import java.util.HashMap;
-import java.util.List;
+import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * ClassName: GCBiasTrainingProcess
@@ -19,24 +26,49 @@ import java.util.List;
 
 public class GCBiasTrainingProcess {
 
-    private MetasOptions metaOpt;
+    private static final Logger LOG = LogManager.getLogger(GCBiasTrainingProcess.class);
 
-    private GCBiasCorrectionTrainerBase trainer;
+    private static final int SPECIES_NUMBER = 100;
+
+    private GCBiasModelTrainerBase trainer;
 
     private int scanWindowSize;
 
+    private String refFastaFile;
     private String trainingResultFile;
 
     /**
      * TODO: trainer可以考虑提供工厂类，用于针对不同的model选取不同的trainer。
      *
-     * @param options
+     * @param options MetasOptions that wraps input options and arguments.
      */
     public GCBiasTrainingProcess(MetasOptions options){
-        this.metaOpt = options;
-        this.scanWindowSize = this.metaOpt.getScanWindowSize();
-        this.trainer = new GCBiasCorrectionDefaultModelTrainer();
-        this.trainingResultFile = this.metaOpt.getGcBiasTrainingOutputFile();
+        this.scanWindowSize = options.getScanWindowSize();
+        this.trainer = new GCBiasDefaultModelTrainer();
+        this.refFastaFile = options.getGcBiasTrainerRefFasta();
+        this.trainingResultFile = options.getGcBiasModelOutput();
+    }
+
+    public void trainGCBiasModel(JavaSparkContext jsc, String multiSamListFile){
+        List<String> alignmentResults = null;
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                new FileInputStream(new File(multiSamListFile))))) {
+
+            alignmentResults = br.lines().collect(Collectors.toList());
+
+        } catch (IOException e) {
+            LOG.error("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Fail to read multi-SAM " +
+                    "list file: " + multiSamListFile);
+        }
+
+        if (alignmentResults == null || alignmentResults.size() < 1){
+            LOG.error("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "]  No available " +
+                    "alignment results in SAM format.");
+            return;
+        }
+
+        this.trainGCBiasModel(jsc, alignmentResults.iterator());
     }
 
     /**
@@ -49,25 +81,44 @@ public class GCBiasTrainingProcess {
      * calculated values by the key of species name.
      *
      * TODO: 这里的 SAMRecord 还是要考虑一下 PE 和 SE 数据的差异。
-     * TODO: runTrainingProcess方法的输入参数 ReferenceSequence 可能需要单独根据species数据来创建
-     * TODO: 不确定两种计算totalReads的方法对最后建模结果以及校正效果的影响。
+     * TODO: 输入参数 ReferenceSequence 可能需要单独根据species数据来创建
+     * TODO: 不确定两种计算totalReads的方法(average reads number of all species, number of reads grouped by species)对最后建模结果以及校正效果的影响。
      *
-     * @param metasSamRecordRDD RDD created from SAM output of alignment process. Note that the alignment is between
-     *                          reads and species genome.
-     * @param refSeq Genome sequence of each reference species used in training process.
+     * @param jsc JavaSparkContext of the original application.
+     * @param alignmentResults Iterator of results paths String list generated from alignmentProcess.
      */
-    public void runTrainingProcess(JavaRDD<SAMRecord> metasSamRecordRDD, HashMap<String, ReferenceSequence> refSeq){
+    public void trainGCBiasModel(JavaSparkContext jsc, Iterator<String> alignmentResults){
 
-        HashMap<String, SpeciesGC> speciesGCMap = null;
-
-        for (String species: refSeq.keySet()){
-            speciesGCMap.put(species, new SpeciesGC(species, refSeq.get(species)));
+        StringBuilder samPathsStB = new StringBuilder();
+        while(alignmentResults.hasNext()){
+            String path = StringUtils.split(alignmentResults.next(), '\t')[1];
+            if (!path.startsWith("file://")){
+                samPathsStB.append("file://").append(path).append(',');
+            } else {
+                samPathsStB.append(path).append(',');
+            }
         }
+        samPathsStB.trimToSize();
+        samPathsStB.deleteCharAt(samPathsStB.length()-1);
+        alignmentResults = null;
 
-        List<Tuple2<String, Integer>> recordPosList = metasSamRecordRDD.filter(rec -> !rec.getReadUnmappedFlag())
+        FastaSequenceFile fastaSeqFile = new FastaSequenceFile(new File(this.refFastaFile), true);
+        Map<String, SpeciesGC> speciesGCMap = new HashMap<>(SPECIES_NUMBER);
+        ReferenceSequence refSeq;
+        while ((refSeq = fastaSeqFile.nextSequence()) != null){
+            speciesGCMap.put(refSeq.getName(), new SpeciesGC(refSeq));
+        }
+        refSeq = null;
+
+        LOG.debug("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Input SAM file for training: " + samPathsStB.toString());
+        List<Tuple2<String, Integer>> recordPosList = jsc.newAPIHadoopFile(samPathsStB.toString(),
+                SAMInputFormat.class, LongWritable.class, SAMRecordWritable.class, jsc.hadoopConfiguration())
+                .values().map(SAMRecordWritable::get)
+                .filter(rec -> !rec.getReadUnmappedFlag())
                 .map(rec -> new Tuple2<>(rec.getReferenceName(),
                         rec.getReadNegativeStrandFlag() ? rec.getAlignmentEnd() - this.scanWindowSize : rec.getAlignmentStart()))
                 .collect();
+        samPathsStB = null;
 
         for (Tuple2<String, Integer> tup: recordPosList){
             speciesGCMap.get(tup._1).addRead(tup._2);
@@ -84,11 +135,9 @@ public class GCBiasTrainingProcess {
             final double totalWindows = sum(windowByGC);
             final double meanReadsPerWindow = totalReads / totalWindows;
 
-            assert totalReads > 0;
-
             for (int i = 0; i < windowByGC.length; i++){
                 if(windowByGC[i] > 0){
-                    this.trainer.setPointValue(readsByGC[i]/windowByGC[i]/meanReadsPerWindow, windowByGC[i], refGCRate);
+                    this.trainer.setPointValue((double) readsByGC[i]/windowByGC[i]/meanReadsPerWindow, windowByGC[i], refGCRate);
                 }
             }
         }
@@ -98,22 +147,21 @@ public class GCBiasTrainingProcess {
     }
 
     private double sum(final int[] values) {
-        final int length = values.length;
         double total = 0;
-        for (int i = 0; i < length; i++) {
-            total += values[i];
+        for (int value: values) {
+            total += value;
         }
         return total;
     }
 
     class SpeciesGC {
-        private String name;
+        private String name = null;
         private double speGCRate;
         private byte[] gc;
         private int[] windowsByGC;
         private int[] readsByGC;
 
-        public SpeciesGC(String name, ReferenceSequence refSequence) {
+        SpeciesGC(ReferenceSequence refSequence) {
             this.windowsByGC = GcBiasUtils.calculateRefWindowsByGc(refSequence,
                     GCBiasTrainingProcess.this.scanWindowSize);
             this.gc = GcBiasUtils.calculateAllGcs(refSequence.getBases(),
@@ -123,7 +171,7 @@ public class GCBiasTrainingProcess {
             this.speGCRate = SequenceUtil.calculateGc(refSequence.getBases());
         }
 
-        public void addRead(int pos) {
+        void addRead(int pos) {
             if (pos > 0) {
                 final int windowGc = gc[pos];
                 if (windowGc >= 0) {
@@ -132,15 +180,15 @@ public class GCBiasTrainingProcess {
             }
         }
 
-        public int[] getWindowsByGC(){
+        int[] getWindowsByGC(){
             return this.windowsByGC;
         }
 
-        public int[] getReadsByGC() {
+        int[] getReadsByGC() {
             return this.readsByGC;
         }
 
-        public double getSpeGCRate() {
+        double getSpeGCRate() {
             return speGCRate;
         }
     }

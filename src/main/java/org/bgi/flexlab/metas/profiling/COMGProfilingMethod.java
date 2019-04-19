@@ -12,10 +12,10 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordInsertSizeFilter;
-import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelBase;
+import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
-import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasCorrectionModelFactory;
+import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
@@ -48,7 +48,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
     private boolean doInsRecalibration;
     private boolean doGCRecalibration;
 
-    private GCBiasCorrectionModelBase gcBiasCorrectionModel;
+    private GCBiasModelBase gcBiasCorrectionModel;
 
     COMGProfilingMethod(MetasOptions options){
 
@@ -63,13 +63,13 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
         if (this.doGCRecalibration) {
             LOG.debug("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Do GC recalibration.");
-            this.gcBiasCorrectionModel = new GCBiasCorrectionModelFactory(options.getGcBiasCorrectionModelType(),
-                    options.getGcBiasCoefficientsFilePath()).getGCBiasCorrectionModel();
+            this.gcBiasCorrectionModel = new GCBiasModelFactory(options.getGcBiasCorrectionModelType(),
+                    options.getGcBiasModelInput()).getGCBiasCorrectionModel();
+            //this.gcBiasCorrectionModel.outputCoefficients(options.getProfilingOutputHdfsDir() + "/builtin_model.json");
         } else {
             LOG.debug("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Skip GC recalibration.");
 
         }
-
         this.referenceInfoMatrix = new ReferenceInfoMatrix(options.getReferenceMatrixFilePath(),
                     options.getSpeciesGenomeGCFilePath());
     }
