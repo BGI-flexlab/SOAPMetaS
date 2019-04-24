@@ -18,7 +18,7 @@ public class GCBiasModelFactory {
         this.inputCoefficientsFile = coefficientsFile;
     }
 
-    public GCBiasModelBase getGCBiasCorrectionModel(){
+    public GCBiasModelBase getGCBiasRecaliModel(){
 
         GCBiasDefaultModel model;
 

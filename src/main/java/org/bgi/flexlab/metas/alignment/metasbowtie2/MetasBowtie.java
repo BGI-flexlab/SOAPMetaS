@@ -116,16 +116,18 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
         arguments.add(this.getIndexPath());
 
-        String rgID = this.getReadGroupID();
         arguments.add("--rg-id");
-        arguments.add(rgID);
+        arguments.add(this.getReadGroupID());
 
-        if (this.rgArray != null && this.rgArray.size() > 0){
-            for(String rg: this.rgArray){
-                arguments.add("--rg");
-                arguments.add(rg);
-            }
-        }
+        arguments.add("--rg");
+        arguments.add("SM:"+this.getSMTag());
+
+        //if (this.rgArray != null && this.rgArray.size() > 0){
+        //    for(String rg: this.rgArray){
+        //        arguments.add("--rg");
+        //        arguments.add(rg);
+        //    }
+        //}
 
         // Add input file.
         if (this.isTab5Mode){

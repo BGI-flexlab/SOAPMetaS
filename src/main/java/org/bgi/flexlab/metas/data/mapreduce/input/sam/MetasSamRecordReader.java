@@ -197,7 +197,12 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
 
         final SAMRecord r = iterator.next();
         key.set(sampleID + "\t" + r.getReadName().replaceFirst("/[12]$", ""));
-        record.set(r);
+
+        if (!r.getReadUnmappedFlag()) {
+            record.set(r);
+        } else {
+            record.set(null);
+        }
 
         //LOG.trace("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] Record element: key: " + key.toString() +
         //        " || value: " + r.toString());

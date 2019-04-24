@@ -14,12 +14,15 @@ public class ProfilingResultRecord implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    private String readGroupID;
+    private String rgID;
+    private String smTag;
     private String clusterName;
     private Integer rawReadCount;
-    private Double correctedReadCount;
-    private Double abundance; // correctedReadCount divided by marker length
+    private Double recaliReadCount;
+    private Double abundance; // recaliReadCount divided by marker length
     private byte[] readNameStringBytes; //后续需要考虑采用更合适的方式来存储read name字符串
+
+    public ProfilingResultRecord(){}
 
     public void setClusterName(String name){
         this.clusterName = name;
@@ -45,20 +48,28 @@ public class ProfilingResultRecord implements Serializable {
         return this.abundance;
     }
 
-    public void setCorrectedReadCount(Double correctedReadCount) {
-        this.correctedReadCount = correctedReadCount;
+    public void setrecaliReadCount(Double recaliReadCount) {
+        this.recaliReadCount = recaliReadCount;
     }
 
-    public Double getCorrectedReadCount() {
-        return this.correctedReadCount;
+    public Double getrecaliReadCount() {
+        return this.recaliReadCount;
     }
 
-    public void setReadGroupID(String readGroupID) {
-        this.readGroupID = readGroupID;
+    public void setRgID(String rgID) {
+        this.rgID = rgID;
     }
 
-    public String getReadGroupID() {
-        return readGroupID;
+    public String getRgID() {
+        return rgID;
+    }
+
+    public void setSmTag(String smTag) {
+        this.smTag = smTag;
+    }
+
+    public String getSmTag() {
+        return smTag;
     }
 
     public void setReadNameString(String readNameStringBytes) {
@@ -75,8 +86,9 @@ public class ProfilingResultRecord implements Serializable {
 
     @Override
     public String toString(){
-        return new StringBuilder("RGID: ").append(readGroupID).append(" | ClusterName: ").append(clusterName)
-                .append(" | RawReadCount/CorrectedReadCount: ").append(rawReadCount).append('/').append(correctedReadCount)
+        return new StringBuilder(64).append("RG:").append(rgID).append("SM:").append(smTag)
+                .append(" | ClusterName: ").append(clusterName)
+                .append(" | RawReadCount/recaliReadCount: ").append(rawReadCount).append('/').append(recaliReadCount)
                 .append(" | Abundance: ").append(abundance).toString();
     }
 

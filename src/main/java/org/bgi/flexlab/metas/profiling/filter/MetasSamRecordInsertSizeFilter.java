@@ -3,6 +3,8 @@ package org.bgi.flexlab.metas.profiling.filter;
 import htsjdk.samtools.SAMRecord;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
@@ -20,7 +22,7 @@ import java.util.List;
  *
  * Note: The filter is merely suitable for pair-end sequencing mode. The main intention of the filter
  * is to detect whether the unmapped end of pair reads is located outside the reference gene (the
- * deviation of gene boundary), in other words, whether the unmapping is caused by boundary effect.
+ * deviation of gene boundary), in other words, whether the "unmapped" is caused by boundary effect.
  * If so, the mapped end will be treated as "proper mapped read", or the mapped "single" end will
  * be filtered out.
  *
@@ -33,6 +35,8 @@ import java.util.List;
 public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Serializable {
 
     public static final long serialVersionUID = 1L;
+
+    private static final Logger LOG = LogManager.getLogger(MetasSamRecordInsertSizeFilter.class);
 
     private int meanInsertSize;
 
@@ -60,10 +64,14 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Ser
 
     public void setMeanInsertSize(int meanIns){
         this.meanInsertSize = meanIns;
+        LOG.trace("[SOAPMetas::" + MetasSamRecordInsertSizeFilter.class.getName() + "] Trained mean insert size: " +
+                meanIns);
     }
 
     public void setInserSizeSD(int insertSizeSD) {
         this.insertSizeSD = insertSizeSD;
+        LOG.trace("[SOAPMetas::" + MetasSamRecordInsertSizeFilter.class.getName() + "] Trained insert size SD: " +
+                insertSizeSD);
     }
 
     /**
@@ -77,9 +85,15 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Ser
     public void training(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD){
         List<WeightedObservedPoint> pointList = readMetasSamPairRDD.values()
                 .filter(pairRec -> pairRec.isProperPaired())
-                .mapToPair(pairRec -> new Tuple2<>(ProfilingUtils.computeInsertSize(pairRec.getFirstRecord(), pairRec.getSecondRecord()), 1))
+                .mapToPair(pairRec -> {
+                    return new Tuple2<>(Math.abs(pairRec.getFirstRecord().getInferredInsertSize()), 1);
+                    //return new Tuple2<>(ProfilingUtils.computeInsertSize(pairRec.getFirstRecord(), pairRec.getSecondRecord()), 1);
+                })
                 .reduceByKey((a, b) -> a+b)
-                .map(tup -> new WeightedObservedPoint(1.0, tup._1, tup._2))
+                .map(tup -> {
+                    //System.out.println("WeightedObservedPoint: weight: 1.0" + " |ins: " + tup._1 + " |count: " + tup._2);
+                    return new WeightedObservedPoint(1.0, tup._1, tup._2);
+                })
                 .collect();
         GaussianCurveFitter.ParameterGuesser guesser = new GaussianCurveFitter.ParameterGuesser(pointList);
 
@@ -112,8 +126,12 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Ser
         if (samRecord.getReadNegativeStrandFlag()){
             return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + this.insTolerance);
         } else {
-            return (this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
-                    < (this.meanInsertSize + this.insTolerance);
+            int geneLen = this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName());
+            if (geneLen > 0) {
+                return (geneLen - samRecord.getAlignmentStart()) < (this.meanInsertSize + this.insTolerance);
+            } else {
+                return false;
+            }
         }
     }
 
@@ -129,8 +147,12 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Ser
         if (samRecord.getReadNegativeStrandFlag()){
             return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + 2 * this.insertSizeSD);
         } else {
-            return (this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName())-samRecord.getAlignmentStart())
-                    < (this.meanInsertSize + 2 * this.insertSizeSD);
+            int geneLen = this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName());
+            if (geneLen > 0) {
+                return (geneLen - samRecord.getAlignmentStart()) < (this.meanInsertSize + 2 * this.insertSizeSD);
+            } else {
+                return false;
+            }
         }
     }
 }

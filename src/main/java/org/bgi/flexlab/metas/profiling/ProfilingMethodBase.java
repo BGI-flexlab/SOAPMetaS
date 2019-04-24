@@ -39,7 +39,7 @@ public abstract class ProfilingMethodBase implements Serializable {
      * JavaPairRDD<String, ProfilingResultRecord>.
      *
      * The PairFlatMapFunction in flatMapToPair() is for computing the reads count of each marker, the
-     * result will be corrected by BiasCorrectionModel. Note that the count value represents merely one
+     * result will be recalibrated by GCBias(Default)Model. Note that the count value represents merely one
      * single read.
      *
      * The Function2 in reduceByKey() is for merging the read count result from flatMapToPair(). Note that
@@ -48,7 +48,7 @@ public abstract class ProfilingMethodBase implements Serializable {
      *
      * @return JavaPairRDD<String, ProfilingResultRecord> A new RDD containing profiling result.
      * ProfilingResultRecord contains cluster name (marker gene, species name or read group id), read count
-     * of cluster, corrected abundance, and name list of all mapped reads(ProfilingAnalysisLevel.ESTIMATE).
+     * of cluster, recalibrated abundance, and name list of all mapped reads(ProfilingAnalysisLevel.ESTIMATE).
      */
     public abstract JavaPairRDD<String, ProfilingResultRecord> runProfiling(
             JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner);

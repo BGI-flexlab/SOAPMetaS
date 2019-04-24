@@ -24,11 +24,13 @@ import java.util.stream.Collectors;
  * @author heshixu@genomics.cn
  */
 
-public class GCBiasTrainingProcess {
+public class GCBiasTrainingProcess implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LogManager.getLogger(GCBiasTrainingProcess.class);
 
-    private static final int SPECIES_NUMBER = 100;
+    private final int SPECIES_NUMBER = 100;
 
     private GCBiasModelTrainerBase trainer;
 
@@ -44,7 +46,9 @@ public class GCBiasTrainingProcess {
      */
     public GCBiasTrainingProcess(MetasOptions options){
         this.scanWindowSize = options.getScanWindowSize();
-        this.trainer = new GCBiasDefaultModelTrainer();
+
+        this.trainer = new GCBiasDefaultModelTrainer(options);
+
         this.refFastaFile = options.getGcBiasTrainerRefFasta();
         this.trainingResultFile = options.getGcBiasModelOutput();
     }
@@ -89,16 +93,16 @@ public class GCBiasTrainingProcess {
      */
     public void trainGCBiasModel(JavaSparkContext jsc, Iterator<String> alignmentResults){
 
-        StringBuilder samPathsStB = new StringBuilder();
+        StringBuilder samPathsStB = new StringBuilder(128);
         while(alignmentResults.hasNext()){
-            String path = StringUtils.split(alignmentResults.next(), '\t')[1];
+            String path = StringUtils.split(alignmentResults.next(), '\t')[2];
             if (!path.startsWith("file://")){
                 samPathsStB.append("file://").append(path).append(',');
             } else {
                 samPathsStB.append(path).append(',');
             }
         }
-        samPathsStB.trimToSize();
+
         samPathsStB.deleteCharAt(samPathsStB.length()-1);
         alignmentResults = null;
 
@@ -113,10 +117,17 @@ public class GCBiasTrainingProcess {
         LOG.debug("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Input SAM file for training: " + samPathsStB.toString());
         List<Tuple2<String, Integer>> recordPosList = jsc.newAPIHadoopFile(samPathsStB.toString(),
                 SAMInputFormat.class, LongWritable.class, SAMRecordWritable.class, jsc.hadoopConfiguration())
-                .values().map(SAMRecordWritable::get)
+                .mapToPair(rec -> new Tuple2<>(rec._1.get(), rec._2.get())).values()
                 .filter(rec -> !rec.getReadUnmappedFlag())
-                .map(rec -> new Tuple2<>(rec.getReferenceName(),
-                        rec.getReadNegativeStrandFlag() ? rec.getAlignmentEnd() - this.scanWindowSize : rec.getAlignmentStart()))
+                .map(rec -> {
+                    int alignmentPos;
+                    if (rec.getReadNegativeStrandFlag()){
+                        alignmentPos = rec.getAlignmentEnd() - this.scanWindowSize;
+                    } else {
+                        alignmentPos = rec.getAlignmentStart();
+                    }
+                    return new Tuple2<>(rec.getReferenceName(), alignmentPos);
+                })
                 .collect();
         samPathsStB = null;
 
@@ -137,7 +148,7 @@ public class GCBiasTrainingProcess {
 
             for (int i = 0; i < windowByGC.length; i++){
                 if(windowByGC[i] > 0){
-                    this.trainer.setPointValue((double) readsByGC[i]/windowByGC[i]/meanReadsPerWindow, windowByGC[i], refGCRate);
+                    this.trainer.addPointValue((double) readsByGC[i]/windowByGC[i]/meanReadsPerWindow, windowByGC[i], refGCRate);
                 }
             }
         }

@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * Note: The application will run normally if the marker gene information in reference matrix file is
  * replaced with "genome" information, and this is functionally similar to species-level analysis. However,
- * users must pay attention that the builtin GC bias correction model won't work as expected.
+ * users must pay attention that the builtin GC bias recalibration model won't work as expected.
  *
  * @author heshixu@genomics.cn
  */
@@ -26,8 +26,8 @@ public class ReferenceInfoMatrix implements Serializable{
 
     private static final Log LOG = LogFactory.getLog(ReferenceInfoMatrix.class);
 
-    private final static int MARKER_NUMBER = 10;
-    private final static int SPECIES_NUMBER = 5;
+    private final int MARKER_NUMBER = 10;
+    private final int SPECIES_NUMBER = 5;
 
     private Map<String, ReferenceGeneRecord> markerRecordMap;
     private Map<String, ReferenceSpeciesRecord> refSpeciesRecordMap;
@@ -117,16 +117,33 @@ public class ReferenceInfoMatrix implements Serializable{
         }
     }
 
+    /**
+     * Get gene length of specific gene.
+     *
+     * @param geneName Marker name.
+     * @return int Gene length. 0 if no length info.
+     */
     public int getGeneLength(String geneName) {
-        return markerRecordMap.get(geneName).getGeneLength();
+
+        ReferenceGeneRecord geneRec = markerRecordMap.getOrDefault(geneName, null);
+
+        if (geneRec == null){
+            LOG.warn("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Gene" + geneName +
+                    " doesn't has gene info. Return 0 as length.");
+            return 0;
+        }
+        return geneRec.getGeneLength();
     }
 
-    public double getGeneGCContent(String referenceName) {
-        double gc = markerRecordMap.get(referenceName).getGcContent();
-        if (gc == 0){
-            LOG.error("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Species of gene" + referenceName + " doesn't has gc content info. Return 0.");
+    public double getGeneGCContent(String geneName) {
+        ReferenceGeneRecord geneRec = markerRecordMap.get(geneName);
+
+        if (geneRec == null){
+            LOG.warn("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Gene" + geneName +
+                    " doesn't has gene info. Return 0 as gc content.");
+            return 0;
         }
-        return gc;
+        return geneRec.getGcContent();
     }
 
     public String getGeneSpeciesName(String referenceName) {
@@ -151,7 +168,7 @@ public class ReferenceInfoMatrix implements Serializable{
         if (speciesRecord == null){
             LOG.warn("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Species " + referenceName +
                     " doesn't has genome info. Return 1 as genome length.");
-            return 1;
+            return 0;
         }
         return speciesRecord.getGenomeLength();
     }

@@ -69,7 +69,7 @@ public class MetasSamPairRecord implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder name = new StringBuilder("rec1: ");
+        StringBuilder name = new StringBuilder(64).append("rec1: ");
         if (record1 == null) {
             name.append("null");
         } else {

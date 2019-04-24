@@ -8,14 +8,16 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.alignment.AlignmentProcessMS;
 import org.bgi.flexlab.metas.profiling.ProfilingProcessMS;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasTrainingProcess;
+import org.bgi.flexlab.metas.util.DataUtils;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
  * ClassName: SOAPMetas
  * Description: Entry class of the Tool.
  *
- * TODO: 更改重要的 assert 语句。
+ * TODO: 如果是 se 的数据，采用 pe 的参数会发生什么
  *
  * @author heshixu@genomics.cn
  */
@@ -33,6 +35,14 @@ public class SOAPMetas {
 
         // Options initialize
         MetasOptions metasOptions = new MetasOptions(args);
+        try {
+            DataUtils.createFolder(jsc.hadoopConfiguration(), metasOptions.getOutputDirectory());
+        } catch (IOException e) {
+            LOG.error("[SOAPMetas::" + SOAPMetas.class.getName() + "] Fail to create output directory: " +
+                    metasOptions.getOutputDirectory());
+            jsc.close();
+            System.exit(1);
+        }
 
         List<String> alignmentOutputList = null;
 
@@ -58,7 +68,7 @@ public class SOAPMetas {
         //if gc training, no profiling process (standard data)
         if (metasOptions.isGCBiasTrainingMode()){
 
-            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start training GC bias correction model.");
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start training GC bias recalibration model.");
             GCBiasTrainingProcess modelTraining = new GCBiasTrainingProcess(metasOptions);
 
             if (alignmentOutputList == null){
@@ -68,7 +78,7 @@ public class SOAPMetas {
             }
 
 
-            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Comoplete training GC Bias correctiong model, " +
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Comoplete training GC Bias recalibration model, " +
                     "the model file is " + metasOptions.getGcBiasModelOutput() + " . Exit program.");
             jsc.close();
             System.exit(0);

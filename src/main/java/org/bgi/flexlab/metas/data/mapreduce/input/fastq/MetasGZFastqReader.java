@@ -29,7 +29,7 @@ import java.util.ArrayList;
  *  + Change the type of "key" from Text to IntWritable.
  *  + Add readGroupID field.
  *  + The default readGroupID without sampleList file is the file path name(file.getName()).
- *  + Add readGrouID to the value for each record.
+ *  + Add readGroupID to the value for each record.
  *
  */
 
@@ -45,11 +45,17 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 
 	protected int sampleID;
 	protected String readGroupID;
+	protected String smTag;
 
 	// 1 for read1 of paired-end, 2 for read2 of paired-end,
 	// 1 for all reads lacking sample info and /1/2 suffix in name are
 	// single-end: 1 for all.
 	protected int mate;
+
+	private StringBuilder keyStb;
+	private StringBuilder valueStb;
+	private int keyReLen; // Used to confine length of deletion of keyStb.
+	private int valReLen; // Used to confine length of deletion of valueStb.
 
 	//protected int recordCount = 0;
 	//protected long fileLength;
@@ -106,11 +112,13 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 			if (slist != null) {
 				sampleID = slist.getSampleID();
 				readGroupID = slist.getRgID();
+				smTag = slist.getSMTag();
 			} else {
 				LOG.fatal("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Please provide multisample " +
 						"information for " + file.toString() + " . Or the processing may be uncontrollable.");
-				sampleID = fastqMultiSampleList.getSampleCount() + 1;
+				sampleID = fastqMultiSampleList.getSampleCount();
 				readGroupID = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
+				smTag = "NOSMTAG";
 				mate = 1;
 			}
 		} else {
@@ -118,6 +126,7 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 					"information list, or the processing may be uncontrollable.");
 			sampleID = 1;
 			readGroupID = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
+			smTag = "NOSMTAG";
 			mate = 1;
 		}
 
@@ -151,6 +160,13 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 		}
 		getFirstFastqLine();
 		this.pos = start;
+
+		keyStb = new StringBuilder(32).append(sampleID).append('\t');
+		keyReLen = keyStb.length();
+		//mateIndex(1 or 2 or 0)||readGroupID	SMTag||sequence	quality|
+		valueStb = new StringBuilder(256).append(mate).append('|').append('|')
+				.append(readGroupID).append('\t').append(smTag).append('|').append('|');
+		valReLen = valueStb.length();
 	}
 
 	/**
@@ -191,6 +207,9 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 		if (value == null){
 			value = new Text();
 		}
+
+		keyStb.delete(keyReLen, keyStb.length());
+		valueStb.delete(valReLen, valueStb.length());
 
 		int newSize = 0;
 		boolean iswrongFq = false;
@@ -237,32 +256,33 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 			if (!iswrongFq) {
 				int index = st[0].lastIndexOf("/");
 				if (index < 0) {
-					String[] splitTmp = StringUtils.split(st[0], " ");
+					String[] splitTmp = StringUtils.split(st[0], ' ');
 					char ch;
 					if(splitTmp.length == 1) {
 						st[0] = splitTmp[0] + "/" + mate;
 					}else {
 						ch = splitTmp[1].charAt(0);
-						if (ch != '1' && ch != '2')
-							throw new RuntimeException("error fq format at reads:"
-								+ st[0]);
+						if (ch != '1' && ch != '2'){
+							LOG.error("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Wrong format of reads: " +
+									st[0] + " . Please check spaces or other potential errors. Here returns " +
+									splitTmp[0] + "_" + splitTmp[1].substring(1) + "/" + ch);
+						}
 
-						st[0] = splitTmp[0] + "__" + splitTmp[1].substring(1) + "/" + ch;
+						st[0] = splitTmp[0] + "_" + splitTmp[1].substring(1) + "/" + ch;
 					}
 					index = st[0].lastIndexOf("/");
 				}
 				String tempkey = st[0].substring(1, index).trim();
-				char keyIndex = st[0].charAt(index + 1);
-
-				// key: sampleID#readName. example: <Text>
-				// value: mateIndex(1 or 2)##sampleID	pos	filelength##readGroupID##sequence	quality
-				//key.set(sampleID + "\t" + tempkey);
-				//value.set(keyIndex + "||" + sampleID + "\t" + pos + "\t" + fileLength + "||" + readGroupID + "||" + st[1] + "\t" + st[3]);
+				keyStb.append(tempkey);
+				//char keyIndex = st[0].charAt(index + 1);
+				valueStb.setCharAt(0, st[0].charAt(index + 1));
 
 				// new key: sampleID	readName
-				// new value: mateIndex(1 or 2 or 0)||readGroupID||sequence	quality||sampleID	readName
-				key.set(sampleID + "\t" + tempkey);
-				value.set(keyIndex + "||" + readGroupID + "||" + st[1] + "\t" + st[3] + "||" + sampleID + "\t" + tempkey);
+				// new value: mateIndex(1 or 2)||readGroupID	SMTag||sequence	quality||sampleID	readName
+				//key.set(sampleID + "\t" + tempkey);
+				key.set(keyStb.toString());
+				value.set(valueStb.append(st[1]).append('\t').append(st[3]).append('|').append('|')
+						.append(sampleID).append('\t').append(tempkey).toString());
 
 				//LOG.trace("[SOAPMetas::" + MetasGZFastqReader.class.getName() + "] Reader returned record: " +
 				//		"sampleID: " + sampleID + " readName: " + tempkey + " index: " + keyIndex +

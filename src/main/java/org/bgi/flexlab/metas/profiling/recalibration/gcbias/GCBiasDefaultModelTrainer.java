@@ -2,6 +2,7 @@ package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.bgi.flexlab.metas.MetasOptions;
 import org.renjin.script.RenjinScriptEngineFactory;
 import org.renjin.sexp.DoubleVector;
 
@@ -17,11 +18,11 @@ import java.util.ArrayList;
  * @author heshixu@genomics.cn
  */
 
-public class GCBiasDefaultModelTrainer extends GCBiasModelTrainerBase {
+public class GCBiasDefaultModelTrainer extends GCBiasModelTrainerBase implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LogManager.getLogger(GCBiasDefaultModelTrainer.class.getName());
-
-    private static final int POINT_CAPACITY = 101;
 
     /**
      * Array stores gc rate of window and reference genome, as well as the normalized reads coverage (counts).
@@ -34,33 +35,55 @@ public class GCBiasDefaultModelTrainer extends GCBiasModelTrainerBase {
     private ArrayList<Double> windowGCLevel;
     private ArrayList<Double> referenceGCLevel;
 
-    private ScriptEngine rEngine;
+    private String nlsOption = "";
+    private String startValue = "p1=0.812093,p2=49.34331,p3=8.886807,p4=6.829778,p5=0.2642576,p6=-0.005291173,p7=3.188492E-5,p8=-2.502158";
+    private int pointCount;
 
-    private String function;
+    //private double[] startCoefficients = new double[8];
 
-    private double[] startCoefficients = new double[8];
+    private boolean outputPoint = false;
+    private String pointPath;
 
-    public GCBiasDefaultModelTrainer(){
+    public GCBiasDefaultModelTrainer(MetasOptions options){
         this.model = new GCBiasDefaultModel();
-        this.normCoverage = new ArrayList<>(POINT_CAPACITY);
-        this.windowGCLevel = new ArrayList<>(POINT_CAPACITY);
-        this.referenceGCLevel = new ArrayList<>(POINT_CAPACITY);
+        this.normCoverage = new ArrayList<>(101);
+        this.windowGCLevel = new ArrayList<>(101);
+        this.referenceGCLevel = new ArrayList<>(101);
 
-        this.rEngine = new RenjinScriptEngineFactory().getScriptEngine();
+        setNLSControl(options.getNlsControl());
+        setStartValue(options.getStartValue());
+        if (options.isOutputPoint()){
+            doOutputPoint();
+            setPointPath(options.getPointPath());
+        }
 
-        //default function refers to <https://doi.org/10.1371/journal.pone.0165015>
-        this.function = "para1*exp(-0.5*(readGC-para2/para3)^2)+para4+para5*readGC" +
-                "+para6*readGC^2+para7*readGC^3+para8*log(genomeGC)";
-        this.model.setFunction(this.function);
-
-        this.setModelStartCoefficients(new double[]{0.812093, 49.34331, 8.886807,
-                6.829778, 0.2642576, -0.005291173, 0.00003188492, -2.502158});
+        //this.setModelStartCoefficients(new double[]{0.812093, 49.34331, 8.886807,
+        //        6.829778, 0.2642576, -0.005291173, 0.00003188492, -2.502158});
     }
 
-    public void setPointValue(double cov, double windowGC, double refGC){
+    public void addPointValue(double cov, double windowGC, double refGC){
         this.normCoverage.add(cov);
         this.windowGCLevel.add(windowGC);
         this.referenceGCLevel.add(refGC);
+        this.pointCount++;
+    }
+
+    private void setNLSControl(String controlList){
+        ((GCBiasDefaultModel) this.model).setNlsControlList(controlList);
+        this.nlsOption = controlList;
+    }
+
+    private void setStartValue(String startValue){
+        ((GCBiasDefaultModel) this.model).setStartValue(startValue);
+        this.startValue = startValue;
+    }
+
+    private void doOutputPoint(){
+        this.outputPoint = true;
+    }
+
+    private void setPointPath(String filePath){
+        this.pointPath = filePath;
     }
 
     /**
@@ -73,20 +96,21 @@ public class GCBiasDefaultModelTrainer extends GCBiasModelTrainerBase {
         return;
     }
 
-    private void setModelStartCoefficients(double[] coes){
-        //Default start value is from the referred article which is the same as default model's.
-        assert coes.length == 8;
-        for (int i=0; i<coes.length; i++){
-            this.startCoefficients[i] = coes[i];
-        }
-    }
+    //private void setModelStartValue(double[] coes){
+    //    //Default start value is from the referred article which is the same as default model's.
+    //    assert coes.length == 8;
+    //    for (int i=0; i<coes.length; i++){
+    //        this.startCoefficients[i] = coes[i];
+    //    }
+    //}
 
-    private String getStartValueListString(){
+    private String getStartValue(){
         //Default start value is from the referred article which is the same as default model's.
         //{0.812093, 49.34331, 8.886807, 6.829778, 0.2642576, -0.005291173, 0.00003188492, -2.502158};
-        return String.format("para1=%g,para2=%g,para3=%g,para4=%g,para5=%g,para6=%g,para7=%g,para8=%g",
-                this.startCoefficients[0],this.startCoefficients[1],this.startCoefficients[2],this.startCoefficients[3],
-                this.startCoefficients[4],this.startCoefficients[5],this.startCoefficients[6],this.startCoefficients[7]);
+        //return String.format("p1=%g,p2=%g,p3=%g,p4=%g,p5=%g,p6=%g,p7=%g,p8=%g",
+        //        this.startCoefficients[0],this.startCoefficients[1],this.startCoefficients[2],this.startCoefficients[3],
+        //        this.startCoefficients[4],this.startCoefficients[5],this.startCoefficients[6],this.startCoefficients[7]);
+        return this.startValue;
     }
 
     /**
@@ -97,41 +121,70 @@ public class GCBiasDefaultModelTrainer extends GCBiasModelTrainerBase {
                 6.829778, 0.2642576, -0.005291173, 0.00003188492, -2.502158};
 
         /*
-        OUTPUT TEST
+        OUTPUT point.
          */
-
-        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(new File("/home/metal/TEST/SOAPMetas_gcPoint"))))) {
-            bw.write("normCoverage\twindowGCLevel\treferenceGCLevel");
-            bw.newLine();
-            for (int i = 0; i < POINT_CAPACITY; i++) {
-                bw.write(this.normCoverage.get(i).toString());
-                bw.write("\t");
-                bw.write(this.windowGCLevel.get(i).toString());
-                bw.write("\t");
-                bw.write(this.referenceGCLevel.get(i).toString());
+        if (this.outputPoint) {
+            try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(new File(this.pointPath))))) {
+                bw.write("normCoverage\twindowGCLevel\treferenceGCLevel");
                 bw.newLine();
+                for (int i = 0; i < this.pointCount; i++) {
+                    bw.write(this.normCoverage.get(i).toString());
+                    bw.write('\t');
+                    bw.write(this.windowGCLevel.get(i).toString());
+                    bw.write('\t');
+                    bw.write(this.referenceGCLevel.get(i).toString());
+                    bw.newLine();
+                }
+                bw.flush();
+            } catch (FileNotFoundException e){
+                LOG.error("[SOAPMetas::" + GCBiasDefaultModelTrainer.class.getName() + "] Can't find point " +
+                        "output file: " + this.pointPath + " . " + e.toString());
+            } catch (IOException e) {
+                LOG.error("[SOAPMetas::" + GCBiasDefaultModelTrainer.class.getName() + "] Fail to output " +
+                        "point matrix. " + e.toString());
             }
-            bw.flush();
-        } catch (IOException e){
-            e.printStackTrace();
+        } else {
+
+            ScriptEngine rEngine = new RenjinScriptEngineFactory().getScriptEngine();
+            //System.out.println("startValue = list(" + this.getStartValue() + ")");
+            //System.out.println("controler = list(" + this.nlsOption + ")");
+            //System.out.println("trained = nls(coverage ~ " + this.model.getFunction() + ", data = GC, start = startValue, control = controler)");
+            try {
+                rEngine.put("normCov", convertArray(this.normCoverage));
+                rEngine.put("windowGC", convertArray(this.windowGCLevel));
+                rEngine.put("referenceGC", convertArray(this.referenceGCLevel));
+                rEngine.eval("GC = data.frame(coverage=normCov, readGC=windowGC, genomeGC=referenceGC)");
+                rEngine.eval("startValue = list(" + this.getStartValue() + ")");
+                rEngine.eval("controler = list(" + this.nlsOption + ")");
+                rEngine.eval("trained = nls(coverage ~ "+ this.model.getFunction() +", data = GC, start = startValue, control = controler)");
+                DoubleVector trained = (DoubleVector) rEngine.eval("unname(coef(trained))");
+
+                int size = trained.length();
+                for (int i=0; i<size; i++){
+                    trainedCoefficients[i] = trained.getElementAsDouble(i);
+                }
+            } catch (ScriptException e) {
+                LOG.error("[SOAPMetas::" + GCBiasDefaultModelTrainer.class.getName() + "] Model Trainer engine works abnormally. " +
+                        e.toString());
+            } catch (IndexOutOfBoundsException e){
+                LOG.error("[SOAPMetas::" + GCBiasDefaultModelTrainer.class.getName() + "] Trained coefficients counts more than " +
+                        + trainedCoefficients.length + " . Please check model function." + e.toString());
+            }
+            rEngine = null;
+        }
+        this.model.setCoefficients(trainedCoefficients);
+    }
+
+    private double[] convertArray(ArrayList<Double> arrayList){
+
+        int size = arrayList.size();
+        double[] out = new double[size];
+
+        for (int i=0; i<size; i++){
+            out[i] = arrayList.get(i);
         }
 
-        //try {
-        //    this.rEngine.put("normCov", this.normCoverage);
-        //    this.rEngine.put("windowGC", this.windowGCLevel);
-        //    this.rEngine.put("referenceGC", this.referenceGCLevel);
-        //    this.rEngine.eval("GC = data.frame(cov=normCov, readGC=windowGC, genomeGC=referenceGC)");
-        //    this.rEngine.eval("startValue = c(" + this.getStartValueListString() + ")");
-        //    this.rEngine.eval("trained = nls(cov ~ "+ this.function +", data = GC, start = startValue)");
-        //    DoubleVector trained = (DoubleVector) this.rEngine.eval("unname(coef(trained))");
-        //    for (int i=0; i<trained.length(); i++){
-        //        trainedCoefficients[i] = trained.getElementAsDouble(i);
-        //    }
-        //} catch (ScriptException e){
-        //    LOG.error("[SOAPMetas::" + GCBiasDefaultModelTrainer.class.getName() + "] Model Trainer " +
-        //            "engine works abnormally. " + e.toString());
-        //}
-        this.model.setCoefficients(trainedCoefficients);
+        return out;
     }
 }

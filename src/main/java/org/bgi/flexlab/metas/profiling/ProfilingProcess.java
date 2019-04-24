@@ -2,7 +2,6 @@ package org.bgi.flexlab.metas.profiling;
 
 import htsjdk.samtools.SAMRecord;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
@@ -12,9 +11,6 @@ import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 
-import java.util.List;
-
-
 /**
  * ClassName: ProfilingProcess
  * Description: Control the profiling process.
@@ -22,6 +18,7 @@ import java.util.List;
  * @author heshixu@genomics.cn
  */
 
+@Deprecated
 public class ProfilingProcess {
 
     private MetasOptions metasOpt;
@@ -126,17 +123,12 @@ public class ProfilingProcess {
      * @return ProfilingMethodBase New profiling pipeline instance of selected software.
      */
     public ProfilingMethodBase getProfilingMethod(){
-        try {
-            if(this.pipeline.equals("metaphlan")){
-                return new COMGProfilingMethod(this.metasOpt);
-            } else if (this.pipeline.equals("comg")){
-                return new METAPHLANProfilingMethod(this.metasOpt);
-            }
-        } catch (final NullPointerException e){
-            e.printStackTrace();
-        } catch (final RuntimeException e){
-            e.printStackTrace();
+        if(this.pipeline.equals("metaphlan")){
+            return new COMGProfilingMethod(this.metasOpt);
+        } else if (this.pipeline.equals("comg")){
+            return new METAPHLANProfilingMethod(this.metasOpt);
+        } else {
+            return null;
         }
-        return null;
     }
 }

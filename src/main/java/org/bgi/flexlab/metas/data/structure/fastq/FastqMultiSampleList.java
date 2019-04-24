@@ -36,43 +36,43 @@ public class FastqMultiSampleList implements Serializable {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
 
 		if (recordSample){
-			sampleList = new ArrayList<>();
+			sampleList = new ArrayList<>(20);
 		}
 		if (recordPath){
-			filePath = new StringBuilder();
+			filePath = new StringBuilder(64);
 		}
 		
 		String line;
+		String[] items;
 		while((line = reader.readLine()) != null) {
-			//LOG.trace("[SOAPMetas::" + FastqMultiSampleList.class.getName() + "] Sample line: " + line);
 			if(line.length() == 0) {
 				continue;
 			}
 
-			String[] items = StringUtils.split(line, '\t');
+			items = StringUtils.split(line, '\t');
 
 			FastqSampleList slist;
 
-			if (items.length == 3){
+			if (items.length == 4){
 				if (isLocal){
-					if (!items[1].startsWith("file://")){
-						items[1] = "file://" + items[1];
+					if (!items[2].startsWith("file://")){
+						items[2] = "file://" + items[2];
 					}
+					if (!items[3].startsWith("file://")){
+						items[3] = "file://" + items[3];
+					}
+				}
+				slist = new FastqSampleList();
+				slist.setSampleList(items[0], items[1], items[2], items[3], sampleCount);
+				this.sampleCount++;
+			} else if (items.length == 3){
+				if(isLocal){
 					if (!items[2].startsWith("file://")){
 						items[2] = "file://" + items[2];
 					}
 				}
 				slist = new FastqSampleList();
-				slist.setSampleList(items[0], items[1], items[2], sampleCount);
-				this.sampleCount++;
-			} else if (items.length == 2){
-				if(isLocal){
-					if (!items[1].startsWith("file://")){
-						items[1] = "file://" + items[1];
-					}
-				}
-				slist = new FastqSampleList();
-				slist.setSampleList(items[0], items[1], null, sampleCount);
+				slist.setSampleList(items[0], items[1], items[2], null, sampleCount);
 				this.sampleCount++;
 			} else {
 				slist = null;
@@ -89,10 +89,6 @@ public class FastqMultiSampleList implements Serializable {
 				LOG.trace("[SOAPMetas::" + FastqMultiSampleList.class.getName() + "] Save sample: " + slist.toString());
 			}
 
-		}
-
-		if (recordPath) {
-			filePath.trimToSize();
 		}
 
 		if (recordSample) {

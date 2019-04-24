@@ -79,10 +79,10 @@ public class AlignmentMethodBase implements Serializable {
      * @param outputSamFileName The output where the final results will be stored
      * @return An ArrayList containing all the file locations
      */
-    public ArrayList<String> copyResults(String outputSamFileName, String readGroupID) {
+    public ArrayList<String> copyResults(String outputSamFileName, String readGroupID, String smTag) {
         ArrayList<String> returnedValues = new ArrayList<>();
 
-        this.LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
+        LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
                 this.appName + " Copy output sam files to output directory.");
 
         try {
@@ -95,18 +95,20 @@ public class AlignmentMethodBase implements Serializable {
                     new Path(this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName)
             );
         } catch (IOException e) {
-            e.printStackTrace();
-            this.LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + e.toString());
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + e.toString());
         }
 
         // Delete the old results file
         File localSam = new File(this.toolWrapper.getOutputFile());
-        localSam.delete();
+        if (!localSam.delete()){
+            LOG.warn("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Fail to delete temp SAM output file: "
+                    + this.toolWrapper.getOutputFile());
+        }
 
         if (readGroupID != null) {
-            returnedValues.add(readGroupID + "\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+            returnedValues.add(readGroupID + "\t" + smTag + "\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
         } else {
-            returnedValues.add("NORGID\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+            returnedValues.add("NORGID\tNOSMTAG\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
         }
 
         return returnedValues;
@@ -133,6 +135,6 @@ public class AlignmentMethodBase implements Serializable {
         this.alignReads(outputSamFileName, fastqFileName1, fastqFileName2);
 
         // Copy the result to HDFS
-        return this.copyResults(outputSamFileName, "NORGID");
+        return this.copyResults(outputSamFileName, "NORGID", "NOSMTAG");
     }
 }

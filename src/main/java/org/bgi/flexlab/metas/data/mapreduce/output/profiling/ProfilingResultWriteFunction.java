@@ -44,7 +44,9 @@ public class ProfilingResultWriteFunction implements Serializable,
                                  Iterator<Tuple2<String, ProfilingResultRecord>> tuple2Iterator) {
 
         String sampleID;
-        String readGroupID;
+        String rgID;
+        String smTag;
+        String readGroup;
         Tuple2<String, ProfilingResultRecord> firstTuple;
 
         LOG.trace("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current Partition index: " + index);
@@ -52,7 +54,8 @@ public class ProfilingResultWriteFunction implements Serializable,
         if (tuple2Iterator.hasNext()){
             firstTuple = tuple2Iterator.next();
             sampleID = firstTuple._1;
-            readGroupID = firstTuple._2.getReadGroupID();
+            rgID = firstTuple._2.getRgID();
+            smTag = firstTuple._2.getSmTag();
         } else {
             LOG.trace("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Empty partition index: " + index);
             return new ArrayList<String>(0).iterator();
@@ -63,12 +66,12 @@ public class ProfilingResultWriteFunction implements Serializable,
         String outputProfilingFile;
 
         if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.PROFILE)) {
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-" + readGroupID + ".abundance";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-RG_" + rgID + "-SM_" + smTag + ".abundance";
         } else if(this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-" + readGroupID + ".abundance.evaluation";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-RG_" + rgID + "-SM_" + smTag + ".abundance.evaluation";
         } else {
             LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Profiling Analysis Mode has wrong value");
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-" + readGroupID + ".abundance";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-RG_" + rgID + "-SM_" + smTag + ".abundance";
         }
 
         outputPaths.add(outputProfilingFile);
@@ -84,47 +87,47 @@ public class ProfilingResultWriteFunction implements Serializable,
 
             if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.PROFILE)) {
 
-                bw.write("cluster name(marker/species),fragment number,corrected frag num,relative abundance");
+                bw.write("cluster name(marker/species)|\tfragment number|\trecalibrated frag num|\trelative abundance");
                 bw.newLine();
-                bw.write(outputFormatProfile(firstTuple));
+                bw.write(outputFormatProfile(sampleID, firstTuple._2));
                 bw.newLine();
 
                 while (tuple2Iterator.hasNext()) {
                     newTuple = tuple2Iterator.next();
 
-                    if (!newTuple._2.getReadGroupID().equals(readGroupID)) {
-                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current " +
-                                "ReadGroup: " + readGroupID + " . Omit wrong partitioned record of RG-" +
-                                newTuple._2.getReadGroupID() + ": " + newTuple._2.toString());
+                    if (!newTuple._2.getSmTag().equals(smTag)) {
+                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current RG:" + rgID + " SM:" + smTag +
+                                " . Omit wrong partitioned record of SM:" + newTuple._2.getSmTag() +
+                                " : " + newTuple._2.toString());
                         continue;
                     }
 
-                    bw.write(outputFormatProfile(newTuple));
+                    bw.write(outputFormatProfile(sampleID, newTuple._2));
                     bw.newLine();
                 }
 
             } else if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
 
-                bw.write("cluster name(marker/species),fragment number,corrected frag num,relative abundance,read Name List");
+                bw.write("cluster name(marker/species)|\tfragment number|\trecalibrated frag num|\trelative abundance|\tread Name List");
                 bw.newLine();
-                bw.write(outputFormatEvaluation(firstTuple));
+                bw.write(outputFormatEvaluation(sampleID, firstTuple._2));
                 bw.newLine();
 
                 while (tuple2Iterator.hasNext()) {
                     newTuple = tuple2Iterator.next();
-                    if (!newTuple._2.getReadGroupID().equals(readGroupID)) {
-                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current " +
-                                "ReadGroup: " + readGroupID + " . Omit wrong partitioned record of RG-" +
-                                newTuple._2.getReadGroupID() + ": " + newTuple._2.toString());
+                    if (!newTuple._2.getSmTag().equals(smTag)) {
+                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current RG:" + rgID + " SM:" + smTag +
+                                " . Omit wrong partitioned record of SM:" + newTuple._2.getSmTag() +
+                                " : " + newTuple._2.toString());
                         continue;
                     }
-                    bw.write(outputFormatEvaluation(newTuple));
+                    bw.write(outputFormatEvaluation(sampleID, newTuple._2));
                     bw.newLine();
                 }
 
             } else {
                 LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Profiling Analysis Mode has wrong value.");
-                bw.write("cluster name(marker/species),fragment number,corrected frag num,relative abundance");
+                bw.write("cluster name(marker/species),fragment number, recalibrated frag num,relative abundance");
                 bw.newLine();
                 bw.write("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Analysis mode wrong, no output");
                 bw.newLine();
@@ -146,18 +149,20 @@ public class ProfilingResultWriteFunction implements Serializable,
         return outputPaths.iterator();
     }
 
-    private String outputFormatProfile(Tuple2<String, ProfilingResultRecord> resultTuple){
-        StringBuilder builder = new StringBuilder(resultTuple._2.getClusterName());
-        return builder.append(",").append(resultTuple._2.getRawReadCount()).append(",")
-                .append(resultTuple._2.getCorrectedReadCount()).append(",")
-                .append(resultTuple._2.getAbundance()/this.totalAbundanceMap.get(resultTuple._1)).append(",")
+    private String outputFormatProfile(String sampleID, ProfilingResultRecord result){
+        StringBuilder builder = new StringBuilder(64);
+        return builder.append(result.getClusterName())
+                .append('\t').append(result.getRawReadCount()).append('\t')
+                .append(result.getrecaliReadCount()).append('\t')
+                .append(result.getAbundance()/this.totalAbundanceMap.get(sampleID))
                 .toString();
     }
-    private String outputFormatEvaluation(Tuple2<String, ProfilingResultRecord> resultTuple){
-        StringBuilder builder = new StringBuilder(resultTuple._2.getClusterName());
-        return builder.append(",").append(resultTuple._2.getRawReadCount()).append(",")
-                .append(resultTuple._2.getCorrectedReadCount()).append(",")
-                .append(resultTuple._2.getAbundance()/this.totalAbundanceMap.get(resultTuple._1)).append(",")
-                .append(resultTuple._2.getReadNameString()).toString();
+    private String outputFormatEvaluation(String sampleID, ProfilingResultRecord result){
+        StringBuilder builder = new StringBuilder(256);
+        return builder.append(result.getClusterName())
+                .append('\t').append(result.getRawReadCount()).append('\t')
+                .append(result.getrecaliReadCount()).append('\t')
+                .append(result.getAbundance()/this.totalAbundanceMap.get(sampleID)).append('\t')
+                .append(result.getReadNameString()).toString();
     }
 }

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 /**
  * ClassName: GCBiasDefaultModel
- * Description: The default correction model for GC bias, the model is used only for BGISEQ-500 sequencing
+ * Description: The default recalibration model for GC bias, the model is used only for BGISEQ-500 sequencing
  * platform. New model coefficients should be trained for data from different platform. The default model is
  * created with reference to <https://doi.org/10.1371/journal.pone.0165015> .
  *
@@ -27,49 +27,57 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
 
     private static final Logger LOG = LogManager.getLogger(GCBiasDefaultModel.class.getName());
 
+    private final int COEFFICIENT_NUM = 8;
+
+    private String nlsControlList = "maxiter=50,tol=1e-05,minFactor=1/1024";
+    private String startValue = "p1=0.812093,p2=49.34331,p3=8.886807,p4=6.829778,p5=0.2642576,p6=-0.005291173,p7=3.188492E-5,p8=-2.502158";
+
     public GCBiasDefaultModel(String inputCoefficientsFilePath){
         this.inputCoefficients(inputCoefficientsFilePath);
+        LOG.debug("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Input model: Function : " +
+                this.modelFunction + " | Coefficients: " + this.coefficients.toString());
     }
 
     public GCBiasDefaultModel(){
-        this.modelFunction = "para1*exp(-0.5*(readGC-para2/para3)^2)+para4+para5*readGC" +
-                "+para6*readGC^2+para7*readGC^3+para8*log(genomeGC)";
+        //default function refers to <https://doi.org/10.1371/journal.pone.0165015>
+        this.modelFunction = "I(p1*exp(-0.5*((readGC-p2)/p3)^2)+p4)+I(p5*readGC)+I(p6*(readGC^2))+I(p7*(readGC^3))+I(p8*log(genomeGC))";
+
         this.coefficients = new double[]{0.812093, 49.34331,
                 8.886807, 6.829778, 0.2642576, -0.005291173, 0.00003188492, -2.502158};
     }
 
     /**
-     * Correction for pair-end sequencing data. We use the average rate of read1GC and read2GC as the
+     * Recalibration for pair-end sequencing data. We use the average rate of read1GC and read2GC as the
      * gc content of the fragment. Then the computation is the same as single-end mode.
      *
      * @param read1GCContent GC content (rate) of read 1 (first segment in SAM file).
      * @param read2GCContent GC content of read 2.
      * @param genomeGCContent GC content of reference genome.
-     * @return Double type number, corrected count of read/fragment.
+     * @return Double type number, recalibrated count of read/fragment.
      */
-    public Double correctedCountForPair(Double read1GCContent, Double read2GCContent, Double genomeGCContent){
-        return correctedCountForSingle((read1GCContent+read2GCContent)/2, genomeGCContent);
+    public Double recalibrateForPair(Double read1GCContent, Double read2GCContent, Double genomeGCContent){
+        return recalibrateForSingle((read1GCContent+read2GCContent)/2, genomeGCContent);
     }
 
     /**
-     * Correction for single-end sequencing data. All the coefficients should have been set.
+     * Recalibration for single-end sequencing data. All the coefficients should have been set.
      *
      * @param readGCContent GC content (rate) of read.
      * @param genomeGCContent GC content of reference genome.
-     * @return Double type number, corrected count of read/fragment.
+     * @return Double type number, recalibrated count of read/fragment.
      */
-    public Double correctedCountForSingle(Double readGCContent, Double genomeGCContent){
+    public Double recalibrateForSingle(Double readGCContent, Double genomeGCContent){
         if (genomeGCContent == 0){
-            return 1.0;
+            return 0.0;
         }
 
-        Double cvalue = coefficients[0] * Math.exp(-0.5 * Math.pow((readGCContent-coefficients[1])/coefficients[2], 2) ) +
+        Double cvalue = coefficients[0] * Math.exp(-0.5 * Math.pow((readGCContent-coefficients[1])/coefficients[2], 2)) +
                 coefficients[3] + coefficients[4]*readGCContent + coefficients[5]*Math.pow(readGCContent,2) +
                 coefficients[6]*Math.pow(readGCContent,3) + coefficients[7]*Math.log(genomeGCContent);
 
         LOG.trace("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Input readGCContent: " +
                 readGCContent.toString() + " | Input genomeGCContent: " + genomeGCContent.toString() +
-                " | Corrected value: " + cvalue.toString());
+                " | Recalibrated value: " + cvalue.toString());
 
         return cvalue;
     }
@@ -85,21 +93,27 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
             jsonWriter.setIndent("\t");
             jsonWriter.beginObject();
 
+            // Write function to json.
             jsonWriter.name("function").value(this.modelFunction);
-            jsonWriter.name("coefficients");
 
+            // Write coefficients to json.
+            jsonWriter.name("coefficients");
             jsonWriter.beginArray();
             for (double value : this.coefficients) {
                 jsonWriter.value(value);
             }
             jsonWriter.endArray();
 
-            jsonWriter.endObject();
+            // Write control arguments to json.
+            jsonWriter.name("control").value(this.nlsControlList);
+            jsonWriter.name("startvalue").value(this.startValue);
 
+
+            jsonWriter.endObject();
             jsonWriter.close();
 
         } catch (IOException e){
-            LOG.warn("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Fail to write coefficients " +
+            LOG.error("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Fail to write coefficients " +
                     "json file: " + outputFilePath + " . " + e.toString());
         }
     }
@@ -123,7 +137,6 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
                         this.modelFunction = jsonReader.nextString();
                         break;
                     }
-
                     case "coefficients":{
                         if (jsonReader.peek() == JsonToken.NULL){
                             throw new JsonParseException("Input coefficients is omitted.");
@@ -158,11 +171,10 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
         }
         reader.endArray();
 
-        doubles.trimToSize();
-
         double[] coe = new double[doubles.size()];
 
-        for (int i=0; i < coe.length; i++){
+        int size = coe.length;
+        for (int i=0; i < size; i++){
             coe[i] = doubles.get(i);
         }
 
@@ -175,13 +187,22 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
      * @param coefficients The concrete value from training result or coefficients file.
      */
     public void setCoefficients(double[] coefficients){
-        if (this.coefficients.length != coefficients.length){
+
+        if (coefficients.length != COEFFICIENT_NUM){
             LOG.error("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Wrong number of input " +
                     "coefficients. Expected: 8. Input: " + coefficients.length + " . Only utilize " +
                     "first eight.");
         }
+
         this.coefficients = coefficients;
         this.setCoefficientsState(true);
     }
 
+    public void setNlsControlList(String nlsControlList) {
+        this.nlsControlList = nlsControlList;
+    }
+
+    public void setStartValue(String startValue){
+        this.startValue = startValue;
+    }
 }

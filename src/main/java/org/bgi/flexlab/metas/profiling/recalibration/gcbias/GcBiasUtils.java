@@ -80,7 +80,7 @@ public class GcBiasUtils {
         final int refLength = refBases.length;
         final int lastWindowStart = refLength - windowSize;
 
-        final CalculateGcState state = new GcBiasUtils().new CalculateGcState();
+        final CalculateGcState state = new GcBiasUtils.CalculateGcState();
 
         for (int i = 1; i < lastWindowStart; ++i) {
             final int windowEnd = i + windowSize;
@@ -96,7 +96,7 @@ public class GcBiasUtils {
     /////////////////////////////////////////////////////////////////////////////
     public static byte [] calculateAllGcs(final byte[] refBases, final int lastWindowStart, final int windowSize) {
 
-        final CalculateGcState state = new GcBiasUtils().new CalculateGcState();
+        final CalculateGcState state = new GcBiasUtils.CalculateGcState();
 
         final int refLength = refBases.length;
         final byte[] gc = new byte[refLength + 1];
@@ -113,7 +113,7 @@ public class GcBiasUtils {
     /////////////////////////////////////////////////////////////////////////////
     // Keeps track of current GC calculation state
     /////////////////////////////////////////////////////////////////////////////
-    class CalculateGcState {
+    private static class CalculateGcState {
         boolean init = true;
         int nCount;
         int gcCount;

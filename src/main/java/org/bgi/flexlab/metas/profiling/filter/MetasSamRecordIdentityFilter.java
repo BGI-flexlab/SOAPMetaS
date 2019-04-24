@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * ClassName: MetasSamRecordIdentityFilter
- * Description: Filter SAM by the identity of mapping result.
+ * Description: Filter SAM by the identity of alignment result.
  *
  * @author heshixu@genomics.cn
  */

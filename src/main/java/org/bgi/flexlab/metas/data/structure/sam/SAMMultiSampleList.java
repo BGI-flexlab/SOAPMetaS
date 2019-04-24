@@ -42,48 +42,46 @@ public class SAMMultiSampleList implements Serializable {
             samPathIDMap = new HashMap<>(100);
         }
         if (recordPath){
-            filePath = new StringBuilder();
+            filePath = new StringBuilder(128);
         }
 
         File file = new File(list);
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 
         String line;
+        String rg;
         while((line = reader.readLine()) != null) {
             LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample line: " + line);
             String[] items = StringUtils.split(line, '\t');
 
-            if (items.length != 2 ) {
+            if (items.length != 3 ) {
                 continue;
             }
 
+            rg = items[0] + "\t" + items[1];
             if (isLocal){
-                if (items[1].startsWith("/")){
-                    items[1] = "file://" + items[1];
+                if (items[2].startsWith("/")){
+                    items[2] = "file://" + items[2];
                 }
             }
 
-            if (!tagSamCount.containsKey(items[0])){
-                tagSamCount.put(items[0], sampleCount);
+            if (!tagSamCount.containsKey(rg)){
+                tagSamCount.put(rg, sampleCount);
                 sampleCount++;
             }
 
             if (recordSample) {
-                samPathIDMap.put(items[1], tagSamCount.get(items[0]));
+                samPathIDMap.put(items[2], tagSamCount.get(rg));
             }
 
             //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample_line info: " +
             //        "RGID: " + items[0] + " || sampleID: " + tagSamCount.get(items[0]) + " || path: " + items[1]);
 
             if (recordPath) {
-                this.filePath.append(items[1]);
+                this.filePath.append(items[2]);
                 this.filePath.append(',');
-                LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Save SAM record file :" + items[1]);
+                LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Save SAM record file: " + items[1]);
             }
-        }
-
-        if (recordPath) {
-            this.filePath.trimToSize();
         }
 
         reader.close();
@@ -91,8 +89,9 @@ public class SAMMultiSampleList implements Serializable {
 
     public int getSampleID(String filePath){
         Iterator<String> keyIter = samPathIDMap.keySet().iterator();
+        String key;
         while (keyIter.hasNext()){
-            String key = keyIter.next();
+            key = keyIter.next();
             if (key.contains(filePath)){
                 return this.samPathIDMap.get(key);
             }

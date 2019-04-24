@@ -25,15 +25,14 @@ import java.util.List;
 
 /**
  * ClassName: AlignmentProcess
- * Description: Control mapping process. The script is based on
+ * Description: Control alignment process. The script is based on
  * com.github.sparkbwa.AlignmentProcess class. All changes are interpreted in comments with
  * "*Changes" label.
- *
- * GNU License.
  *
  * @author heshixu@genomics.cn
  */
 
+@Deprecated
 public class AlignmentProcess {
 
     private static final Log LOG = LogFactory.getLog(AlignmentProcess.class); // The LOG
@@ -105,7 +104,6 @@ public class AlignmentProcess {
             fs.close();
         } catch (IOException e) {
             LOG.error("[SOAPMetas::" + AlignmentProcess.class.getName() + "] " + e.toString());
-            e.printStackTrace();
         }
     }
 
@@ -357,7 +355,7 @@ public class AlignmentProcess {
 
         AlignmentToolWrapper alignmentToolWrapper = getAlignmentTool(this.options.getAlignmentTool());
 
-        // Returned list of mapping results files' paths.
+        // Returned list of alignment results files' paths.
         List<String> returnedValues;
 
         if (this.options.getSequencingMode().equals(SequencingMode.PAIREDEND)) {
@@ -402,7 +400,6 @@ public class AlignmentProcess {
                 outputFinalStream.close();
                 fs.close();
             } catch (IOException e) {
-                e.printStackTrace();
                 LOG.error("[SOAPMetas::" + AlignmentProcess.class.getName() + "] " + e.toString());
             }
         }

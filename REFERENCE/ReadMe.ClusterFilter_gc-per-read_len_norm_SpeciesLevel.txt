@@ -1,6 +1,6 @@
 The enclosed Perl script is provided only for illustration of the methods presented in the publication. 
 
-The script performs filtration of bacterial hits with genomic islands and provides GC- and genome-length corrected  read counts for each reported bacterial hit.
+The script performs filtration of bacterial hits with genomic islands and provides GC- and genome-length recalibrated read counts for each reported bacterial hit.
 The GC normalization is performed based on a regression model created as described in the manuscript.
 The regression coefficients are hard coded in the script on line 340.
 

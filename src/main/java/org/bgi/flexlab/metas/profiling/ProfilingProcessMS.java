@@ -82,8 +82,7 @@ public class ProfilingProcessMS {
             try {
                 DataUtils.createFolder(conf, this.tmpDir);
             } catch (IOException e){
-                LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling temp directory.");
-                e.printStackTrace();
+                LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling temp directory. " + e.toString());
             }
         }
 
@@ -91,10 +90,8 @@ public class ProfilingProcessMS {
         try {
             DataUtils.createFolder(conf, this.outputHdfsDir);
         } catch (IOException e){
-            LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling output directory.");
-            e.printStackTrace();
+            LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling output directory. " + e.toString());
         }
-
         LOG.info("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Profiling process: Temp directory: " + this.tmpDir +
                 " Output Directpry: " + this.outputHdfsDir);
 
@@ -122,10 +119,8 @@ public class ProfilingProcessMS {
 
             bw1.close();
         } catch (FileNotFoundException e){
-            e.printStackTrace();
             LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] MultiSampleFileList not found. " + e.toString());
         } catch (IOException e){
-            e.printStackTrace();
             LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] MultiSampleFileList IO error. " + e.toString());
         }
 
@@ -183,11 +178,11 @@ public class ProfilingProcessMS {
         JavaPairRDD<String, SAMRecord> cleanMetasSamRecordRDD = this.jscontext
                 .newAPIHadoopFile(filePath, MetasSamInputFormat.class, Text.class, SAMRecordWritable.class,
                         this.jscontext.hadoopConfiguration())
-                .filter(tup -> tup._2 != null)
                 .mapToPair(rec -> {
                     //LOG.trace("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Remaining samRecod: " + rec._1.toString());
                     return new Tuple2<>(rec._1.toString(), rec._2.get());
-                });
+                })
+                .filter(tup -> tup._2 != null);
         if (this.doIdentityFiltering){
             cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
         }
@@ -203,12 +198,12 @@ public class ProfilingProcessMS {
         After groupByKey:
          key: sampleID\treadName
          value: Interable<SAMRecord>
-         partition: sampleID + clusterName
+         partition: sampleID + readName
 
         After mapValues && filter:
          key: sampleID\treadName
          value: MetasSamPairRecord
-         partition: sampleID + clusterName
+         partition: sampleID + readName
         */
         JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
                 .groupByKey(sampleIDClusterNamePartitioner)
@@ -223,7 +218,7 @@ public class ProfilingProcessMS {
 
         After runProfiling:
          key: sampleID
-         value: ProfilingResultRecord (Tuple3<raw read count (uncorrected), corrected read count, merged read>)
+         value: ProfilingResultRecord (Tuple3<raw read count (unrecalibrated), recalibrated read count, merged read>)
          partition: sampleID + clusterName
 
         Note: Result Record doesn't contains relative abundance. And the RDD has been partitioned

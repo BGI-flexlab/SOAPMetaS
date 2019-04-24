@@ -22,6 +22,7 @@ public abstract class AlignmentToolWrapper implements Serializable {
     private String alignmentIndexPath;
 
     private String readGroupID;
+    private String smTag;
 
     private String samOutputHdfsDir;
 
@@ -171,6 +172,14 @@ public abstract class AlignmentToolWrapper implements Serializable {
 
     public String getReadGroupID() {
         return readGroupID;
+    }
+
+    public void setSMTag(String smTag) {
+        this.smTag = smTag;
+    }
+
+    public String getSMTag() {
+        return smTag;
     }
 
     /**

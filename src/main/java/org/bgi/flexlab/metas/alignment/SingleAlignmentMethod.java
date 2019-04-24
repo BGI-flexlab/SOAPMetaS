@@ -86,7 +86,6 @@ public class SingleAlignmentMethod extends AlignmentMethodBase implements Serial
             FastqFile1.delete();
 
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
             LOG.error("[SOAPMetas::" + SingleAlignmentMethod.class.getName() + "] "+e.toString());
         }
 

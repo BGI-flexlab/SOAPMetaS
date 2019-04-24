@@ -24,16 +24,11 @@ public final class ProfilingUtils {
 
 
     public String samRecordNameModifier(SAMRecord record){
-        try {
-            if(this.sequencingMode.equals(SequencingMode.SINGLEEND)){
-                return record.getReadName();
-            } else {
-                return record.getReadName().replaceFirst("/[12]$", "");
-            }
-        } catch (final NullPointerException e){
-            e.printStackTrace();
+        if(this.sequencingMode.equals(SequencingMode.SINGLEEND)){
+            return record.getReadName();
+        } else {
+            return record.getReadName().replaceFirst("/[12]$", "");
         }
-        return null;
     }
 
     public Double computeRelativeAbundance(Double abundance, Double totalAbundance){
@@ -63,6 +58,8 @@ public final class ProfilingUtils {
 
         final int adjustment = (secondEnd5PrimePosition >= firstEnd5PrimePosition) ? +1
                 : -1;
+        //System.out.println("first postion: " + firstEnd5PrimePosition + " || second position: " +
+        //        secondEnd5PrimePosition + " || insertsize: " + (secondEnd5PrimePosition - firstEnd5PrimePosition));
         return secondEnd5PrimePosition - firstEnd5PrimePosition + adjustment;
     }
 

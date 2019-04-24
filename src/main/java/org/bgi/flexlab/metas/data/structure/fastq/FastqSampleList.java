@@ -17,6 +17,7 @@ public class FastqSampleList implements Serializable {
 	private int sampleID = 0;
 
 	private String rgID;
+	private String smTag;
 
 	private String fastq1;
 	private String fastq2;
@@ -24,12 +25,14 @@ public class FastqSampleList implements Serializable {
 	
 	public FastqSampleList() {
 		rgID = "OMISSION";
+		smTag = "OMISSION";
 		fastq1 = null;
 		fastq2 = null;
 	}
 	
-	public void setSampleList (String rgID, String fastq1, String fastq2, int sampleID) {
+	public void setSampleList (String rgID, String smTag, String fastq1, String fastq2, int sampleID) {
 		this.rgID = rgID;
+		this.smTag = smTag;
 		this.fastq1 = fastq1;
 		this.fastq2 = fastq2;
 		this.sampleID = sampleID;
@@ -77,13 +80,12 @@ public class FastqSampleList implements Serializable {
 		return fastq2;
 	}
 
-
-	public void setRgID(String rgID) {
-		this.rgID = rgID;
-	}
-
 	public String getRgID() {
 		return rgID;
+	}
+
+	public String getSMTag() {
+		return smTag;
 	}
 
 	public String getFastqPathString(){
@@ -95,6 +97,6 @@ public class FastqSampleList implements Serializable {
 
 	@Override
 	public String toString() {
-		return this.rgID + "::" + this.fastq1 + "::"+ this.fastq2;
+		return "ID:" + this.rgID + "|SM:" + this.smTag + "|" + this.fastq1 + "::"+ this.fastq2;
 	}
 }

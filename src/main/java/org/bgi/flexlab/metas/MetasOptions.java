@@ -7,7 +7,6 @@ import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
-
 /**
  * ClassName: MetasOptions
  * Description:
@@ -47,7 +46,7 @@ public class MetasOptions {
     private int numPartitionEachSample = 10;// Partition number of each sample. The final partition number is partNumEachSample*NumberOfSample
 
     // Recalibration arguments group.
-    private String gcBiasCorrectionModelType = "builtin";
+    private String gcBiasRecaliModelType = "builtin";
     private String gcBiasModelOutput; // training coefficient output
     private String gcBiasModelInput; // model coefficient input
     private boolean gcBiasTrainingMode = false;
@@ -55,8 +54,12 @@ public class MetasOptions {
     private boolean doGCBiasRecalibration = false;
 
     private String gcBiasTrainerRefFasta;
-
     private boolean doInsRecalibration;
+
+    private String nlsControl;
+    private String startValue;
+    private boolean outputPoint = false;
+    private String pointPath;
 
     // Profiling process arguments group.
     private String  profilingPipeline = "comg";
@@ -75,6 +78,7 @@ public class MetasOptions {
     private boolean doAlignment = true;
     private boolean doProfiling = true;
 
+    private String outputDirectory;
 
     //private String optionsAbbr = "\t\t[other options] --seqmod <pe|se> [--anamod <name>] [--pipemod <name>] [--analev <name>]\n" +
     //        "\t\t[-e/--extra-arg <\"AlignmentTool arguments\">] [--min-identity <float>] [--insert <int>]\n" +
@@ -144,18 +148,18 @@ public class MetasOptions {
         Option multiFqSampleListOpt = new Option("i", "multi-sample-list", true,
                 "Input file of multi sample fastq path list, one line per sample. The option is " +
                         "exclusive to \"-s\". File format(tab delimited):\n" +
-                        "\t\tReadGroupID read1_path read2_path (header line not included)\n" +
-                        "\t\tERR0000001 /path/to/read_1.fq [/path/to/read_2.fq]\n" +
+                        "\t\tReadGroupID Sample(SMTag) read1_path read2_path (header line not included)\n" +
+                        "\t\tERR0000001 HG00001 /path/to/read_1.fq [/path/to/read_2.fq]\n" +
                         "\t\t...");
         multiFqSampleListOpt.setArgName("FILE");
         //multiFqSampleListOpt.setRequired(true);
         Option multiSamSampleListOpt = new Option("s", "multi-sam-list", true,
                 "Input file of multi sample SAM path list, one sample could be splited into " +
                         "multi lines (with same ReadGroupID). the option is exclusive to \"-i\". File format (tab delimited):\n" +
-                        "\t\tReadGroupID sam_path  (header line not included)\n" +
-                        "\t\tERR0000001 /path/to/rg1_part1.sam\n" +
-                        "\t\tERR0000001 /path/to/rg1_part2.sam\n" +
-                        "\t\tERR0000002 /path/to/rg2_part1.sam\n" +
+                        "\t\tReadGroupID sample(SMTag) sam_path (header line not included)\n" +
+                        "\t\tERR0000001 HG00001 /path/to/rg1_part1.sam\n" +
+                        "\t\tERR0000001 HG00001 /path/to/rg1_part2.sam\n" +
+                        "\t\tERR0000002 HG00001 /path/to/rg2_part1.sam\n" +
                         "\t\t...");
         multiSamSampleListOpt.setArgName("FILE");
         inputSampleGroup.addOption(multiFqSampleListOpt).addOption(multiSamSampleListOpt).setRequired(true);
@@ -181,7 +185,7 @@ public class MetasOptions {
          */
         this.options.addOption(null, "gc-cali", false,
                 "Switch for GC bias recalibration in profiling process. Recalibration will " +
-                        "be done if set, or the corrected read number in profiling result will be equal " +
+                        "be done if set, or the recalibrated read number in profiling result will be equal " +
                         "to raw read number. Note that \"--spe-gc\" (species genome gc information) must be set.");
         // Species genome GC table
         Option speciesGC = new Option("g", "spe-gc", true,
@@ -193,19 +197,19 @@ public class MetasOptions {
 
         // Species genome sequence fastq
         Option speciesGenome = new Option(null, "spe-fa", true,
-                "Genome sequence of reference species used in training process of GC bias correction model. " +
+                "Genome sequence of reference species used in training process of GC bias recalibration model. " +
                         "The file is necessary merely for training process, and is the exact ref used in alignment process.");
         speciesGenome.setArgName("FILE");
         this.options.addOption(speciesGenome);
 
         this.options.addOption(null, "gc-model-type", true,
-                "Statistical model used for GC bias correction. Now merely support builtin model.");
+                "Statistical model used for GC bias recalibration. Now merely support builtin model.");
         this.options.addOption(null, "gc-model-train", false,
                 "Switch for gc training process. The process will run for training if set," +
                         "and this means no profiling process.");
 
         Option gcTrainOut = new Option(null, "gc-train-out", true,
-                "Output json format file of the training result of GC bias correction model." +
+                "Output json format file of the training result of GC bias recalibration model." +
                         "We use com.google.gson.stream.JsonWriter for file writing.");
         gcTrainOut.setArgName("FILE");
         this.options.addOption(gcTrainOut);
@@ -222,7 +226,7 @@ public class MetasOptions {
         //scanWindowSize.setType(Integer.TYPE);
         this.options.addOption(scanWindowSize);
 
-        this.options.addOption(null, "ins-cali", false,
+        this.options.addOption(null, "ins-cali-train", false,
                 "Switch for insert-size recalibration in profiling process. If set, a Gaussian curve " +
                         "will be used to fit the insert-size distribution of sample data, and we will use " +
                         "the 2-sigma range for insert-size filter. Note: Insert size is exactly the term in " +
@@ -259,14 +263,15 @@ public class MetasOptions {
 
         Option analysisMode = new Option(null, "ana-mode", true,
                 "Analysis mode for profiling.\n" +
-                        "\t\tprofile: basic mode with fragment number(also corrected) and relative abundance.\n" +
+                        "\t\tprofile: basic mode with fragment number(also recalibrated) and relative abundance.\n" +
                         "\t\tevaluation: name list of reads mapped to each cluster.");
         analysisMode.setArgName("MODE");
         this.options.addOption(analysisMode);
 
         Option analysisLevel = new Option(null, "ana-lev", true,
                 "Output level of profiling. Options: species, markers. \"species\" level means the " +
-                        "result is profiling of species. \"markers\" means profiling of marker gene (genes of reference).");
+                        "result is profiling of species. \"markers\" means profiling of marker gene (genes of reference)." +
+                        " Default: species");
         analysisLevel.setArgName("MODE");
         this.options.addOption(analysisLevel);
 
@@ -312,17 +317,16 @@ public class MetasOptions {
         Processing stage control.
          */
         this.options.addOption(null, "merge-sam-sample", false,
-                "*(Not supported in current version) Switch argument. SAM file generated by alignment " +
+                "*(Not supported in current version) Switch option. SAM file generated by alignment " +
                         "tool will be merged by sample if set. Note that the process may slow down with " +
                         "this arg. Note: Merging will slow down the whole process.");
 
         this.options.addOption(null, "skip-alignment", false,
-                "Switch argument. If set, the alignment process will be skipped, and users must " +
+                "Switch option. If set, the alignment process will be skipped, and users must " +
                         "provide formatted SAM sample list (argument \"-s\").");
         this.options.addOption(null, "skip-profiling", false,
-                "Switch argument. If set, the profiling process will be skipped, the tools will run " +
+                "Switch option. If set, the profiling process will be skipped, the tools will run " +
                         "as an Spark-version of Bowtie2 for multi-sample.");
-
 
         /*
         Supplementary arguments. Not useful in current version.
@@ -334,6 +338,22 @@ public class MetasOptions {
         //this.options.addOption(null, "read-length", true, "Standard read length (theoretical value from sequencing) of the data. Default: 100");
         //this.options.addOption("f", "hdfs", false, "The HDFS is used to perform the input FASTQ reads sort.");
         //this.options.addOption("k", "spark", false, "the Spark engine is used to perform the input FASTQ reads sort.");
+        this.options.addOption(null, "zz-control", true, "Parameters for controling nls " +
+                "estimates. Refer to manual of nls.control in R for more help. This option might be " +
+                "deprecated in future version. Users who want to control nls estimation in detail in RStudio " +
+                "may use \"--zz-output-point\" and \"--zz-point-path\" to output data matrix of Normalized Cov, " +
+                "Window GC (Read GC) and Genome GC. Note: use with \"--gc-model-train\". Default: " +
+                "\"maxiter=50,tol=1e-05,minFactor=1/1024\".");
+        this.options.addOption(null, "zz-start-value", true, "Start values " +
+                "used in NLS estimation. Refer to manual of nls in RStudio for more information. Default: " +
+                "(\"startvalue\" in SOAPMetas_builtinModel.json). Note: use with \"--gc-model-train\".");
+        this.options.addOption(null, "zz-output-point", false, "Switch option. " +
+                "If set, data matrix used in GC Bias model training process will be written into file. And " +
+                "the process will be skipped. Note: use with \"--gc-model-train\".");
+        Option pointPath = new Option(null, "zz-point-path", true, "Path of file to " +
+                "save data matrix used in training process. Note: use with \"--gc-model-train\".");
+        pointPath.setArgName("PATH");
+        this.options.addOption(pointPath);
 
         this.options.addOption("h", "help", false, "Show help information.");
 
@@ -342,14 +362,16 @@ public class MetasOptions {
     private void optionsParse(String[] args){
 
         if (args.length < 1 || args[0].equals("-h") || args[0].equals("--help")){
-            usage();
+            usage("");
             System.exit(0);
         }
-        StringBuilder allArgs = new StringBuilder();
+
+        StringBuilder allArgs = new StringBuilder(8*args.length);
         for (int i=0; i<args.length; i++){
             allArgs.append(args[i]).append(' ');
         }
         LOG.info("[SOAPMetas::" + MetasOptions.class.getName() + "] Received arguments: " + allArgs.toString());
+        allArgs = null;
 
         CommandLineParser parser = new BasicParser();
         CommandLine commandLine;
@@ -358,7 +380,7 @@ public class MetasOptions {
             commandLine = parser.parse(this.options, args, true);
 
             if (commandLine.hasOption('h') || commandLine.hasOption("help")){
-                usage();
+                usage("");
                 System.exit(0);
             }
             /*
@@ -398,14 +420,32 @@ public class MetasOptions {
             this.speciesGenomeGCFilePath = commandLine.getOptionValue('g', null); //Species genome gc
 
             /*
+            IO arguments parsing.
+             */
+            this.referenceMatrixFilePath = commandLine.getOptionValue('r');
+
+            this.outputDirectory = commandLine.getOptionValue('o', null);
+            if (this.outputDirectory == null) {
+                throw new MissingOptionException("Missing output directory option.");
+            }
+            this.profilingOutputHdfsDir = this.outputDirectory + "/profiling/";
+            this.samOutputHdfsDir = this.outputDirectory + "/alignment/";
+
+            if (commandLine.hasOption("tmp-dir")) {
+                String tmpDir = commandLine.getOptionValue("tmp-dir");
+                this.alignmentTmpDir = tmpDir + "/alignment/";
+                this.profilingTmpDir = tmpDir + "/profiling/";
+            }
+
+            /*
             Recalibration process arguments parsing.
              */
             if (commandLine.hasOption("gc-cali")){
                 this.doGCBiasRecalibration = true;
-                this.gcBiasCorrectionModelType = commandLine.getOptionValue("gc-model-type", "builtin");
+                this.gcBiasRecaliModelType = commandLine.getOptionValue("gc-model-type", "builtin");
                 this.gcBiasModelInput = commandLine.getOptionValue("gc-model-file", null);
-                if (!this.gcBiasCorrectionModelType.equals("builtin")){
-                    throw new UnrecognizedOptionException("GC bias correction model not support in current version.");
+                if (!this.gcBiasRecaliModelType.equals("builtin")){
+                    throw new UnrecognizedOptionException("GC bias recalibration model not support in current version.");
                 }
                 if (this.speciesGenomeGCFilePath == null) {
                     throw new MissingArgumentException("Please provide species genome information file.");
@@ -414,15 +454,22 @@ public class MetasOptions {
 
             if (commandLine.hasOption("gc-model-train")){
                 this.gcBiasTrainingMode = true;
-                this.gcBiasModelOutput = commandLine.getOptionValue("gc-train-out", null);
+                this.gcBiasModelOutput = commandLine.getOptionValue("gc-train-out", this.outputDirectory + "/SOAPMetas_modelTrainResult.json");
                 this.scanWindowSize = Integer.parseInt(commandLine.getOptionValue("gc-window-size", "100"));
                 this.gcBiasTrainerRefFasta = commandLine.getOptionValue("spe-fa", null);
                 if (this.gcBiasTrainerRefFasta == null){
                     throw new MissingArgumentException("Please provide species genome sequence fasta file.");
                 }
+                this.nlsControl = commandLine.getOptionValue("zz-control", "maxiter=50,tol=1e-05,minFactor=1/1024");
+                this.startValue = commandLine.getOptionValue("zz-start-value", "p1=0.812093,p2=49.34331,p3=8.886807,p4=6.829778,p5=0.2642576,p6=-0.005291173,p7=3.188492E-5,p8=-2.502158");
+
+                if (commandLine.hasOption("zz-output-point")){
+                    this.outputPoint = true;
+                    this.pointPath = commandLine.getOptionValue("zz-point-path", this.outputDirectory + "/SOAPMetas_nlsPointMatrix");
+                }
             }
 
-            if (commandLine.hasOption("ins-cali")){
+            if (commandLine.hasOption("ins-cali-train")){
                 this.doInsRecalibration = true;
             }
 
@@ -451,23 +498,6 @@ public class MetasOptions {
                         "in \"species\" analysis level.");
             }
 
-
-            /*
-            IO arguments parsing.
-             */
-            this.referenceMatrixFilePath = commandLine.getOptionValue('r');
-            if (commandLine.getOptionValue('o', null) == null) {
-                throw new MissingOptionException("Missing output directory option.");
-            }
-            this.profilingOutputHdfsDir = commandLine.getOptionValue('o') + "/profiling/";
-            this.samOutputHdfsDir = commandLine.getOptionValue('o') + "/alignment/";
-
-            if (commandLine.hasOption("tmp-dir")) {
-                String tmpDir = commandLine.getOptionValue("tmp-dir");
-                this.alignmentTmpDir = tmpDir + "/alignment/";
-                this.profilingTmpDir = tmpDir + "/profiling/";
-            }
-
             /*
             Process controling arguments parsing/
              */
@@ -480,7 +510,7 @@ public class MetasOptions {
                 }
             } else {
                 if (this.multiSampleList == null) {
-                    throw new MissingOptionException("Missing --multi-sample-list option.");
+                    throw new MissingOptionException("Missing -i (--multi-sample-list) option.");
                 }
             }
             if (commandLine.hasOption("skip-profiling")){
@@ -489,36 +519,33 @@ public class MetasOptions {
 
         } catch (UnrecognizedOptionException e) {
             LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] Unrecognized option." + e.toString());
-            e.printStackTrace();
-            this.usage();
+            this.usage(e.toString());
             System.exit(1);
         } catch (MissingOptionException e) {
             LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] Required option missing error." + e.toString());
-            this.usage();
+            this.usage(e.toString());
             System.exit(1);
         } catch (MissingArgumentException e){
             LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] Required argument missing error. " + e.toString());
-            this.usage();
+            this.usage(e.toString());
             System.exit(1);
         } catch (ParseException e){
             LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] Arguments parsing error. Please check input options." + e.toString());
-            e.printStackTrace();
-            this.usage();
+            this.usage(e.toString());
             System.exit(1);
         }
 
     }
 
-    private void usage(){
+    private void usage(String errInfo){
 
         String submit = "spark-submit [spark options] --class org.bgi.flexlab.metas.SOAPMetas SOAPMetas-0.0.1.jar";
         String header = "SOAPMetas for metagenomic data analysis, include multi-sample distributed alignment and gene/species profiling.";
-        String footer = "Author: heshixu@genomics.cn";
+        String footer = "Author: heshixu@genomics.cn\n" + errInfo;
 
         HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.setWidth(100);
         helpFormatter.printHelp(submit, header, this.options, footer, true);
-
     }
 
     public String getReferenceMatrixFilePath(){
@@ -528,6 +555,8 @@ public class MetasOptions {
     public String getSpeciesGenomeGCFilePath() {
         return speciesGenomeGCFilePath;
     }
+
+
 
     /*
     Profiling analysis arguments group.
@@ -613,12 +642,28 @@ public class MetasOptions {
         return this.gcBiasTrainingMode;
     }
 
-    public String getGcBiasCorrectionModelType(){
-        return this.gcBiasCorrectionModelType;
+    public String getGcBiasRecaliModelType(){
+        return this.gcBiasRecaliModelType;
     }
 
     public boolean isDoGcBiasRecalibration(){
         return this.doGCBiasRecalibration;
+    }
+
+    public String getNlsControl() {
+        return nlsControl;
+    }
+
+    public String getStartValue() {
+        return startValue;
+    }
+
+    public boolean isOutputPoint() {
+        return outputPoint;
+    }
+
+    public String getPointPath() {
+        return pointPath;
     }
 
     /*
@@ -706,4 +751,7 @@ public class MetasOptions {
         return this.doProfiling;
     }
 
+    public String getOutputDirectory() {
+        return outputDirectory;
+    }
 }

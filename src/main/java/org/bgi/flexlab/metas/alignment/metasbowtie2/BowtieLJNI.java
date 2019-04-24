@@ -17,7 +17,7 @@ public class BowtieLJNI {
         try{
             NativeUtils.loadLibraryFromJar("/libbowtiel.so");
         } catch (IOException e){
-            e.printStackTrace();
+            ;
         }
     }
 

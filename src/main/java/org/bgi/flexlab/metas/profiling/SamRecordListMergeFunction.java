@@ -35,6 +35,7 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
 
     @Override
     public MetasSamPairRecord call(Iterable<SAMRecord> metasSamRecords) {
+
         if (this.sequencingMode.equals(SequencingMode.PAIREDEND)){
             return pairedListToSamPair(metasSamRecords);
         } else if (this.sequencingMode.equals(SequencingMode.SINGLEEND)){
@@ -47,7 +48,7 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
 
     /**
      * Generator of MetasSamPairRecord for single-end sequencing data, the generated instance will have
-     * only one SAMRecord stored in "record1" field. If one read has multiple mapping, all info about
+     * only one SAMRecord stored in "record1" field. If one read has multiple alignment, all info about
      * the read will be abandoned.
      *
      * @param metasSamRecords Iterator of MetasSamRecords created by groupByKey() operation of RDD.
@@ -69,10 +70,10 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
 
         if (tempRecord != null){
             pairRecord = new MetasSamPairRecord(tempRecord, null);
-            pairRecord.setPaired(false);
+            //pairRecord.setPaired(false);
         }
 
-        LOG.trace("[SOAPMetas::" + SamRecordListMergeFunction.class.getName() + "] Single-end SAMPair: " + pairRecord.toString());
+        //LOG.trace("[SOAPMetas::" + SamRecordListMergeFunction.class.getName() + "] Single-end SAMPair: " + pairRecord.toString());
 
         return pairRecord;
     }
@@ -84,12 +85,12 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
      * + Both reads are unmapped. This kind of pairs will have been filtered out in the first operation of RDD.
      * + One of the paired is unmapped. If the other read is exactly mapped to one reference, the insert size
      *    and "FirstOfPair" flag will be considered.
-     * + One of the paired is unmapped. If the other one is multiple-mapping, return null.
+     * + One of the paired is unmapped. If the other one is multiple-mapped record, return null.
      * + Each one of the pair is exactly mapped to two different references, At species analysis level, the
      *    species origin of the marker will be considered. At markers level, both are treated as the last
      *    two status.
      * + Bath are properly mapped to the same single reference. This is the standard status.
-     * + One is exactly mapped, while the other is multiply mapped. If one of the multiple reference is the
+     * + One is exact alignment, while the other is secondary alignment. If one of the multiple reference is the
      *    same as the exact one, treat them as the proper pair. If none, treated the multiple read as unmapped.
      * + Both are multiply mapped, abandoned.
      *
@@ -102,50 +103,44 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
     private MetasSamPairRecord pairedListToSamPair(Iterable<SAMRecord> metasSamRecords){
         MetasSamPairRecord pairRecord = null;
 
-        boolean exact1 = true;
-        boolean exact2 = true;
+        int count1 = 0;
+        int count2 = 0;
 
         SAMRecord tempRec1 = null;
         SAMRecord tempRec2 = null;
 
         for (SAMRecord record: metasSamRecords){
             if (record.getFirstOfPairFlag()){
-                if (record.isSecondaryAlignment()){
-                    exact1 = false;
-                    continue;
-                }
                 tempRec1 = record;
-                continue;
+                count1++;
             }
 
             if (record.getSecondOfPairFlag()){
-                if (record.isSecondaryAlignment()){
-                    exact2 = false;
-                    continue;
-                }
                 tempRec2 = record;
+                count2++;
             }
         }
 
-        if (exact1 && exact2){
+        if (count1 == 1){
+            if (count2 == 1){
+                pairRecord = new MetasSamPairRecord(tempRec1, tempRec2);
+                pairRecord.setPaired(true);
 
-            pairRecord = new MetasSamPairRecord(tempRec1, tempRec2);
-            pairRecord.setPaired(true);
-
-            if (tempRec1.getReferenceName().equals(tempRec2.getReferenceName())){
-                pairRecord.setProperPaired(true);
+                if (tempRec1.getReferenceName().equals(tempRec2.getReferenceName())) {
+                    pairRecord.setProperPaired(true);
+                }
+            } else {
+                pairRecord = new MetasSamPairRecord(tempRec1, null);
+                //pairRecord.setPaired(false);
             }
-
-        } else if (exact1) {
-            pairRecord = new MetasSamPairRecord(tempRec1, null);
-            pairRecord.setPaired(false);
-
-        } else if (exact2) {
-            pairRecord = new MetasSamPairRecord(tempRec2, null);
-            pairRecord.setPaired(false);
+        } else {
+            if (count2 == 1){
+                pairRecord = new MetasSamPairRecord(tempRec2, null);
+                //pairRecord.setPaired(false);
+            }
         }
 
-        LOG.trace("[SOAPMetas::" + SamRecordListMergeFunction.class.getName() + "] Paired-end SAMPair: " + pairRecord.toString());
+        //LOG.trace("[SOAPMetas::" + SamRecordListMergeFunction.class.getName() + "] Paired-end SAMPair: " + pairRecord.toString());
         return pairRecord;
     }
 }

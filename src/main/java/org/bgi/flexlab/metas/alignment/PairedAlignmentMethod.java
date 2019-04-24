@@ -104,7 +104,6 @@ public class PairedAlignmentMethod extends AlignmentMethodBase implements Serial
             FastqFile2.delete();
 
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
             LOG.error("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] "+e.toString());
         }
 

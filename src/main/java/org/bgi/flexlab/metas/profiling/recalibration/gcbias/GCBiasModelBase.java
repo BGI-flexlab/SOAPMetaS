@@ -8,8 +8,8 @@ import java.io.Serializable;
 
 /**
  * ClassName: GCBiasModelBase
- * Description: The basic abstract class of GC bias correction model. Different model depends on different
- * correction function/method, such as LOWESS regression method or method in https://doi.org/10.1093/nar/gks001.
+ * Description: The basic abstract class of GC bias recalibration model. Different model depends on different
+ * recalitration function/method, such as LOWESS regression method or method in https://doi.org/10.1093/nar/gks001.
  * Pay attention that some classic models for CNV analysis of human genome don't need coefficients training,
  * and application of these models needs more consideration.
  *
@@ -32,23 +32,23 @@ public abstract class GCBiasModelBase implements Serializable {
     protected String modelFunction;
 
     /**
-     * Correction for pair-end sequencing data.
+     * Recalibration for pair-end sequencing data.
      *
      * @param read1GCContent GC content (rate) of read 1 (first segment in SAM file).
      * @param read2GCContent GC content of read 2.
      * @param genomeGCContent GC content of reference genome.
-     * @return Double type number, corrected count of read/fragment.
+     * @return Double type number, recalibrated count of read/fragment.
      */
-    public abstract Double correctedCountForPair(Double read1GCContent, Double read2GCContent, Double genomeGCContent);
+    public abstract Double recalibrateForPair(Double read1GCContent, Double read2GCContent, Double genomeGCContent);
 
     /**
-     * Correction for single-end sequencing data.
+     * Recalibration for single-end sequencing data.
      *
      * @param readGCContent GC content (rate) of read.
      * @param genomeGCContent GC content of reference genome.
-     * @return Double type number, corrected count of read/fragment.
+     * @return Double type number, recalibrated count of read/fragment.
      */
-    public abstract Double correctedCountForSingle(Double readGCContent, Double genomeGCContent);
+    public abstract Double recalibrateForSingle(Double readGCContent, Double genomeGCContent);
 
     /**
      * The method is used to save coefficients to file so that the model could be reused.

@@ -28,14 +28,15 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         ((MetasBowtie) toolWrapper).setTab5Mode();
     }
 
-    private ArrayList<String> runMultiSampleAlignment(String readGroupID, String tab5FileName, String outSamFileName){
+    private ArrayList<String> runMultiSampleAlignment(String readGroupID, String smTag, String tab5FileName, String outSamFileName){
         this.toolWrapper.setInputFile(tab5FileName);
         this.toolWrapper.setOutputFile(this.tmpDir + "/" + outSamFileName);
         this.toolWrapper.setReadGroupID(readGroupID);
+        this.toolWrapper.setSMTag(smTag);
 
         this.toolWrapper.run();
 
-        return this.copyResults(outSamFileName, readGroupID);
+        return this.copyResults(outSamFileName, readGroupID, smTag);
     }
 
     /**
@@ -48,10 +49,6 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
     @Override
     public Iterator<String> call(Integer index, Iterator<Tuple2<String, String>> elementIter) {
 
-        String tab5FileName;
-        String outSamFileName;
-        String readGroupID;
-
         LOG.trace("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Current Partition index: " + index);
 
         if (!elementIter.hasNext()){
@@ -59,14 +56,26 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             return new ArrayList<String>(0).iterator();
         }
 
-        ArrayList<String> returnedValues = new ArrayList<>();
+        ArrayList<String> returnedValues = new ArrayList<>(2);
         Tuple2<String, String> element;
 
-        element = elementIter.next();
-        readGroupID = element._1;
+        String tab5FileName;
+        String outSamFileName;
+        String readGroupID;
+        String smTag;
+        String partRGSM;
 
-        tab5FileName = this.tmpDir + "/" + this.appId + "-RDDPart" + index + "-" + readGroupID + ".tab5";
-        outSamFileName = this.appId + "-RDDPart" + index + "-" + readGroupID + ".sam";
+        element = elementIter.next();
+        partRGSM = element._1;
+
+        String[] temp;
+        temp = StringUtils.split(partRGSM, '\t');
+        readGroupID = temp[0];
+        smTag = temp[1];
+        temp = null;
+
+        tab5FileName = this.tmpDir + "/" + this.appId + "-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".tab5";
+        outSamFileName = this.appId + "-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".sam";
 
         LOG.info("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Writing input file for bowtie2: " + tab5FileName);
 
@@ -86,9 +95,10 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             while (elementIter.hasNext()) {
                 element = elementIter.next();
 
-                if (!element._1.equals(readGroupID)) {
-                    LOG.warn("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] ReadGroup: " + readGroupID + ". Omit wrong partitioned sequence: "
-                            + StringUtils.split(element._2, '\t')[0] + " of group " + element._1);
+                if (!element._1.equals(partRGSM)) {
+                    LOG.warn("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] RG:" + readGroupID +
+                            " SM:" + smTag + ". Omit wrong partitioned sequence in part (" + element._1 + "): "
+                            + StringUtils.split(element._2, '\t')[0]);
                     continue;
                 }
 
@@ -102,7 +112,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             elementIter = null;
 
             // This is where the actual local alignment takes place
-            returnedValues = this.runMultiSampleAlignment(readGroupID, tab5FileName, outSamFileName);
+            returnedValues = this.runMultiSampleAlignment(readGroupID, smTag, tab5FileName, outSamFileName);
 
             // Delete the temporary file, as results have been copied to the specified output directory
             if (tab5File.delete()) {

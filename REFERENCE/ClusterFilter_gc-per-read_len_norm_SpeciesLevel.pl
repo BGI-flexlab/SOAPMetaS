@@ -169,7 +169,7 @@ foreach $key (keys %hits)
     catch($e){print "During initialization, the following error was handled:\n $e"; next;};
 
     #$R->set( 'gr', \@delt ); <------ TOO BUGGY AND SLOW
-    $R->run(q`gr = read.table("temp.txt", sep = "\t", header=FALSE,  check.names=FALSE, stringsAsFactors=FALSE)`);
+    $R->run(q`gr = read.table("temp.txt", sep = '\t', header=FALSE,  check.names=FALSE, stringsAsFactors=FALSE)`);
     $R->set('H0_mu', $mu_H0);
     
     try{$R->run(q`t = t.test(gr,mu=H0_mu,na.action=na.omit)`);}
