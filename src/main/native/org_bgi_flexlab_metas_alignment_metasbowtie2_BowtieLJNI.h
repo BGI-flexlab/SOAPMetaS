@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (I[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI_bowtie_1jni
-  (JNIEnv *, jobject, jint, jobjectArray);
+  (JNIEnv *, jobject, jint, jobjectArray, jstring);
 
 #ifdef __cplusplus
 }

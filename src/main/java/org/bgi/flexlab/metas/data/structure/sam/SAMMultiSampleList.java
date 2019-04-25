@@ -15,11 +15,11 @@ import java.util.Map;
  *
  * Note:
  * 1. multiple sample SAM file list format: (all path must be absolute path)
- *  SampleTag samfilePath1_1
- *  SampleTag samfilePath1_2
- *  SampleTag samfilePath1_3
+ *  ReadGroupID sample(SMTag) samfilePath1_1
+ *  ReadGroupID sample(SMTag) samfilePath1_2
+ *  ReadGroupID sample(SMTag) samfilePath1_3
  *  ...
- *  SampleTag2 samfilePath2
+ *  ReadGroupID2 sample2(SMTag) samfilePath2
  *  ...
  *
  * @author heshixu@genomics.cn
@@ -51,7 +51,7 @@ public class SAMMultiSampleList implements Serializable {
         String line;
         String rg;
         while((line = reader.readLine()) != null) {
-            LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample line: " + line);
+            //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample line: " + line);
             String[] items = StringUtils.split(line, '\t');
 
             if (items.length != 3 ) {
@@ -80,7 +80,7 @@ public class SAMMultiSampleList implements Serializable {
             if (recordPath) {
                 this.filePath.append(items[2]);
                 this.filePath.append(',');
-                LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Save SAM record file: " + items[1]);
+                //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Save SAM record file: " + items[1]);
             }
         }
 

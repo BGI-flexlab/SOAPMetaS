@@ -28,11 +28,12 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         ((MetasBowtie) toolWrapper).setTab5Mode();
     }
 
-    private ArrayList<String> runMultiSampleAlignment(String readGroupID, String smTag, String tab5FileName, String outSamFileName){
+    private ArrayList<String> runMultiSampleAlignment(String readGroupID, String smTag, String tab5FileName, String outSamFileName, String logFile){
         this.toolWrapper.setInputFile(tab5FileName);
         this.toolWrapper.setOutputFile(this.tmpDir + "/" + outSamFileName);
         this.toolWrapper.setReadGroupID(readGroupID);
         this.toolWrapper.setSMTag(smTag);
+        this.toolWrapper.setAlnLog(this.outDir + "/" + logFile);
 
         this.toolWrapper.run();
 
@@ -61,6 +62,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
 
         String tab5FileName;
         String outSamFileName;
+        String logFile;
         String readGroupID;
         String smTag;
         String partRGSM;
@@ -76,6 +78,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
 
         tab5FileName = this.tmpDir + "/" + this.appId + "-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".tab5";
         outSamFileName = this.appId + "-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".sam";
+        logFile = this.appId + "-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + "-alignment.log";
 
         LOG.info("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Writing input file for bowtie2: " + tab5FileName);
 
@@ -112,7 +115,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             elementIter = null;
 
             // This is where the actual local alignment takes place
-            returnedValues = this.runMultiSampleAlignment(readGroupID, smTag, tab5FileName, outSamFileName);
+            returnedValues = this.runMultiSampleAlignment(readGroupID, smTag, tab5FileName, outSamFileName, logFile);
 
             // Delete the temporary file, as results have been copied to the specified output directory
             if (tab5File.delete()) {

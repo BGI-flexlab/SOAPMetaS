@@ -28,6 +28,7 @@ public class AlignmentMethodBase implements Serializable {
     protected String appName;
     protected String appId;
     protected String tmpDir;
+    protected String outDir;
     protected AlignmentToolWrapper toolWrapper;
 
     /**
@@ -46,6 +47,7 @@ public class AlignmentMethodBase implements Serializable {
         this.appName = context.appName();
         this.toolWrapper = toolWrapper;
         this.tmpDir = this.toolWrapper.getTmpDir();
+        this.outDir = this.toolWrapper.getOutputHdfsDir();
 
         this.LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName);
     }

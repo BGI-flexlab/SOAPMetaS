@@ -15,6 +15,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+
+@Deprecated
 public class PairedAlignmentMethod extends AlignmentMethodBase implements Serializable, Function2<Integer, Iterator<Tuple2<String, String>>, Iterator<String>>{
 
     private static final long serialVersionUID = 1L;

@@ -45,6 +45,8 @@ public class MetasOptions {
     private String multiSampleList;
     private int numPartitionEachSample = 10;// Partition number of each sample. The final partition number is partNumEachSample*NumberOfSample
 
+    //private String alignLog;
+
     // Recalibration arguments group.
     private String gcBiasRecaliModelType = "builtin";
     private String gcBiasModelOutput; // training coefficient output
@@ -341,19 +343,23 @@ public class MetasOptions {
         this.options.addOption(null, "zz-control", true, "Parameters for controling nls " +
                 "estimates. Refer to manual of nls.control in R for more help. This option might be " +
                 "deprecated in future version. Users who want to control nls estimation in detail in RStudio " +
-                "may use \"--zz-output-point\" and \"--zz-point-path\" to output data matrix of Normalized Cov, " +
+                "may use \"--zz-opoint\" and \"--zz-point-file\" to output data matrix of Normalized Cov, " +
                 "Window GC (Read GC) and Genome GC. Note: use with \"--gc-model-train\". Default: " +
                 "\"maxiter=50,tol=1e-05,minFactor=1/1024\".");
         this.options.addOption(null, "zz-start-value", true, "Start values " +
                 "used in NLS estimation. Refer to manual of nls in RStudio for more information. Default: " +
                 "(\"startvalue\" in SOAPMetas_builtinModel.json). Note: use with \"--gc-model-train\".");
-        this.options.addOption(null, "zz-output-point", false, "Switch option. " +
+        this.options.addOption(null, "zz-opoint", false, "Switch option. " +
                 "If set, data matrix used in GC Bias model training process will be written into file. And " +
                 "the process will be skipped. Note: use with \"--gc-model-train\".");
-        Option pointPath = new Option(null, "zz-point-path", true, "Path of file to " +
+        Option pointPath = new Option(null, "zz-point-file", true, "Path of file to " +
                 "save data matrix used in training process. Note: use with \"--gc-model-train\".");
-        pointPath.setArgName("PATH");
+        pointPath.setArgName("FILE");
         this.options.addOption(pointPath);
+
+        //Option alnLog = new Option(null, "aln-log-pre", true, "LOG file path prefix for alignment process.");
+        //alnLog.setArgName("FILE");
+        //this.options.addOption(alnLog);
 
         this.options.addOption("h", "help", false, "Show help information.");
 
@@ -437,6 +443,8 @@ public class MetasOptions {
                 this.profilingTmpDir = tmpDir + "/profiling/";
             }
 
+            //this.alignLog = commandLine.getOptionValue("aln-log-pre", this.samOutputHdfsDir + "/SOAPMetas_alignmentLOG");
+
             /*
             Recalibration process arguments parsing.
              */
@@ -463,9 +471,9 @@ public class MetasOptions {
                 this.nlsControl = commandLine.getOptionValue("zz-control", "maxiter=50,tol=1e-05,minFactor=1/1024");
                 this.startValue = commandLine.getOptionValue("zz-start-value", "p1=0.812093,p2=49.34331,p3=8.886807,p4=6.829778,p5=0.2642576,p6=-0.005291173,p7=3.188492E-5,p8=-2.502158");
 
-                if (commandLine.hasOption("zz-output-point")){
+                if (commandLine.hasOption("zz-opoint")){
                     this.outputPoint = true;
-                    this.pointPath = commandLine.getOptionValue("zz-point-path", this.outputDirectory + "/SOAPMetas_nlsPointMatrix");
+                    this.pointPath = commandLine.getOptionValue("zz-point-file", this.outputDirectory + "/SOAPMetas_nlsPointMatrix");
                 }
             }
 

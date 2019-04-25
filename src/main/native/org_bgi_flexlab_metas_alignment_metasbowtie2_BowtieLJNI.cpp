@@ -12,7 +12,7 @@ extern "C" {
     int bowtie(int argc, const char** argv);
 }
 
-JNIEXPORT jint JNICALL Java_org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI_bowtie_1jni (JNIEnv *env, jobject obj, jint argc, jobjectArray argStrArray){
+JNIEXPORT jint JNICALL Java_org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI_bowtie_1jni (JNIEnv *env, jobject obj, jint argc, jobjectArray argStrArray, jstring logFile){
     
     const char** argv;
 
@@ -20,8 +20,18 @@ JNIEXPORT jint JNICALL Java_org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieL
 
     int argsCount = env->GetArrayLength(argStrArray);
 
+    const char* alnLog = env->GetStringUTFChars(logFile, 0);
+
+    streambuf* backup;
+    backup = cerr.rdbuf();
+
+    ofstream logfile;
+    logfile.open(alnLog);
+
+    cerr.rdbuf(logfile.rdbuf());
+
     if ( argsCount != argc ){
-        fprintf(stderr, "[BowtieJNI C++] Arguments ArrayLength (%d) unequal to argc (%d).\n", argsCount, argc);
+        cerr << "[BowtieJNI C++] Arguments ArrayLength (" << argsCount << ") unequal to argc (" << argc << ")." << endl;
         return -1;
     }
 
@@ -34,6 +44,10 @@ JNIEXPORT jint JNICALL Java_org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieL
 
     argv = argvTemp;
 
-    return bowtie(argc, argv);
+    int ret = bowtie(argc, argv);
 
+    cerr.rdbuf(backup);
+    logfile.close();
+
+    return ret;
 }

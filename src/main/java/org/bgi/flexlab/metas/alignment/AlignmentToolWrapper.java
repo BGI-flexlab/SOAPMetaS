@@ -25,8 +25,8 @@ public abstract class AlignmentToolWrapper implements Serializable {
     private String smTag;
 
     private String samOutputHdfsDir;
-
     private String tmpDirectory;
+    protected String alnLog;
 
     private SequencingMode sequencingMode;
 
@@ -82,6 +82,14 @@ public abstract class AlignmentToolWrapper implements Serializable {
      */
     public void setOutputFile(String outputFile) {
         this.outputFile = outputFile;
+    }
+
+    public void setAlnLog(String alnLog) {
+        this.alnLog = alnLog;
+    }
+
+    public String getAlnLog() {
+        return alnLog;
     }
 
     /**

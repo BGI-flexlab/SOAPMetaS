@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 
+@Deprecated
 public class SingleAlignmentMethod extends AlignmentMethodBase implements Serializable, Function2<Integer, Iterator<String>, Iterator<String>> {
 
     private static final long serialVersionUID = 1L;

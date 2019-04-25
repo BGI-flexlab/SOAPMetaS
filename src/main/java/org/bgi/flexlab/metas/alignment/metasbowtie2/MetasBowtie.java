@@ -160,9 +160,9 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
         int returnCode;
 
         if (this.isShortIndex){
-            returnCode = new BowtieSJNI().bowtieJNI(arguments);
+            returnCode = new BowtieSJNI().bowtieJNI(arguments, this.alnLog);
         } else {
-            returnCode = new BowtieLJNI().bowtieJNI(arguments);
+            returnCode = new BowtieLJNI().bowtieJNI(arguments, this.alnLog);
         }
 
         if (returnCode == 0){

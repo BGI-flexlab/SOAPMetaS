@@ -207,31 +207,31 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         SAMRecord samRecord2 = tupleKeyValue._2.getSecondRecord();
 
         if (tupleKeyValue._2.isProperPaired()) {
-            LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Proper paired records. rec1: " +
-                    samRecord1.getReadName() + " || rec2: " + samRecord2.getReadName());
+            //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Proper paired records. rec1: " +
+            //        samRecord1.getReadName() + " || rec2: " + samRecord2.getReadName());
             readCountTupleList.add(this.pairedCountTupleGenerator(sampleID, samRecord1, samRecord2));
         } else if (tupleKeyValue._2.isPaired()){
             if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
                     this.isPairedAtSpeciesLevel(samRecord1, samRecord2)) {
-                LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Proper paired records in Species " +
-                        "level. rec1: " + samRecord1.getReadName() + " || rec2: " + samRecord2.getReadName());
+                //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Proper paired records in Species " +
+                //        "level. rec1: " + samRecord1.getReadName() + " || rec2: " + samRecord2.getReadName());
                 readCountTupleList.add(this.pairedCountTupleGenerator(sampleID, samRecord1, samRecord2));
             } else {
                 if (this.insertSizeFilter.filter(samRecord1)) {
-                    LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Discordant paired records1. " +
-                            samRecord1.getReadName());
+                    //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Discordant paired records1. " +
+                    //        samRecord1.getReadName());
                     readCountTupleList.add(this.singleCountTupleGenerator(sampleID, samRecord1));
                 }
                 if (this.insertSizeFilter.filter(samRecord2)) {
-                    LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Discordant paired records2. " +
-                            samRecord2.getReadName());
+                    //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Discordant paired records2. " +
+                    //        samRecord2.getReadName());
                     readCountTupleList.add(this.singleCountTupleGenerator(sampleID, samRecord2));
                 }
             }
         } else {
             if (this.insertSizeFilter.filter(samRecord1)) {
-                LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Unpaired record in PE mode. " +
-                        samRecord1.getReadName());
+                //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Unpaired record in PE mode. " +
+                //        samRecord1.getReadName());
                 readCountTupleList.add(this.singleCountTupleGenerator(sampleID, samRecord1));
             }
         }
@@ -246,8 +246,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         String sampleID = StringUtils.split(tupleKeyValue._1, '\t')[0];
         SAMRecord samRecord = tupleKeyValue._2.getFirstRecord();
 
-        LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Record in SE mode. " +
-                samRecord.getReadName());
+        //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Record in SE mode. " +
+        //        samRecord.getReadName());
         readCountTupleList.add(this.singleCountTupleGenerator(sampleID, samRecord));
 
         return readCountTupleList.iterator();
@@ -272,8 +272,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
         String geneName = record.getReferenceName();
 
-        LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Count Single Record: " +
-                record.toString() + " || Reference Gene name: " + geneName);
+        //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Count Single Record: " +
+        //        record.toString() + " || Reference Gene name: " + geneName);
 
         if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES)) {
             clusterName = this.referenceInfoMatrix.getGeneSpeciesName(geneName);
@@ -309,8 +309,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
         String geneName = record1.getReferenceName();
 
-        LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Count Paired Record : rec1: " +
-                record1.toString() + " || rec2: " + record2.toString() + " || Reference Gene name: " + geneName);
+        //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Count Paired Record : rec1: " +
+        //        record1.toString() + " || rec2: " + record2.toString() + " || Reference Gene name: " + geneName);
 
 
         if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES)){
