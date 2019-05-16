@@ -49,7 +49,7 @@ public class SAMMultiSampleList implements Serializable {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 
         String line;
-        String rg;
+        String sampleTag;
         while((line = reader.readLine()) != null) {
             //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample line: " + line);
             String[] items = StringUtils.split(line, '\t');
@@ -58,20 +58,20 @@ public class SAMMultiSampleList implements Serializable {
                 continue;
             }
 
-            rg = items[0] + "\t" + items[1];
+            sampleTag = items[1];
             if (isLocal){
                 if (items[2].startsWith("/")){
                     items[2] = "file://" + items[2];
                 }
             }
 
-            if (!tagSamCount.containsKey(rg)){
-                tagSamCount.put(rg, sampleCount);
+            if (!tagSamCount.containsKey(sampleTag)){
+                tagSamCount.put(sampleTag, sampleCount);
                 sampleCount++;
             }
 
             if (recordSample) {
-                samPathIDMap.put(items[2], tagSamCount.get(rg));
+                samPathIDMap.put(items[2], tagSamCount.get(sampleTag));
             }
 
             //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample_line info: " +

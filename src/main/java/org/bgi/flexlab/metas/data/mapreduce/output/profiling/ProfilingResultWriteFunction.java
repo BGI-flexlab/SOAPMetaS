@@ -44,9 +44,7 @@ public class ProfilingResultWriteFunction implements Serializable,
                                  Iterator<Tuple2<String, ProfilingResultRecord>> tuple2Iterator) {
 
         String sampleID;
-        String rgID;
         String smTag;
-        String readGroup;
         Tuple2<String, ProfilingResultRecord> firstTuple;
 
         LOG.trace("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current Partition index: " + index);
@@ -54,7 +52,6 @@ public class ProfilingResultWriteFunction implements Serializable,
         if (tuple2Iterator.hasNext()){
             firstTuple = tuple2Iterator.next();
             sampleID = firstTuple._1;
-            rgID = firstTuple._2.getRgID();
             smTag = firstTuple._2.getSmTag();
         } else {
             LOG.trace("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Empty partition index: " + index);
@@ -66,12 +63,12 @@ public class ProfilingResultWriteFunction implements Serializable,
         String outputProfilingFile;
 
         if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.PROFILE)) {
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-RG_" + rgID + "-SM_" + smTag + ".abundance";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-SAMPLE_" + smTag + ".abundance";
         } else if(this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-RG_" + rgID + "-SM_" + smTag + ".abundance.evaluation";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-SAMPLE_" + smTag + ".abundance.evaluation";
         } else {
             LOG.error("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Profiling Analysis Mode has wrong value");
-            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-RG_" + rgID + "-SM_" + smTag + ".abundance";
+            outputProfilingFile = this.outputDir + "/" + this.appID + "-Sample" + sampleID + "-Profiling-SAMPLE_" + smTag + ".abundance";
         }
 
         outputPaths.add(outputProfilingFile);
@@ -96,7 +93,7 @@ public class ProfilingResultWriteFunction implements Serializable,
                     newTuple = tuple2Iterator.next();
 
                     if (!newTuple._2.getSmTag().equals(smTag)) {
-                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current RG:" + rgID + " SM:" + smTag +
+                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current SAMPLE:" + smTag +
                                 " . Omit wrong partitioned record of SM:" + newTuple._2.getSmTag() +
                                 " : " + newTuple._2.toString());
                         continue;
@@ -116,7 +113,7 @@ public class ProfilingResultWriteFunction implements Serializable,
                 while (tuple2Iterator.hasNext()) {
                     newTuple = tuple2Iterator.next();
                     if (!newTuple._2.getSmTag().equals(smTag)) {
-                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current RG:" + rgID + " SM:" + smTag +
+                        LOG.warn("[SOAPMetas::" + ProfilingResultWriteFunction.class.getName() + "] Current SAMPLE:" + smTag +
                                 " . Omit wrong partitioned record of SM:" + newTuple._2.getSmTag() +
                                 " : " + newTuple._2.toString());
                         continue;

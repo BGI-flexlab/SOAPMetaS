@@ -34,7 +34,7 @@ public class ReferenceInfoMatrix implements Serializable{
 
     /**
      * Reference matrix file format:
-     * geneID	geneName	geneLength	species[	genus	phylum  geneGC]
+     * geneID	geneName	geneLength	species[    geneGC[	genus	phylum]]
      *
      * species file format:
      * s__Genusname_speciesname genomeLength    genomeGC
@@ -77,7 +77,7 @@ public class ReferenceInfoMatrix implements Serializable{
 
     /**
      * Reference matrix file format:
-     * geneID	geneName	geneLength	species[	genus	phylum  geneGC]
+     * geneID	geneName	geneLength	species[   geneGC[	genus	phylum]]
      *
      * TODO: 更高效的matrix存储方式，除了hashMap
      * TODO: 考虑是否可以采用 sparkcontext.textfile来读取并生成map
@@ -97,9 +97,9 @@ public class ReferenceInfoMatrix implements Serializable{
                 if (lineSplit.length == 4) {
                     geneRecord = new ReferenceGeneRecord(null, Integer.parseInt(lineSplit[2]),
                             lineSplit[3]);
-                } else if (lineSplit.length == 7) {
+                } else if (lineSplit.length > 4) {
                     geneRecord = new ReferenceGeneRecord(null, Integer.parseInt(lineSplit[2]),
-                            lineSplit[3], Double.parseDouble(lineSplit[6]));
+                            lineSplit[3], Double.parseDouble(lineSplit[4]));
                 } else {
                     continue;
                 }

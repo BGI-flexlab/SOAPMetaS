@@ -82,7 +82,7 @@ public class AlignmentMethodBase implements Serializable {
      * @return An ArrayList containing all the file locations
      */
     public ArrayList<String> copyResults(String outputSamFileName, String readGroupID, String smTag) {
-        ArrayList<String> returnedValues = new ArrayList<>();
+        ArrayList<String> returnedValues = new ArrayList<>(2);
 
         LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
                 this.appName + " Copy output sam files to output directory.");
@@ -92,23 +92,24 @@ public class AlignmentMethodBase implements Serializable {
             Configuration conf = new Configuration();
             FileSystem fs = FileSystem.get(conf);
 
-            fs.copyFromLocalFile(
+            fs.copyFromLocalFile(true, true,
                     new Path(this.toolWrapper.getOutputFile()),
                     new Path(this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName)
             );
         } catch (IOException e) {
-            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + e.toString());
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Original alignment result file: "
+                    + this.toolWrapper.getOutputFile() + ". " + e.toString());
         }
 
-        // Delete the old results file
-        File localSam = new File(this.toolWrapper.getOutputFile());
-        if (!localSam.delete()){
-            LOG.warn("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Fail to delete temp SAM output file: "
-                    + this.toolWrapper.getOutputFile());
-        }
+        //// Delete the old results file
+        //File localSam = new File(this.toolWrapper.getOutputFile());
+        //if (!localSam.delete()){
+        //    LOG.warn("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Fail to delete temp SAM output file: "
+        //            + this.toolWrapper.getOutputFile());
+        //}
 
-        if (readGroupID != null) {
-            returnedValues.add(readGroupID + "\t" + smTag + "\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+        if (smTag != null) {
+            returnedValues.add(readGroupID + '\t' + smTag + '\t' + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
         } else {
             returnedValues.add("NORGID\tNOSMTAG\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
         }

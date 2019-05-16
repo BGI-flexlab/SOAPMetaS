@@ -102,7 +102,7 @@ public class ProfilingProcessMS {
      * @param samFileList Paths string list. Format: ReadGroupID\tPath
      */
     public void processInitialize(List<String> samFileList){
-        String multiSamListFile = this.tmpDir + "/" + "tmp-multiSampleSAMList";
+        String multiSamListFile = this.tmpDir + "/" + "tmp-multiSampleSAMList-" + this.jscontext.appName();
 
         File samList = new File(multiSamListFile);
         FileOutputStream fos1;

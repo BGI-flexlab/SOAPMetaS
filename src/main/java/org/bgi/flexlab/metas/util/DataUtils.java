@@ -89,7 +89,7 @@ public class DataUtils {
 
         String dirName = jsc.getLocalProperty("spark.local.dir");
 
-        if (dirName == null || dirName == "null") {
+        if (dirName == null || dirName.equals("null") || dirName.isEmpty()) {
             dirName = jsc.hadoopConfiguration().get("hadoop.tmp.dir");
         }
         if (dirName.startsWith("file:")) {
@@ -104,10 +104,11 @@ public class DataUtils {
     }
 
     public static void createFolder(Configuration hadoopConf, String target) throws IOException {
-        FileSystem fs = FileSystem.get(hadoopConf);
 
         // Path variable
         Path outputDir = new Path(target);
+
+        FileSystem fs = outputDir.getFileSystem(hadoopConf);
 
         // Directory creation
         if (!fs.exists(outputDir)) {
@@ -117,6 +118,5 @@ public class DataUtils {
             fs.mkdirs(outputDir);
         }
 
-        fs.close();
     }
 }

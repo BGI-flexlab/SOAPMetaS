@@ -96,7 +96,7 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
         } else {
             LOG.error("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] Please provide multisample " +
                     "information list, or the partitioning may be uncontrollable.");
-            sampleID = 0;
+            sampleID = 1;
         }
 
         input = fs.open(file);
@@ -196,7 +196,7 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
             return false;
 
         final SAMRecord r = iterator.next();
-        key.set(sampleID + "\t" + r.getReadName().replaceFirst("/[12]$", ""));
+        key.set(Integer.toString(sampleID) + '\t' + r.getReadName().replaceFirst("/[12]$", ""));
 
         if (!r.getReadUnmappedFlag()) {
             record.set(r);

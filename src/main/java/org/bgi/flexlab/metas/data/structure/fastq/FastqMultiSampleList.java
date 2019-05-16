@@ -16,7 +16,8 @@ import java.util.ArrayList;
  *
  * Note:
  * 1.Input multisample information list file format:
- * ReadGroupID(SAM RG:Z:)	read1_path	read2_path
+ * ReadGroupID(SAM RG:Z:)	sample(SMTag)	read1_path	read2_path
+ * ERR0000001 HG00001 /path/to/read_1.fq [/path/to/read_2.fq]
  *
  */
 

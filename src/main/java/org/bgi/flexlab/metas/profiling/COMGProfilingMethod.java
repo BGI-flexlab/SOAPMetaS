@@ -104,12 +104,12 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
             After flatMapToPair:
              key: sampleID\tclusterName
-             value: Tuple4<readGroup(rgID+SM), raw read count (unrecalibrated), recalibrated read count, merged read>
+             value: Tuple4<SMTag, raw read count (unrecalibrated), recalibrated read count, merged read>
              partition: sampleID + readname
 
             After reduceByKey:
              key: sampleID\tclusterName
-             value: Tuple4<readGroup(rgID+SM), raw read count (unrecalibrated), recalibrated read count, merged read>
+             value: Tuple4<SMTag, raw read count (unrecalibrated), recalibrated read count, merged read>
              partition: sampleID + clusterName
 
             After mapToPair:
@@ -145,7 +145,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
      * Generate ProfilingResultRecord instance.
      *
      * @param clusterName String of cluster name. "Cluster" is related to analysis level.
-     * @param result Tuple4 of result list. Tuple4< readGroup(rgID+SM), raw read count (unrecalibrated), recalibrated read count, merged read>
+     * @param result Tuple4 of result list. Tuple4< SMTag, raw read count (unrecalibrated), recalibrated read count, merged read>
      * @return
      */
     private ProfilingResultRecord profilingResultGenerator(String clusterName, Tuple4<String, Integer, Double, String> result){
@@ -154,10 +154,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
         resultRecord.setClusterName(clusterName);
 
-        String[] rg = StringUtils.split(result._1(), '\t');
-        resultRecord.setRgID(rg[0]);
-        resultRecord.setSmTag(rg[1]);
-        rg = null;
+        resultRecord.setSmTag(result._1());
 
         resultRecord.setRawReadCount(result._2());
         resultRecord.setrecaliReadCount(result._3());
@@ -195,7 +192,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
      * @param tupleKeyValue The object that store the sampleID_readName (key) and properly mapped
      *                      SamRecords (value) for both single-end and paired-end sequencing mode.
      * @return Iterator of scala.Tuple2<> where the 1st element is reference name, the 2nd element is a
-     *     scala.Tuple3<> containing raw read count (unrecalibrated), recalibrated read count and merged read
+     *     scala.Tuple4<> containing read SMTag, raw read count (unrecalibrated), recalibrated read count and merged read
      *     names (form: "read1/1|read1/2|read2/1|read3/2|...|").
      */
     private Iterator<Tuple2<String, Tuple4<String, Integer, Double, String>>> computePEReadCount (Tuple2<String, MetasSamPairRecord> tupleKeyValue){
@@ -296,7 +293,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
         readNameLine = record.getReadName() + "|";
 
-        return new Tuple2<>(sampleID + "\t" + clusterName, new Tuple4<>(getReadGroup(record),
+        return new Tuple2<>(sampleID + '\t' + clusterName, new Tuple4<>(getSampleTag(record),
                 rawReadCount, recaliReadCount, readNameLine));
     }
 
@@ -333,46 +330,30 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
             recaliReadCount = (double) rawReadCount;
         }
 
-        String readGroupID = getReadGroup(record1);
+        String sampleTag = getSampleTag(record1);
 
         String readNameLine;
 
         readNameLine = record1.getReadName() + "," + record2.getReadName() + ",";
 
-        return new Tuple2<>(sampleID + "\t" + clusterName,
-                new Tuple4<>(readGroupID, rawReadCount, recaliReadCount, readNameLine)
+        return new Tuple2<>(sampleID + '\t' + clusterName,
+                new Tuple4<>(sampleTag, rawReadCount, recaliReadCount, readNameLine)
         );
     }
 
-    private String getReadGroup(SAMRecord record){
+    private String getSampleTag(SAMRecord record){
 
-        StringBuilder rgBuilder = new StringBuilder(32);
-        String rgID;
         String smTag;
-        String rg = "NORGID\tNOSMTAG";
-        SAMReadGroupRecord groupRecord = record.getReadGroup();
-        if (groupRecord == null){
-            return rg.intern();
-        }
 
-        rgID = groupRecord.getReadGroupId();
+        SAMReadGroupRecord groupRecord = record.getReadGroup();
+
         smTag = groupRecord.getSample();
 
-        if (rgID == null){
-            rgBuilder.append("NORGID");
-        } else {
-            rgBuilder.append(rgID);
-        }
-
-        rgBuilder.append('\t');
-
         if (smTag == null){
-            rgBuilder.append("NOSMTAG");
-        } else {
-            rgBuilder.append(smTag);
+            smTag = "NOSMTAG";
         }
 
-        return rgBuilder.toString();
+        return smTag;
     }
 
 }

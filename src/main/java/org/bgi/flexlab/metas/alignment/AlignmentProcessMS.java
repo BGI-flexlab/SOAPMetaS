@@ -96,15 +96,17 @@ public class AlignmentProcessMS {
             LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to create SAM output directory. " + e.toString());
         }
 
-        String tmpDir = this.options.getAlignmentTmpDir();
-        if (tmpDir != null) {
-            try {
-                DataUtils.createFolder(conf, tmpDir);
-            } catch (IOException e){
-                LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to create alignment temp directory.");
-                e.printStackTrace();
-            }
-        }
+        //String tmpDir = this.options.getAlignmentTmpDir();
+        //if (tmpDir == null) {
+        //    tmpDir = DataUtils.getTmpDir(this.jscontext);
+        //} else {
+        //    try {
+        //        DataUtils.createFolder(conf, tmpDir);
+        //    } catch (IOException e){
+        //        LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to create alignment temp directory.");
+        //        e.printStackTrace();
+        //    }
+        //}
 
         LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Alignment process output Directpry: "
                 + samOutputHdfsDir);
@@ -119,7 +121,7 @@ public class AlignmentProcessMS {
             LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Hadoop context configure " +
                     "\"metas.data.mapreduce.input.fqsamplelist\": " + conf.get("metas.data.mapreduce.input.fqsamplelist"));
 
-            this.fastqMultiSampleList = new FastqMultiSampleList(multilistFile, true, false, true);
+            this.fastqMultiSampleList = new FastqMultiSampleList(multilistFile, this.options.isLocalFS(), false, true);
         } catch (IOException e){
             LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to load multisample list file. " + e.toString());
         }
@@ -240,7 +242,7 @@ public class AlignmentProcessMS {
                     String[] values = StringUtils.split(record._2, "||");
                     return new Tuple2<>(
                             values[1],
-                            StringUtils.split(record._1, '\t')[1] + "\t" + values[2]
+                            StringUtils.split(record._1, '\t')[1] + '\t' + values[2]
                     );
                 });
 
@@ -356,7 +358,7 @@ public class AlignmentProcessMS {
                 .mapToPair(rec -> {
                     String[] keys =  StringUtils.split(rec._1, '\t');
                     String[] values = StringUtils.split(rec._2, "||");
-                    return new Tuple2<>(values[0], keys[1] + "\t" + values[1]);
+                    return new Tuple2<>(values[0], keys[1] + '\t' + values[1]);
                 });
         return partitionedTab5RDD;
     }
@@ -401,7 +403,7 @@ public class AlignmentProcessMS {
          partition: sampleID + readName
 
         After mapPartitionsWithIndex:
-         readGroupID    outputHDFSDir/<appId>-RDDPart<index>-<readGroupID>.sam
+         readGroupID    samTag    outputHDFSDir/<appId>-RDDPart<index>-<readGroupID>.sam
          */
         List<String> returnedValues = partitionedTab5RDD
                 .mapPartitionsWithIndex(new BowtieTabAlignmentMethod(partitionedTab5RDD.context(),

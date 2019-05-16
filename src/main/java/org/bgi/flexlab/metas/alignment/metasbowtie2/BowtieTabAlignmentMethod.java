@@ -33,7 +33,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         this.toolWrapper.setOutputFile(this.tmpDir + "/" + outSamFileName);
         this.toolWrapper.setReadGroupID(readGroupID);
         this.toolWrapper.setSMTag(smTag);
-        this.toolWrapper.setAlnLog(this.outDir + "/" + logFile);
+        this.toolWrapper.setAlnLog(this.tmpDir + "/" + logFile);
 
         this.toolWrapper.run();
 

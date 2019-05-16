@@ -80,7 +80,9 @@ public class MetasOptions {
     private boolean doAlignment = true;
     private boolean doProfiling = true;
 
-    private String outputDirectory;
+    private String hdfsOutputDir;
+    private String tmpDir;
+    private boolean isLocal = false;
 
     //private String optionsAbbr = "\t\t[other options] --seqmod <pe|se> [--anamod <name>] [--pipemod <name>] [--analev <name>]\n" +
     //        "\t\t[-e/--extra-arg <\"AlignmentTool arguments\">] [--min-identity <float>] [--insert <int>]\n" +
@@ -176,12 +178,6 @@ public class MetasOptions {
         //                "mode, fastq2 will be treated as a independent file.");
         //fastq2.setArgName("FILE");
 
-        Option rgID = new Option(null, "rgid", true,
-                "ReadGroupID for single-sample mode.");
-        rgID.setArgName("STR");
-        this.options.addOption(rgID);
-
-
         /*
         Recalibration Process arguments group.
          */
@@ -192,8 +188,8 @@ public class MetasOptions {
         // Species genome GC table
         Option speciesGC = new Option("g", "spe-gc", true,
                 "Genome GC rate of each species included in reference matrix file. File format(tab delimited): \n" +
-                        "\t\ts__Genusname_speciesname\t<float> (header line not included)\n" +
-                        "\t\ts__Escherichia_coli\t0.506\n");
+                        "\t\ts__Genusname_speciesname\t<int>\t<float> (header line not included)\n" +
+                        "\t\ts__Escherichia_coli\t4641652\t0.508\n");
         speciesGC.setArgName("FILE");
         this.options.addOption(speciesGC);
 
@@ -293,27 +289,31 @@ public class MetasOptions {
                 "Reference information matrix file of marker gene. We suggest filtering out gene " +
                         "with no species info. File format(tab delimited):\n" +
                         "\t\tgeneID geneName geneLength geneGC species[ genus phylum] (header line not included)\n" +
-                        "\t\t1 T2D-6A_GL0083352 88230 s__unclassed[ g__unclassed p__unclassed]\n" +
+                        "\t\t1 T2D-6A_GL0083352 88230 s__unclassed[ geneGC[ g__unclassed p__unclassed]]\n" +
                         "..." +
-                        "\t\t59 585054.EFER_0542 21669 s__Escherichia__coli[ g__Escherichia p__Proteobacteria]\n" +
+                        "\t\t59 585054.EFER_0542 21669 s__Escherichia_coli[ geneGC[ g__Escherichia p__Proteobacteria]]\n" +
                         "...");
         referenceMatrix.setRequired(true);
         referenceMatrix.setArgName("FILE");
         this.options.addOption(referenceMatrix);
 
-        Option outputDir = new Option("o", "output-dir", true,
-                "Output directory of SAM result and Profiling result. Note that the \"alignment\" and " +
-                        "\"profiling\" subdirectory will be created.");
+        Option outputDir = new Option("o", "output-hdfs-dir", true,
+                "Output directory, in HDFS, of SAM result and Profiling result. Note that the \"alignment\" and " +
+                        "\"profiling\" subdirectory will be created. Add \"file://\" prefix to save outputs in local file system.");
         outputDir.setArgName("PATH");
         outputDir.setRequired(true);
         this.options.addOption(outputDir);
 
-        Option tmpDirOpt = new Option(null, "tmp-dir", true,
-                "Temp directory. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set.");
+        Option tmpDirOpt = new Option(null, "tmp-local-dir", true,
+                "Local temp directory. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. The temp directory is used to save alignment results, GC-model-related outputs and sample list file.");
         tmpDirOpt.setArgName("PATH");
         this.options.addOption(tmpDirOpt);
         //this.options.addOption(null, "align-out-dir", true, "Output directory of profiling results. Default is output-dir/alignment.")
         //this.options.addOption(null, "prof-out-dir", true, "Output directory of profiling results. Default is output-dir/profiling.")
+
+        Option local = new Option(null, "local", false,
+                "Input fastq/SAM files are considered to be in local file system. By default, fastq/SAM file paths are considered to be in HDFS by default.");
+        this.options.addOption(local);
 
         /*
         Processing stage control.
@@ -389,6 +389,10 @@ public class MetasOptions {
                 usage("");
                 System.exit(0);
             }
+
+            if (commandLine.hasOption("local")){
+                this.isLocal = true;
+            }
             /*
             Alignment process args parsing.
              */
@@ -418,7 +422,6 @@ public class MetasOptions {
             //    if (commandLine.hasOption('2') || commandLine.hasOption("fastq2")){
             //        this.inputFastqPath2 = commandLine.getOptionValue('2');
             //    }
-            //    this.readGroupID = commandLine.getOptionValue("rgid", "NORGID");
             //}
 
             this.multiSampleList = commandLine.getOptionValue('i', null);
@@ -430,17 +433,18 @@ public class MetasOptions {
              */
             this.referenceMatrixFilePath = commandLine.getOptionValue('r');
 
-            this.outputDirectory = commandLine.getOptionValue('o', null);
-            if (this.outputDirectory == null) {
+            this.hdfsOutputDir = commandLine.getOptionValue('o', null);
+            if (this.hdfsOutputDir == null) {
                 throw new MissingOptionException("Missing output directory option.");
             }
-            this.profilingOutputHdfsDir = this.outputDirectory + "/profiling/";
-            this.samOutputHdfsDir = this.outputDirectory + "/alignment/";
 
-            if (commandLine.hasOption("tmp-dir")) {
-                String tmpDir = commandLine.getOptionValue("tmp-dir");
-                this.alignmentTmpDir = tmpDir + "/alignment/";
-                this.profilingTmpDir = tmpDir + "/profiling/";
+            this.profilingOutputHdfsDir = this.hdfsOutputDir + "/profiling/";
+            this.samOutputHdfsDir = this.hdfsOutputDir + "/alignment/";
+
+            if (commandLine.hasOption("tmp-local-dir")) {
+                this.tmpDir = commandLine.getOptionValue("tmp-local-dir");
+                this.alignmentTmpDir = this.tmpDir + "/alignment/";
+                this.profilingTmpDir = this.tmpDir + "/profiling/";
             }
 
             //this.alignLog = commandLine.getOptionValue("aln-log-pre", this.samOutputHdfsDir + "/SOAPMetas_alignmentLOG");
@@ -462,7 +466,7 @@ public class MetasOptions {
 
             if (commandLine.hasOption("gc-model-train")){
                 this.gcBiasTrainingMode = true;
-                this.gcBiasModelOutput = commandLine.getOptionValue("gc-train-out", this.outputDirectory + "/SOAPMetas_modelTrainResult.json");
+                this.gcBiasModelOutput = commandLine.getOptionValue("gc-train-out", this.tmpDir + "/SOAPMetas_modelTrainResult.json");
                 this.scanWindowSize = Integer.parseInt(commandLine.getOptionValue("gc-window-size", "100"));
                 this.gcBiasTrainerRefFasta = commandLine.getOptionValue("spe-fa", null);
                 if (this.gcBiasTrainerRefFasta == null){
@@ -473,7 +477,7 @@ public class MetasOptions {
 
                 if (commandLine.hasOption("zz-opoint")){
                     this.outputPoint = true;
-                    this.pointPath = commandLine.getOptionValue("zz-point-file", this.outputDirectory + "/SOAPMetas_nlsPointMatrix");
+                    this.pointPath = commandLine.getOptionValue("zz-point-file", this.tmpDir + "/SOAPMetas_nlsPointMatrix");
                 }
             }
 
@@ -760,6 +764,10 @@ public class MetasOptions {
     }
 
     public String getOutputDirectory() {
-        return outputDirectory;
+        return hdfsOutputDir;
+    }
+
+    public boolean isLocalFS() {
+        return this.isLocal;
     }
 }

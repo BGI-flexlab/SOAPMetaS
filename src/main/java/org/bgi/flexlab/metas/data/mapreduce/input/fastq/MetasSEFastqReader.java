@@ -278,8 +278,8 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
 
                 // new key: sampleID	readName
                 // new value: readGroupID   SMTag||sequence	quality
-                this.key.set(sampleID + "\t" + st[0]);
-                this.value.set(readGroupID + "\t" + smTag + "||" + st[1] + "\t" + st[3]);
+                this.key.set(Integer.toString(sampleID) + '\t' + st[0]);
+                this.value.set(readGroupID + '\t' + smTag + "||" + st[1] + '\t' + st[3]);
 
                 //LOG.trace("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Reader returned record: " +
                 //		"sampleID: " + sampleID + " readName: " + tempkey + " index: " + keyIndex +

@@ -43,12 +43,11 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
         this.setOutputHdfsDir(options.getSamOutputHdfsDir());
 
-
-        if (options.getAlignmentTmpDir() == null) {
-            this.setTmpDir(DataUtils.getTmpDir(jsc));
-        } else {
-            this.setTmpDir(options.getAlignmentTmpDir());
+        String tmpd = options.getAlignmentTmpDir();
+        if (tmpd == null || tmpd.isEmpty()) {
+            tmpd = DataUtils.getTmpDir(jsc);
         }
+        this.setTmpDir(tmpd);
 
         this.setSequencingMode(options.getSequencingMode());
     }
