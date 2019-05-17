@@ -7,6 +7,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,7 +86,8 @@ public class DataUtils {
         return pathStrings.toArray(new String[0]);
     }
 
-    public static String getTmpDir(JavaSparkContext jsc) {
+    /**
+    public static String getTmpDir(JavaSparkContext jsc, String subdir) {
 
         String dirName = jsc.getLocalProperty("spark.local.dir");
 
@@ -99,11 +101,10 @@ public class DataUtils {
         if (!tmpFileDir.isDirectory() || !tmpFileDir.canWrite()) {
             dirName = "/tmp/";
         }
+        return dirName + '/' + jsc.appName() + '/' + subdir;
+    }*/
 
-        return dirName;
-    }
-
-    public static void createFolder(Configuration hadoopConf, String target) throws IOException {
+    public static void createHDFSFolder(Configuration hadoopConf, String target) throws IOException {
 
         // Path variable
         Path outputDir = new Path(target);
@@ -119,4 +120,5 @@ public class DataUtils {
         }
 
     }
+
 }

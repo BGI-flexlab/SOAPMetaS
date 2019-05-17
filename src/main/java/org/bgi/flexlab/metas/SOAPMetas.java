@@ -35,14 +35,14 @@ public class SOAPMetas {
 
         // Options initialize
         MetasOptions metasOptions = new MetasOptions(args);
-        try {
-            DataUtils.createFolder(jsc.hadoopConfiguration(), metasOptions.getOutputDirectory());
-        } catch (IOException e) {
-            LOG.error("[SOAPMetas::" + SOAPMetas.class.getName() + "] Fail to create output directory: " +
-                    metasOptions.getOutputDirectory());
-            jsc.close();
-            System.exit(1);
-        }
+        //try {
+        //    DataUtils.createFolder(jsc.hadoopConfiguration(), metasOptions.getHdfsOutputDir());
+        //} catch (IOException e) {
+        //    LOG.error("[SOAPMetas::" + SOAPMetas.class.getName() + "] Fail to create output directory: " +
+        //            metasOptions.getHdfsOutputDir());
+        //    jsc.close();
+        //    System.exit(1);
+        //}
 
         List<String> alignmentOutputList = null;
 

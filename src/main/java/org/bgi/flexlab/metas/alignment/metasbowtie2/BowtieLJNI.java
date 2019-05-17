@@ -15,6 +15,9 @@ public class BowtieLJNI {
 
     static {
         try{
+            NativeUtils.loadLibraryFromJar("/libtbbmalloc.so.2");
+            NativeUtils.loadLibraryFromJar("/libtbbmalloc_proxy.so.2");
+            NativeUtils.loadLibraryFromJar("/libtbb.so.2");
             NativeUtils.loadLibraryFromJar("/libbowtiel.so");
         } catch (IOException e){
             e.printStackTrace();

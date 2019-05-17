@@ -90,6 +90,18 @@
         <repository>
             <id>bedatadriven</id>
             <name>bedatadriven public repo</name>
+            <!--
+            <releases>
+                <enabled>false</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+            -->
             <url>https://nexus.bedatadriven.com/content/groups/public/</url>
         </repository>
     </repositories>
@@ -151,6 +163,9 @@
                 <includes>
                     <include>libbowtiel.so</include>
                     <include>libbowties.so</include>
+                    <include>libtbb.so.2</include>
+                    <include>libtbbmalloc_proxy.so.2</include>
+                    <include>libtbbmalloc.so.2</include>
                 </includes>
             </resource>
         </resources>

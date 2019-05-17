@@ -305,7 +305,7 @@ public class MetasOptions {
         this.options.addOption(outputDir);
 
         Option tmpDirOpt = new Option(null, "tmp-local-dir", true,
-                "Local temp directory. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. The temp directory is used to save alignment results, GC-model-related outputs and sample list file.");
+                "Local temp directory for intermediate files. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. The temp directory is used to save alignment results, GC-model-related outputs and sample list file.");
         tmpDirOpt.setArgName("PATH");
         this.options.addOption(tmpDirOpt);
         //this.options.addOption(null, "align-out-dir", true, "Output directory of profiling results. Default is output-dir/alignment.")
@@ -437,6 +437,9 @@ public class MetasOptions {
             if (this.hdfsOutputDir == null) {
                 throw new MissingOptionException("Missing output directory option.");
             }
+            if (this.isLocal && !this.hdfsOutputDir.startsWith("file://")){
+                this.hdfsOutputDir = "file://" + this.hdfsOutputDir;
+            }
 
             this.profilingOutputHdfsDir = this.hdfsOutputDir + "/profiling/";
             this.samOutputHdfsDir = this.hdfsOutputDir + "/alignment/";
@@ -466,7 +469,7 @@ public class MetasOptions {
 
             if (commandLine.hasOption("gc-model-train")){
                 this.gcBiasTrainingMode = true;
-                this.gcBiasModelOutput = commandLine.getOptionValue("gc-train-out", this.tmpDir + "/SOAPMetas_modelTrainResult.json");
+                this.gcBiasModelOutput = commandLine.getOptionValue("gc-train-out", this.tmpDir + "./SOAPMetas_modelTrainResult.json");
                 this.scanWindowSize = Integer.parseInt(commandLine.getOptionValue("gc-window-size", "100"));
                 this.gcBiasTrainerRefFasta = commandLine.getOptionValue("spe-fa", null);
                 if (this.gcBiasTrainerRefFasta == null){
@@ -477,7 +480,7 @@ public class MetasOptions {
 
                 if (commandLine.hasOption("zz-opoint")){
                     this.outputPoint = true;
-                    this.pointPath = commandLine.getOptionValue("zz-point-file", this.tmpDir + "/SOAPMetas_nlsPointMatrix");
+                    this.pointPath = commandLine.getOptionValue("zz-point-file", this.tmpDir + "./SOAPMetas_nlsPointMatrix");
                 }
             }
 
@@ -763,7 +766,7 @@ public class MetasOptions {
         return this.doProfiling;
     }
 
-    public String getOutputDirectory() {
+    public String getHdfsOutputDir() {
         return hdfsOutputDir;
     }
 

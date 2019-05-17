@@ -28,7 +28,8 @@ public abstract class AlignmentToolWrapper implements Serializable {
     private String smTag;
 
     private String samOutputHdfsDir;
-    private String tmpDirectory;
+    private String localTmpDir;
+    private String alnTmpDir;
     protected String alnLog;
 
     private SequencingMode sequencingMode;
@@ -158,23 +159,20 @@ public abstract class AlignmentToolWrapper implements Serializable {
         this.samOutputHdfsDir = outputHdfsDir;
     }
 
-    /**
-     * Getter for the tmp path
-     *
-     * @return A String containing the tmp path
-     */
-    public String getTmpDir() {
-        return this.tmpDirectory;
+    public String getLocalTmpDir() {
+        return this.localTmpDir;
     }
 
+    public void setLocalTmpDir(String tmpPath) {
+        this.localTmpDir = tmpPath;
+    }
 
-    /**
-     * Setter for the tmp path
-     *
-     * @param tmpPath A String that indicates the tmp dir
-     */
-    public void setTmpDir(String tmpPath) {
-        this.tmpDirectory = tmpPath;
+    public String getAlnTmpDir() {
+        return alnTmpDir;
+    }
+
+    public void setAlnTmpDir(String alnTmpDir) {
+        this.alnTmpDir = alnTmpDir;
     }
 
     public void setReadGroupID(String readGroupID) {

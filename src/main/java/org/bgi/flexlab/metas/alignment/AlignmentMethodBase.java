@@ -14,7 +14,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class AlignmentMethodBase implements Serializable {
         this.appId = context.applicationId();
         this.appName = context.appName();
         this.toolWrapper = toolWrapper;
-        this.tmpDir = this.toolWrapper.getTmpDir();
+        this.tmpDir = this.toolWrapper.getAlnTmpDir();
         this.outDir = this.toolWrapper.getOutputHdfsDir();
 
         this.LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName);
@@ -78,10 +77,10 @@ public class AlignmentMethodBase implements Serializable {
      * *Changes:
      *  + Change Bwa object to toolWrapper object.
      *
-     * @param outputSamFileName The output where the final results will be stored
+     * @param outSamFileName The name of the file of final results.
      * @return An ArrayList containing all the file locations
      */
-    public ArrayList<String> copyResults(String outputSamFileName, String readGroupID, String smTag) {
+    public ArrayList<String> copyResults(String outSamFileName, String readGroupID, String smTag) {
         ArrayList<String> returnedValues = new ArrayList<>(2);
 
         LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
@@ -94,7 +93,7 @@ public class AlignmentMethodBase implements Serializable {
 
             fs.copyFromLocalFile(true, true,
                     new Path(this.toolWrapper.getOutputFile()),
-                    new Path(this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName)
+                    new Path(this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName)
             );
         } catch (IOException e) {
             LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Original alignment result file: "
@@ -109,9 +108,9 @@ public class AlignmentMethodBase implements Serializable {
         //}
 
         if (smTag != null) {
-            returnedValues.add(readGroupID + '\t' + smTag + '\t' + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+            returnedValues.add(readGroupID + '\t' + smTag + '\t' + this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName);
         } else {
-            returnedValues.add("NORGID\tNOSMTAG\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outputSamFileName);
+            returnedValues.add("NORGID\tNOSMTAG\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName);
         }
 
         return returnedValues;

@@ -3,7 +3,6 @@ package org.bgi.flexlab.metas.profiling.recalibration.gcbias;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.Serializable;
 
 /**

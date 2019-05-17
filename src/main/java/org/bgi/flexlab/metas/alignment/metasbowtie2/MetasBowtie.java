@@ -8,6 +8,8 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.alignment.AlignmentToolWrapper;
 import org.bgi.flexlab.metas.util.DataUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,11 +45,36 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
         this.setOutputHdfsDir(options.getSamOutputHdfsDir());
 
-        String tmpd = options.getAlignmentTmpDir();
-        if (tmpd == null || tmpd.isEmpty()) {
-            tmpd = DataUtils.getTmpDir(jsc);
+
+        // Set alignment temp directory
+        String dirName = jsc.getLocalProperty("spark.local.dir");
+        if (dirName == null || dirName == "null") {
+            dirName = options.getAlignmentTmpDir();
         }
-        this.setTmpDir(tmpd);
+        if (dirName == null || dirName.equals("null") || dirName.isEmpty()) {
+            dirName = jsc.hadoopConfiguration().get("hadoop.tmp.dir");
+        }
+        if (dirName.startsWith("file:")) {
+            dirName = dirName.replaceFirst("file:", "");
+        }
+        File tmpFileDir = new File(dirName);
+        if (!tmpFileDir.isDirectory() || !tmpFileDir.canWrite()) {
+            dirName = "/tmp/";
+        }
+        this.setAlnTmpDir(dirName);
+        dirName = null;
+
+        // Set local temp dir.
+        dirName = options.getAlignmentTmpDir();
+        if (dirName == null || dirName.equals("null") || dirName.isEmpty()){
+            dirName = "/tmp/" + jsc.appName() + "_TEMP/alignment";
+        }
+        try {
+            DataUtils.createHDFSFolder(jsc.hadoopConfiguration(), "file://" + dirName);
+        } catch (IOException e){
+            LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Fail to create alignment temp directory. " + e.toString());
+        }
+        this.setLocalTmpDir(dirName);
 
         this.setSequencingMode(options.getSequencingMode());
     }
@@ -60,7 +87,7 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
     /**
      * Parse all arguments as String array.
      *
-     * TODO:index文件的读取是否需要考虑 Spark 的内存共享问题？不过 JNI 的模式可能无法实现。
+     * TODO:index文件的读取是否需要考虑 Spark 的内存共享问题？不过 JNI 的模式可能无法实现。不过 bowtie2 的 --mm 参数可以一定程度上实现这种模式。
      *
      * @param alnStep **Omitted in Bowtie.
      * @return Arguments array.

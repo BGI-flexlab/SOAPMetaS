@@ -91,7 +91,7 @@ public class AlignmentProcessMS {
         Configuration conf = this.jscontext.hadoopConfiguration();
 
         try {
-            DataUtils.createFolder(conf, samOutputHdfsDir);
+            DataUtils.createHDFSFolder(conf, samOutputHdfsDir);
         } catch (IOException e){
             LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to create SAM output directory. " + e.toString());
         }
@@ -176,8 +176,8 @@ public class AlignmentProcessMS {
                 this.numPartitionEachSample);
 
         String filePath = this.fastqMultiSampleList.getAllFastqPath();
-        LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Start handling multi-sample reads. " +
-                "Total partition number: " + numPartition + " Input fastq file: " + filePath);
+        LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Read multi-sample reads in. " +
+                "Total partition number: " + numPartition + ". Input fastq file: " + filePath);
 
         /*
         Merge pair read and prepare RDD for repartition.
@@ -334,8 +334,8 @@ public class AlignmentProcessMS {
                 this.numPartitionEachSample);
 
         String filePath = this.fastqMultiSampleList.getAllFastqPath();
-        LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Start handling multi-sample reads. " +
-                "Total partition number: " + numPartition + " Input fastq file: " + filePath);
+        LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Read multi-sample reads in. " +
+                "Total partition number: " + numPartition + ". Input fastq file: " + filePath);
 
         /*
         Merge pair read and prepare RDD for repartition.

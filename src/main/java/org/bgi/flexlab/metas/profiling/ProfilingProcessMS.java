@@ -76,19 +76,18 @@ public class ProfilingProcessMS {
         Configuration conf = this.jscontext.hadoopConfiguration();
 
         this.tmpDir = this.metasOpt.getProfilingTmpDir();
-        if (this.tmpDir == null) {
-            this.tmpDir = DataUtils.getTmpDir(this.jscontext);
-        } else {
-            try {
-                DataUtils.createFolder(conf, this.tmpDir);
-            } catch (IOException e){
-                LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling temp directory. " + e.toString());
-            }
+        if (this.tmpDir == null || this.tmpDir.isEmpty()) {
+            this.tmpDir = "/tmp/" + this.jscontext.appName() + "_TEMP/profiling";
+        }
+        try {
+            DataUtils.createHDFSFolder(conf, "files://" + this.tmpDir);
+        } catch (IOException e){
+            LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling temp directory. " + e.toString());
         }
 
         this.outputHdfsDir = this.metasOpt.getProfilingOutputHdfsDir();
         try {
-            DataUtils.createFolder(conf, this.outputHdfsDir);
+            DataUtils.createHDFSFolder(conf, this.outputHdfsDir);
         } catch (IOException e){
             LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling output directory. " + e.toString());
         }

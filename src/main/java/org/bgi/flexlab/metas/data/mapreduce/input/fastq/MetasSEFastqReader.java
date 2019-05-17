@@ -122,16 +122,16 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
                 LOG.fatal("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Please provide multisample " +
                         "information for " + file.toString() + " . Or the processing may be uncontrollable.");
                 sampleID = fastqMultiSampleList.getSampleCount() + 1;
-                readGroupID = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
-                smTag = "NOSMTAG";
+                smTag = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
+                readGroupID = "NORGID";
                 //mate = 1;
             }
         } else {
             LOG.fatal("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Please provide multisample " +
                     "information list, or the processing may be uncontrollable.");
             sampleID = 1;
-            readGroupID = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
-            smTag = "NOSMTAG";
+            smTag = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
+            readGroupID = "NORGID";
             //mate = 1;
         }
 
@@ -264,12 +264,7 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
                 //}
                 //String tempkey = st[0].substring(1, index).trim();
                 //char keyIndex = st[0].charAt(index + 1);
-                String[] splitTmp = StringUtils.split(st[0].substring(1), ' ');
-                if(splitTmp.length == 1) {
-                    st[0] = splitTmp[0];
-                }else {
-                    StringUtils.join(splitTmp, '_');
-                }
+                st[0] = StringUtils.replaceChars(st[0].substring(1), ' ', '_');
 
                 // key: sampleID#readName. example: <Text>
                 // value: mateIndex(1 or 2)##sampleID	pos	filelength##readGroupID##sequence	quality
@@ -285,7 +280,7 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
                 //		"sampleID: " + sampleID + " readName: " + tempkey + " index: " + keyIndex +
                 //		" readGroupID: " + readGroupID);
                 //recordCount++;
-                LOG.trace("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Key: " + this.key.toString() + " Value: " + this.value.toString());
+                //LOG.trace("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Key: " + this.key.toString() + " Value: " + this.value.toString());
             } else {
                 LOG.warn("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Wrong fastq reads:blank line among fq file or end of file!");
             }
