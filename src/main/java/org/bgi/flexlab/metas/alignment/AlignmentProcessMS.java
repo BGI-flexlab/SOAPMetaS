@@ -15,7 +15,6 @@ import org.bgi.flexlab.metas.data.mapreduce.input.fastq.MetasFastqInputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.input.fastq.MetasSEFastqInputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
 import org.bgi.flexlab.metas.data.structure.fastq.FastqMultiSampleList;
-import org.bgi.flexlab.metas.util.DataUtils;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 
@@ -86,30 +85,9 @@ public class AlignmentProcessMS {
 
         this.numPartitionEachSample = Math.max(this.options.getNumPartitionEachSample(), 1);
 
-        String samOutputHdfsDir = this.options.getSamOutputHdfsDir();
+        //String samOutputHdfsDir = this.options.getSamOutputHdfsDir();
 
         Configuration conf = this.jscontext.hadoopConfiguration();
-
-        try {
-            DataUtils.createHDFSFolder(conf, samOutputHdfsDir);
-        } catch (IOException e){
-            LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to create SAM output directory. " + e.toString());
-        }
-
-        //String tmpDir = this.options.getAlignmentTmpDir();
-        //if (tmpDir == null) {
-        //    tmpDir = DataUtils.getTmpDir(this.jscontext);
-        //} else {
-        //    try {
-        //        DataUtils.createFolder(conf, tmpDir);
-        //    } catch (IOException e){
-        //        LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to create alignment temp directory.");
-        //        e.printStackTrace();
-        //    }
-        //}
-
-        LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Alignment process output Directpry: "
-                + samOutputHdfsDir);
 
         /*
         Read multiple sample list file.
@@ -126,42 +104,6 @@ public class AlignmentProcessMS {
             LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Fail to load multisample list file. " + e.toString());
         }
     }
-
-    //private String generateMultiSampleList(String fastqPath1, String fastqPath2){
-    //    String[] fq1Array = StringUtils.split(fastqPath1, ',');
-    //    String[] fq2Array = null;
-    //    String rgID = this.options.getReadGroupID();
-    //    if (fastqPath2 != null && !fastqPath2.isEmpty()){
-    //        fq2Array = StringUtils.split(fastqPath2, ',');
-    //        assert fq1Array.length == fq2Array.length: "Numbers of paired fastq files are not equal.";
-    //    }
-//
-    //    String outputMultiSampleList = this.samOutputHdfsDir + "/tmp-multiSampleFastqList";
-    //    File sampleList = new File(outputMultiSampleList);
-//
-    //    try (BufferedWriter bfr = new BufferedWriter(
-    //            new OutputStreamWriter(new FileOutputStream(sampleList)))){
-//
-    //        if (fq2Array.length > 0) {
-    //            for (int i = 0; i < fq1Array.length; i++) {
-    //                bfr.write(rgID + "\t" + fq1Array[i] + "\t" + fq2Array[i]);
-    //                bfr.newLine();
-    //            }
-    //        } else {
-    //            for (int i = 0; i < fq1Array.length; i++) {
-    //                bfr.write(rgID + "\t" + fq1Array[i]);
-    //                bfr.newLine();
-    //            }
-    //        }
-    //    } catch (FileNotFoundException e){
-    //        LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Can't create multiple sample fastq list file.");
-    //        e.printStackTrace();
-    //    } catch (IOException e){
-    //        LOG.error("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Can't write multiple sample fastq list file.");
-    //        e.printStackTrace();
-    //    }
-    //    return outputMultiSampleList;
-    //}
 
     /**
      * Form input reads data.

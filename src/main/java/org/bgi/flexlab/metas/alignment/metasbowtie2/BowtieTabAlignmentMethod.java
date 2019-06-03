@@ -28,16 +28,16 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         ((MetasBowtie) toolWrapper).setTab5Mode();
     }
 
-    private ArrayList<String> runMultiSampleAlignment(String readGroupID, String smTag, String tab5FilePath, String outSamFileName, String logFile){
-        this.toolWrapper.setInputFile(tab5FilePath);
-        this.toolWrapper.setOutputFile(this.tmpDir + '/' + outSamFileName);
+    private ArrayList<String> runMultiSampleAlignment(String readGroupID, String smTag, File tab5File, File outSamFile, File logFile){
+        this.toolWrapper.setInputFile(tab5File.getAbsolutePath());
+        this.toolWrapper.setOutputFile(outSamFile.getAbsolutePath());
         this.toolWrapper.setReadGroupID(readGroupID);
         this.toolWrapper.setSMTag(smTag);
-        this.toolWrapper.setAlnLog(this.toolWrapper.getLocalTmpDir() + "/" + logFile);
+        this.toolWrapper.setAlnLog(logFile.getAbsolutePath());
 
         this.toolWrapper.run();
 
-        return this.copyResults(outSamFileName, readGroupID, smTag);
+        return this.copyResults(outSamFile.getName(), logFile.getName(), readGroupID, smTag);
     }
 
     /**
@@ -60,9 +60,9 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         ArrayList<String> returnedValues = new ArrayList<>(2);
         Tuple2<String, String> element;
 
-        String tab5FilePath;
-        String outSamFileName;
-        String logFile;
+        //String tab5FilePath;
+        //String outSamFileName;
+        //String logFile;
         String readGroupID;
         String smTag;
         String partRGSM;
@@ -76,16 +76,25 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         smTag = temp[1];
         temp = null;
 
-        tab5FilePath = this.tmpDir + '/' + this.appId + "-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".tab5";
-        outSamFileName = this.appId + "-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".sam";
-        logFile = this.appId + "-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + "-alignment.log";
+        //tab5FilePath = this.tmpDir + '/' + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".tab5";
+        //outSamFileName = this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".sam";
+        //logFile = this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + "-alignment.log";
 
-        LOG.info("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Writing input file for bowtie2: " + tab5FilePath);
+        // Set writable and deleteOnExit so that files can be deleted by group accounts if the Application is interrupted.
+        File outSamFile = new File(this.tmpDir + "/" + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".sam");
+        outSamFile.setWritable(true, false);
+        outSamFile.deleteOnExit();
+        File logFile = new File(this.tmpDir + '/' + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + "-alignment.log");
+        logFile.setWritable(true, false);
+        logFile.deleteOnExit();
 
-        File tab5File = new File(tab5FilePath);
+        File tab5File = new File(this.tmpDir + '/' + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".tab5");
+        tab5File.setWritable(true, false);
+        tab5File.deleteOnExit();
         FileOutputStream fos1;
         BufferedWriter bw1;
 
+        LOG.info("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Writing input file for bowtie2: " + tab5File.getAbsolutePath());
 
         try {
             fos1 = new FileOutputStream(tab5File);
@@ -115,22 +124,22 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             elementIter = null;
 
             // This is where the actual local alignment takes place
-            returnedValues = this.runMultiSampleAlignment(readGroupID, smTag, tab5FilePath, outSamFileName, logFile);
+            returnedValues = this.runMultiSampleAlignment(readGroupID, smTag, tab5File, outSamFile, logFile);
 
             // Delete the temporary file, as results have been copied to the specified output directory
             if (tab5File.delete()) {
                 LOG.debug("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Delete temp tab5 " +
-                        "file: " + tab5FilePath);
+                        "file: " + tab5File.getAbsolutePath());
             } else {
                 LOG.warn("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Fail to delete " +
-                        "temp tab5 file: " + tab5FilePath);
+                        "temp tab5 file: " + tab5File.getAbsolutePath());
             }
         } catch (FileNotFoundException e){
             LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Can't find temp tab5 file " +
-                    tab5FilePath + " . " + e.toString());
+                    tab5File.getAbsolutePath() + " . " + e.toString());
         } catch (IOException e) {
             LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Fail to write temp tab5 " +
-                    "file: " + tab5FilePath + " . " + e.toString());
+                    "file: " + tab5File.getAbsolutePath() + " . " + e.toString());
         }
 
         return returnedValues.iterator();

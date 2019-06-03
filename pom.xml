@@ -118,6 +118,12 @@
                     <encoding>UTF-8</encoding>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
+                    <excludes>
+                        <exclude>org/bgi/flexlab/metas/profiling/ProfilingNewProcessMS.java</exclude>
+                        <exclude>org/bgi/flexlab/metas/alignment/SingleAlignmentMethod.java</exclude>
+                        <exclude>org/bgi/flexlab/metas/alignment/PairedAlignmentMethod.java</exclude>
+                        <exclude>org/bgi/flexlab/metas/alignment/AlignmentProcess.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>

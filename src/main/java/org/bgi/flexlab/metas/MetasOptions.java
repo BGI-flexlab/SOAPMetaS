@@ -123,7 +123,6 @@ public class MetasOptions {
         Option alignmentIndex = new Option("x", "index", true,
                 "Alignment tool index path. Refer to Bowtie2 manual.");
         alignmentIndex.setArgName("PATH-PREFIX");
-        alignmentIndex.setRequired(true);
         this.options.addOption(alignmentIndex);
 
         this.options.addOption(null, "large-index", false,
@@ -293,7 +292,6 @@ public class MetasOptions {
                         "..." +
                         "\t\t59 585054.EFER_0542 21669 s__Escherichia_coli[ geneGC[ g__Escherichia p__Proteobacteria]]\n" +
                         "...");
-        referenceMatrix.setRequired(true);
         referenceMatrix.setArgName("FILE");
         this.options.addOption(referenceMatrix);
 
@@ -401,7 +399,7 @@ public class MetasOptions {
                 assert this.alignmentTool.equals("bowtie"): "Alignment tool not support.";
             }
 
-            this.alignmentIndexPath = commandLine.getOptionValue('x');
+            this.alignmentIndexPath = commandLine.getOptionValue('x', null);
             if (commandLine.hasOption("large-index")){
                 this.alignmentShortIndex = false;
             }
@@ -431,7 +429,7 @@ public class MetasOptions {
             /*
             IO arguments parsing.
              */
-            this.referenceMatrixFilePath = commandLine.getOptionValue('r');
+            this.referenceMatrixFilePath = commandLine.getOptionValue('r', null);
 
             this.hdfsOutputDir = commandLine.getOptionValue('o', null);
             if (this.hdfsOutputDir == null) {
@@ -463,7 +461,7 @@ public class MetasOptions {
                     throw new UnrecognizedOptionException("GC bias recalibration model not support in current version.");
                 }
                 if (this.speciesGenomeGCFilePath == null) {
-                    throw new MissingArgumentException("Please provide species genome information file.");
+                    throw new MissingArgumentException("GC-recalibration is set, please provide species genome information file.");
                 }
             }
 
@@ -507,11 +505,6 @@ public class MetasOptions {
             if (!this.profilingPipeline.equals("comg")) {
                 throw new ParseException("Profiling pipeline mode not supported.");
             }
-            if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
-                    this.speciesGenomeGCFilePath == null){
-                throw new MissingArgumentException("Please provide species genome information file " +
-                        "in \"species\" analysis level.");
-            }
 
             /*
             Process controling arguments parsing/
@@ -524,12 +517,23 @@ public class MetasOptions {
                     throw new MissingOptionException("Missing --multi-sam-list option.");
                 }
             } else {
+                if (this.alignmentIndexPath == null) {
+                    throw new MissingOptionException("Missing -x (--index) option.");
+                }
                 if (this.multiSampleList == null) {
                     throw new MissingOptionException("Missing -i (--multi-sample-list) option.");
                 }
             }
             if (commandLine.hasOption("skip-profiling")){
                 this.doProfiling = false;
+            } else {
+                if (this.referenceMatrixFilePath == null) {
+                    throw new MissingOptionException("Missing -r (--ref-matrix) option.");
+                }
+                if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
+                        this.speciesGenomeGCFilePath == null){
+                    throw new MissingArgumentException("Missing -g (--spe-gc) option. Please provide species genome information file in \"species\" analysis level.");
+                }
             }
 
         } catch (UnrecognizedOptionException e) {

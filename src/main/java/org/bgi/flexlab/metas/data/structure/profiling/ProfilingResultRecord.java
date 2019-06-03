@@ -20,6 +20,7 @@ public class ProfilingResultRecord implements Serializable {
     private Integer rawReadCount;
     private Double recaliReadCount;
     private Double abundance; // recaliReadCount divided by marker length
+    private Double relAbun; // Relative abundance.
     private byte[] readNameStringBytes; //后续需要考虑采用更合适的方式来存储read name字符串
 
     public ProfilingResultRecord(){}
@@ -46,6 +47,14 @@ public class ProfilingResultRecord implements Serializable {
 
     public Double getAbundance(){
         return this.abundance;
+    }
+
+    public void setRelAbun(Double relAbun) {
+        this.relAbun = relAbun;
+    }
+
+    public Double getRelAbun() {
+        return relAbun;
     }
 
     public void setrecaliReadCount(Double recaliReadCount) {

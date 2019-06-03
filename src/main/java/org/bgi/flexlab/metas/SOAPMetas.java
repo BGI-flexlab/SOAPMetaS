@@ -8,9 +8,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.alignment.AlignmentProcessMS;
 import org.bgi.flexlab.metas.profiling.ProfilingProcessMS;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasTrainingProcess;
-import org.bgi.flexlab.metas.util.DataUtils;
 
-import java.io.IOException;
 import java.util.List;
 
 /**

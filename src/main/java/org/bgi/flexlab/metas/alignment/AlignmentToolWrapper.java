@@ -159,13 +159,12 @@ public abstract class AlignmentToolWrapper implements Serializable {
         this.samOutputHdfsDir = outputHdfsDir;
     }
 
-    public String getLocalTmpDir() {
-        return this.localTmpDir;
-    }
-
-    public void setLocalTmpDir(String tmpPath) {
-        this.localTmpDir = tmpPath;
-    }
+    //public String getLocalTmpDir() {
+    //    return this.localTmpDir;
+    //}
+    //public void setLocalTmpDir(String tmpPath) {
+    //    this.localTmpDir = tmpPath;
+    //}
 
     public String getAlnTmpDir() {
         return alnTmpDir;

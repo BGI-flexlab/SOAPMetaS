@@ -1,6 +1,7 @@
 package org.bgi.flexlab.metas.alignment.metasbowtie2;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -43,15 +44,28 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
         this.isShortIndex = options.isAlignmentShortIndex();
         this.extraArguments = options.getExtraAlignmentArguments();
 
-        this.setOutputHdfsDir(options.getSamOutputHdfsDir());
+        Configuration conf = jsc.hadoopConfiguration();
 
+        String dirName = options.getSamOutputHdfsDir();
+        try {
+            DataUtils.createHDFSFolder(conf, dirName);
+        } catch (IOException e){
+            LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Fail to create HDFS SAM output directory. " + e.toString());
+        }
+        this.setOutputHdfsDir(dirName);
 
         // Set alignment temp directory
-        String dirName = jsc.getLocalProperty("spark.local.dir");
-        if (dirName == null || dirName == "null") {
+        dirName = jsc.getLocalProperty("spark.local.dir");
+        if (dirName == null || dirName.isEmpty()) {
+            // We use local temp directory here during development for convenience.
             dirName = options.getAlignmentTmpDir();
+            try {
+                DataUtils.createHDFSFolder(conf, "file://" + dirName);
+            } catch (IOException e){
+                LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Fail to create temp directory" + dirName + "for alignment. " + e.toString());
+            }
         }
-        if (dirName == null || dirName.equals("null") || dirName.isEmpty()) {
+        if (dirName == null || dirName.isEmpty()) {
             dirName = jsc.hadoopConfiguration().get("hadoop.tmp.dir");
         }
         if (dirName.startsWith("file:")) {
@@ -59,22 +73,18 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
         }
         File tmpFileDir = new File(dirName);
         if (!tmpFileDir.isDirectory() || !tmpFileDir.canWrite()) {
-            dirName = "/tmp/";
+            dirName = "/tmp/SOAPMetas" + jsc.appName() + "_TEMP/alignment";
+            try {
+                DataUtils.createHDFSFolder(conf, "file://" + dirName);
+                new File(dirName).deleteOnExit();
+            } catch (IOException e){
+                LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Fail to create temp directory" + dirName + "for alignment. " + e.toString());
+            }
         }
+        LOG.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] SOAPMetas Alignment Temp Directory: " + dirName +
+                " . Spark local dir: " + jsc.getLocalProperty("spark.local.dir") +
+                " . Hadoop tmp dir: " + jsc.hadoopConfiguration().get("hadoop.tmp.dir"));
         this.setAlnTmpDir(dirName);
-        dirName = null;
-
-        // Set local temp dir.
-        dirName = options.getAlignmentTmpDir();
-        if (dirName == null || dirName.equals("null") || dirName.isEmpty()){
-            dirName = "/tmp/" + jsc.appName() + "_TEMP/alignment";
-        }
-        try {
-            DataUtils.createHDFSFolder(jsc.hadoopConfiguration(), "file://" + dirName);
-        } catch (IOException e){
-            LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Fail to create alignment temp directory. " + e.toString());
-        }
-        this.setLocalTmpDir(dirName);
 
         this.setSequencingMode(options.getSequencingMode());
     }
@@ -194,7 +204,7 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
         if (returnCode == 0){
             LOG.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 runs successfully for input: " + arguments[arguments.length-1]);
         } else {
-            LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 failed in running for input: " + arguments[arguments.length-1]);
+            LOG.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 failed in running for input: " + arguments[arguments.length-1]);
         }
 
         // 0 means successful execution.

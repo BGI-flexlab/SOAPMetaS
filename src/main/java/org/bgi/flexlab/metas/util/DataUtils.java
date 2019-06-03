@@ -3,11 +3,11 @@ package org.bgi.flexlab.metas.util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.permission.FsAction;
+import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.spark.api.java.JavaSparkContext;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,12 +111,15 @@ public class DataUtils {
 
         FileSystem fs = outputDir.getFileSystem(hadoopConf);
 
+        FsPermission permission = new FsPermission(FsAction.ALL, FsAction.ALL, FsAction.READ_EXECUTE);
         // Directory creation
         if (!fs.exists(outputDir)) {
             fs.mkdirs(outputDir);
+            fs.setPermission(outputDir, permission);
         } else {
             fs.delete(outputDir, true);
             fs.mkdirs(outputDir);
+            fs.setPermission(outputDir, permission);
         }
 
     }

@@ -80,11 +80,12 @@ public class AlignmentMethodBase implements Serializable {
      * @param outSamFileName The name of the file of final results.
      * @return An ArrayList containing all the file locations
      */
-    public ArrayList<String> copyResults(String outSamFileName, String readGroupID, String smTag) {
+    public ArrayList<String> copyResults(String outSamFileName, String alnLogFileName, String readGroupID, String smTag) {
         ArrayList<String> returnedValues = new ArrayList<>(2);
 
         LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
                 this.appName + " Copy output sam files to output directory.");
+        String hdfsSamPath = this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName;
 
         try {
             //if (outputDir.startsWith("hdfs")) {
@@ -93,8 +94,12 @@ public class AlignmentMethodBase implements Serializable {
 
             fs.copyFromLocalFile(true, true,
                     new Path(this.toolWrapper.getOutputFile()),
-                    new Path(this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName)
+                    new Path(hdfsSamPath)
             );
+
+            fs.copyFromLocalFile(true, true,
+                    new Path(this.toolWrapper.getAlnLog()),
+                    new Path(this.toolWrapper.getOutputHdfsDir() + "/" + alnLogFileName));
         } catch (IOException e) {
             LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Original alignment result file: "
                     + this.toolWrapper.getOutputFile() + ". " + e.toString());
@@ -108,35 +113,34 @@ public class AlignmentMethodBase implements Serializable {
         //}
 
         if (smTag != null) {
-            returnedValues.add(readGroupID + '\t' + smTag + '\t' + this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName);
+            returnedValues.add(readGroupID + '\t' + smTag + '\t' + hdfsSamPath);
         } else {
-            returnedValues.add("NORGID\tNOSMTAG\t" + this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName);
+            returnedValues.add("NORGID\tNOSMTAG\t" + hdfsSamPath);
         }
 
         return returnedValues;
     }
 
-    /**
-     * @param readBatchID Identification for the sam file
-     * @return A String for the sam file name
-     */
-    public String getOutputSamFilename(Integer readBatchID) {
-        return this.appName + "-" + this.appId + "-" + readBatchID + ".sam";
-    }
+    ///**
+    // * @param readBatchID Identification for the sam file
+    // * @return A String for the sam file name
+    // */
+    //public String getOutputSamFilename(Integer readBatchID) {
+    //    return this.appName + "-" + this.appId + "-" + readBatchID + ".sam";
+    //}
 
-    /**
-     *
-     * @param readBatchID Identification for the sam file
-     * @param fastqFileName1 First of the FASTQ files
-     * @param fastqFileName2 Second of the FASTQ files
-     * @return
-     */
-    public ArrayList<String> runAlignmentProcess(Integer readBatchID, String fastqFileName1, String fastqFileName2) {
-        //The output filename (without the tmp directory)
-        String outputSamFileName = this.getOutputSamFilename(readBatchID);
-        this.alignReads(outputSamFileName, fastqFileName1, fastqFileName2);
-
-        // Copy the result to HDFS
-        return this.copyResults(outputSamFileName, "NORGID", "NOSMTAG");
-    }
+    ///**
+    // *
+    // * @param readBatchID Identification for the sam file
+    // * @param fastqFileName1 First of the FASTQ files
+    // * @param fastqFileName2 Second of the FASTQ files
+    // * @return
+    // */
+    //public ArrayList<String> runAlignmentProcess(Integer readBatchID, String fastqFileName1, String fastqFileName2) {
+    //    //The output filename (without the tmp directory)
+    //    String outputSamFileName = this.getOutputSamFilename(readBatchID);
+    //    this.alignReads(outputSamFileName, fastqFileName1, fastqFileName2);
+    //    // Copy the result to HDFS
+    //    return this.copyResults(outputSamFileName, "NORGID", "NOSMTAG");
+    //}
 }
