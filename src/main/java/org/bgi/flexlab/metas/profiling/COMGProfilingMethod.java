@@ -10,6 +10,7 @@ import org.apache.spark.HashPartitioner;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.bgi.flexlab.metas.MetasOptions;
+import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordInsertSizeFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
@@ -150,7 +151,13 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
      */
     private ProfilingResultRecord profilingResultGenerator(String clusterName, Tuple4<String, Integer, Double, String> result){
 
-        ProfilingResultRecord resultRecord = new ProfilingResultRecord();
+        ProfilingResultRecord resultRecord;
+
+        if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
+            resultRecord = new ProfilingEveResultRecord();
+        } else {
+            resultRecord = new ProfilingResultRecord();
+        }
 
         resultRecord.setClusterName(clusterName);
 

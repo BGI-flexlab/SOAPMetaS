@@ -152,7 +152,9 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
             try {
                 if (iterator.hasNext())
                     iterator.next();
-            } catch (SAMFormatException e) {}
+            } catch (SAMFormatException e) {
+                LOG.error("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] SAM format is not correct. File: " + file.getName());
+            }
         }
     }
 
@@ -196,7 +198,7 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
             return false;
 
         final SAMRecord r = iterator.next();
-        key.set(Integer.toString(sampleID) + '\t' + r.getReadName().replaceFirst("/[12]$", ""));
+        key.set(Integer.toString(sampleID) + '\t' + r.getReadName());
 
         if (!r.getReadUnmappedFlag()) {
             record.set(r);

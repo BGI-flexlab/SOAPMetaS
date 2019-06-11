@@ -94,7 +94,17 @@ public class ProfilingResultRecord implements Serializable {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
+        //return this.getClusterName() + '\t' + this.getRelAbun();
+        StringBuilder builder = new StringBuilder(64);
+        return builder.append(this.getClusterName())
+                .append('\t').append(this.getRawReadCount()).append('\t')
+                .append(this.getrecaliReadCount()).append('\t')
+                .append(this.getRelAbun())
+                .toString();
+    }
+
+    public String getInfo(){
         return new StringBuilder(64).append("RG:").append(rgID).append("SM:").append(smTag)
                 .append(" | ClusterName: ").append(clusterName)
                 .append(" | RawReadCount/recaliReadCount: ").append(rawReadCount).append('/').append(recaliReadCount)
