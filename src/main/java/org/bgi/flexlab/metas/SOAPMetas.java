@@ -29,7 +29,7 @@ public class SOAPMetas {
         SparkConf sconf = new SparkConf().setAppName("SOAPMetas-" + System.nanoTime());
                 //.set("spark.eventLog.dir", "/tmp/SOAPMetas/spark-events");
         JavaSparkContext jsc = new JavaSparkContext(sconf);
-        jsc.hadoopConfiguration().set("metas.application.name", jsc.appName());
+        //jsc.hadoopConfiguration().set("metas.application.name", jsc.appName());
 
         // Options initialize
         MetasOptions metasOptions = new MetasOptions(args);

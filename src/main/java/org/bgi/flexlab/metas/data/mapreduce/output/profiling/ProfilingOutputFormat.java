@@ -1,12 +1,6 @@
 package org.bgi.flexlab.metas.data.mapreduce.output.profiling;
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
-
-import java.io.IOException;
 
 /**
  * ClassName: ProfilingOutputFormat
@@ -15,26 +9,19 @@ import java.io.IOException;
  * @author: heshixu@genomics.cn
  */
 
-public class ProfilingOutputFormat extends MetasAbunOutputFormat<String, ProfilingResultRecord> {
-
-    private TextOutputFormat<String, ProfilingResultRecord> textOutForm = null;
+public class ProfilingOutputFormat<K, V> extends ProfilingOutputFormatBase<K, V> {
 
     @Override
-    protected String generateFileNameForKeyValue(String key, ProfilingResultRecord value, String outDir, String appName) {
-        return outDir + "/" + appName + "-Profiling-SAMPLE_" + value.getSmTag() + ".abundance";
+    protected String generateFileNameFromKeyValue(K key, V value, String appName) {
+        // outputProfilingFile = this.outputDir + "/" + this.appName + "-Profiling-SAMPLE_" + smTag + ".abundance";
+        return appName + "-Profiling-SAMPLE_" + getSmTag(value) + ".abundance";
     }
 
-    @Override
-    protected RecordWriter<String, ProfilingResultRecord> getBaseRecordWriter(TaskAttemptContext taskAttemptContext, String outputFile) throws IOException, InterruptedException {
-        if (textOutForm == null) {
-            textOutForm = new TextOutputFormat<String, ProfilingResultRecord>() {
-                @Override
-                public Path getDefaultWorkFile(TaskAttemptContext context, String extension) throws IOException {
-                    return new Path(outputFile);
-                }
-            };
+    private String getSmTag(Object rec){
+        if (rec instanceof ProfilingResultRecord) {
+            return ((ProfilingResultRecord) rec).getSmTag();
+        } else {
+            return "NOSMTAG";
         }
-
-        return textOutForm.getRecordWriter(taskAttemptContext);
     }
 }

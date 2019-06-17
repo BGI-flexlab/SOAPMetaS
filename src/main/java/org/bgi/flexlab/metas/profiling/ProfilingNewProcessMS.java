@@ -5,15 +5,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSamInputFormat;
-import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingPathGenerateFunction;
+import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingEveOutputFormat;
+import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.RelativeAbundanceFunction;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
+import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
@@ -25,6 +28,7 @@ import scala.Tuple2;
 
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,6 +56,8 @@ public class ProfilingNewProcessMS {
     private String tmpDir;
     private String outputHdfsDir;
 
+    private JobConf jcf;
+
     public ProfilingNewProcessMS(final MetasOptions options, final JavaSparkContext context){
         this.metasOpt = options;
         this.jscontext = context;
@@ -73,6 +79,7 @@ public class ProfilingNewProcessMS {
             this.identityFilter = new MetasSamRecordIdentityFilter(this.metasOpt.getMinIdentity());
         }
         Configuration conf = this.jscontext.hadoopConfiguration();
+        this.jcf = new JobConf(conf);
 
         this.tmpDir = this.metasOpt.getProfilingTmpDir();
         if (this.tmpDir == null || this.tmpDir.isEmpty()) {
@@ -93,7 +100,8 @@ public class ProfilingNewProcessMS {
         LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Profiling process: Temp directory: " + this.tmpDir +
                 " . Output Directpry: " + this.outputHdfsDir);
 
-        conf.set("metas.profiling.outputHdfsDir", this.outputHdfsDir);
+        this.jcf.set("metas.profiling.outputHdfsDir", this.outputHdfsDir);
+        this.jcf.set("metas.application.name", this.jscontext.appName());
 
     }
 
@@ -218,6 +226,16 @@ public class ProfilingNewProcessMS {
          value: ProfilingResultRecord (Tuple3<raw read count (unrecalibrated), recalibrated read count, merged read>)
          partition: sampleID + clusterName
 
+        After partitionBy:
+         key: sampleID
+         value: no change
+         partition: sampleID
+
+        After mapPartitionsToPair:
+         key: sampleID
+         value: ProfilingResultRecord (Traw read count (unrecalibrated), recalibrated read count, merged read, rel abun)
+         partition: no change
+
         Note: Result Record doesn't contains relative abundance. And the RDD has been partitioned
          according to the sampleID and clusterName.hash.
         */
@@ -230,21 +248,29 @@ public class ProfilingNewProcessMS {
 
         relAbunResultRDD.persist(StorageLevel.MEMORY_AND_DISK());
 
-        /*
-        Input:
-         key: sampleID
-         value: ProfilingResultRecord (no relative abundance)
-         partition: sampleID + clusterName
-         */
-        // get abundance file path which will be used to save rdd file
-        List<String> outputFilePathsList = relAbunResultRDD
-                .mapPartitionsWithIndex(new ProfilingPathGenerateFunction(jscontext.appName(), this.outputHdfsDir, this.analysisMode), true)
-                .collect();
-
         // save rdd profiling file
-        relAbunResultRDD.saveAsNewAPIHadoopFile();
+        if (this.analysisMode.equals(ProfilingAnalysisMode.PROFILE)) {
+            relAbunResultRDD.saveAsHadoopFile(this.outputHdfsDir, String.class,
+                    ProfilingResultRecord.class, ProfilingOutputFormat.class, this.jcf);
+        } else {
+            relAbunResultRDD.saveAsHadoopFile(this.outputHdfsDir, String.class,
+                    ProfilingEveResultRecord.class, ProfilingEveOutputFormat.class, this.jcf);
+        }
 
-        profilingResultRecordRDD.unpersist();
+
+        ///*
+        //Input:
+        // key: sampleID
+        // value: ProfilingResultRecord (no relative abundance)
+        // partition: sampleID + clusterName
+        // */
+        //// get abundance file path which will be used to save rdd file
+        //List<String> outputFilePathsList = relAbunResultRDD
+        //        .mapPartitionsWithIndex(new ProfilingPathGenerateFunction(jscontext.appName(), this.outputHdfsDir, this.analysisMode), true)
+        //        .collect();
+        relAbunResultRDD.unpersist();
+        List<String> outputFilePathsList = new ArrayList<>(2);
+        outputFilePathsList.add(this.outputHdfsDir + "/" + this.jscontext.appName() + "-Profiling-SAMPLE_*.abundance.evaluation");
         return outputFilePathsList;
     }
 

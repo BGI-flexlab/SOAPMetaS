@@ -10,13 +10,13 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 /**
- * ClassName: MetasAbunOutputFormat
+ * ClassName: ProfilingTempOutputFormatBase
  * Description:
  *
  * @author: heshixu@genomics.cn
  */
-
-public abstract class MetasAbunOutputFormat<K, V> extends FileOutputFormat<K, V> {
+@Deprecated
+public abstract class ProfilingTempOutputFormatBase<K, V> extends FileOutputFormat<K, V> {
 
 
     @Override

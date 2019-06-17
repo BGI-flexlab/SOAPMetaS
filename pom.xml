@@ -123,6 +123,9 @@
                         <exclude>org/bgi/flexlab/metas/alignment/SingleAlignmentMethod.java</exclude>
                         <exclude>org/bgi/flexlab/metas/alignment/PairedAlignmentMethod.java</exclude>
                         <exclude>org/bgi/flexlab/metas/alignment/AlignmentProcess.java</exclude>
+                        <exclude>org/bgi/flexlab/metas/data/mapreduce/output/profiling/ProfilingTempEveOutputFormat.java</exclude>
+                        <exclude>org/bgi/flexlab/metas/data/mapreduce/output/profiling/ProfilingTempOutputFormat.java</exclude>
+                        <exclude>org/bgi/flexlab/metas/data/mapreduce/output/profiling/ProfilingTempOutputFormatBase.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
