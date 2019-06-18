@@ -69,7 +69,7 @@ public final class ProfilingUtils {
     // * Deprecated.
     // */
     //public static class SamPairRecordMergeFunction implements
-    //        Function2<MetasSamPairRecord, MetasSamPairRecord, MetasSamPairRecord> {
+    //        Function2<MetasSAMPairRecord, MetasSAMPairRecord, MetasSAMPairRecord> {
 //
     //    private SequencingMode seqMode;
 //
@@ -78,7 +78,7 @@ public final class ProfilingUtils {
     //    }
 //
     //    @Override
-    //    public MetasSamPairRecord call(MetasSamPairRecord metasSamPairRecord, MetasSamPairRecord metasSamPairRecord2) throws Exception {
+    //    public MetasSAMPairRecord call(MetasSAMPairRecord metasSamPairRecord, MetasSAMPairRecord metasSamPairRecord2) throws Exception {
     //        if (this.seqMode.equals(SequencingMode.PAIREDEND)){
     //            this.pairedModeMerge(metasSamPairRecord, metasSamPairRecord2);
     //        } else {
@@ -86,13 +86,13 @@ public final class ProfilingUtils {
     //        }
     //    }
 //
-    //    private MetasSamPairRecord singleModeMerge(MetasSamPairRecord metasSamPairRecord,
-    //                                               MetasSamPairRecord metasSamPairRecord2){
+    //    private MetasSAMPairRecord singleModeMerge(MetasSAMPairRecord metasSamPairRecord,
+    //                                               MetasSAMPairRecord metasSamPairRecord2){
     //        return null;
     //    }
 //
-    //    private MetasSamPairRecord pairedModeMerge(MetasSamPairRecord pair1,
-    //                                               MetasSamPairRecord pair2){
+    //    private MetasSAMPairRecord pairedModeMerge(MetasSAMPairRecord pair1,
+    //                                               MetasSAMPairRecord pair2){
     //        SAMRecord pair2Rec1 = pair2.getFirstRecord();
     //        SAMRecord pair2Rec2 = pair2.getSecondRecord();
 //

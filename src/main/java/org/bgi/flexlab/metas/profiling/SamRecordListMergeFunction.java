@@ -4,7 +4,7 @@ import htsjdk.samtools.SAMRecord;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.Function;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
 import java.io.Serializable;
@@ -16,7 +16,7 @@ import java.io.Serializable;
  * @author heshixu@genomics.cn
  */
 
-public class SamRecordListMergeFunction implements Serializable, Function<Iterable<SAMRecord>, MetasSamPairRecord> {
+public class SamRecordListMergeFunction implements Serializable, Function<Iterable<SAMRecord>, MetasSAMPairRecord> {
 
     public static final long serialVersionUID = 1L;
 
@@ -34,7 +34,7 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
     }
 
     @Override
-    public MetasSamPairRecord call(Iterable<SAMRecord> metasSamRecords) {
+    public MetasSAMPairRecord call(Iterable<SAMRecord> metasSamRecords) {
 
         if (this.sequencingMode.equals(SequencingMode.PAIREDEND)){
             return pairedListToSamPair(metasSamRecords);
@@ -47,16 +47,16 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
 
 
     /**
-     * Generator of MetasSamPairRecord for single-end sequencing data, the generated instance will have
+     * Generator of MetasSAMPairRecord for single-end sequencing data, the generated instance will have
      * only one SAMRecord stored in "record1" field. If one read has multiple alignment, all info about
      * the read will be abandoned.
      *
      * @param metasSamRecords Iterator of MetasSamRecords created by groupByKey() operation of RDD.
-     * @return MetasSamPairRecord if the read is exactly mapped to one reference, else null.
+     * @return MetasSAMPairRecord if the read is exactly mapped to one reference, else null.
      */
-    private MetasSamPairRecord singleListToSamPair(Iterable<SAMRecord> metasSamRecords){
+    private MetasSAMPairRecord singleListToSamPair(Iterable<SAMRecord> metasSamRecords){
 
-        MetasSamPairRecord pairRecord = null;
+        MetasSAMPairRecord pairRecord = null;
 
         SAMRecord tempRecord = null;
 
@@ -69,7 +69,7 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
         }
 
         if (tempRecord != null){
-            pairRecord = new MetasSamPairRecord(tempRecord, null);
+            pairRecord = new MetasSAMPairRecord(tempRecord, null);
             //pairRecord.setPaired(false);
         }
 
@@ -80,7 +80,7 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
 
     /**
      * TODO: 注意cOMG原流程中insertsize+100的100是为了容错，insertsize本身包含end+gap+end的区域。
-     * Generator of MetasSamPairRecord for paired-end sequencing data, both "record1" and "record2" fields
+     * Generator of MetasSAMPairRecord for paired-end sequencing data, both "record1" and "record2" fields
      * will be set. There are several status of the paired records:
      * + Both reads are unmapped. This kind of pairs will have been filtered out in the first operation of RDD.
      * + One of the paired is unmapped. If the other read is exactly mapped to one reference, the insert size
@@ -97,11 +97,11 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
      * @param metasSamRecords Iterator of MetasSamRecords created by groupByKey() operation of RDD, all
      *                        the records from the iterator have the same record name (read id) without
      *                        "/1/2" suffix.
-     * @return MetasSamPairRecord if the read is exactly mapped to one reference, else null.
+     * @return MetasSAMPairRecord if the read is exactly mapped to one reference, else null.
      */
 
-    private MetasSamPairRecord pairedListToSamPair(Iterable<SAMRecord> metasSamRecords){
-        MetasSamPairRecord pairRecord = null;
+    private MetasSAMPairRecord pairedListToSamPair(Iterable<SAMRecord> metasSamRecords){
+        MetasSAMPairRecord pairRecord = null;
 
         int count1 = 0;
         int count2 = 0;
@@ -123,19 +123,19 @@ public class SamRecordListMergeFunction implements Serializable, Function<Iterab
 
         if (count1 == 1){
             if (count2 == 1){
-                pairRecord = new MetasSamPairRecord(tempRec1, tempRec2);
+                pairRecord = new MetasSAMPairRecord(tempRec1, tempRec2);
                 pairRecord.setPaired(true);
 
                 if (tempRec1.getReferenceName().equals(tempRec2.getReferenceName())) {
                     pairRecord.setProperPaired(true);
                 }
             } else {
-                pairRecord = new MetasSamPairRecord(tempRec1, null);
+                pairRecord = new MetasSAMPairRecord(tempRec1, null);
                 //pairRecord.setPaired(false);
             }
         } else {
             if (count2 == 1){
-                pairRecord = new MetasSamPairRecord(tempRec2, null);
+                pairRecord = new MetasSAMPairRecord(tempRec2, null);
                 //pairRecord.setPaired(false);
             }
         }

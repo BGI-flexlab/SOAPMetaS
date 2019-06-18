@@ -12,10 +12,10 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordInsertSizeFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 
@@ -86,21 +86,21 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
      */
     @Override
     public JavaPairRDD<String, ProfilingResultRecord> runProfiling(
-            JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner){
+            JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD, Partitioner partitioner){
 
         if (partitioner == null){
             partitioner = new HashPartitioner(200);
         }
 
         if (this.sequencingMode.equals(SequencingMode.PAIREDEND)){
-                if (this.doInsRecalibration){
+            if (this.doInsRecalibration){
                 this.insertSizeFilter.training(readMetasSamPairRDD);
             }
 
             /*
             Input:
              key: sampleID\treadName
-             value: MetasSamPairRecord
+             value: MetasSAMPairRecord
              partition: sampleID + readname
 
             After flatMapToPair:
@@ -202,7 +202,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
      *     scala.Tuple4<> containing read SMTag, raw read count (unrecalibrated), recalibrated read count and merged read
      *     names (form: "read1/1|read1/2|read2/1|read3/2|...|").
      */
-    private Iterator<Tuple2<String, Tuple4<String, Integer, Double, String>>> computePEReadCount (Tuple2<String, MetasSamPairRecord> tupleKeyValue){
+    private Iterator<Tuple2<String, Tuple4<String, Integer, Double, String>>> computePEReadCount (Tuple2<String, MetasSAMPairRecord> tupleKeyValue){
 
         ArrayList<Tuple2<String, Tuple4<String, Integer, Double, String>>> readCountTupleList = new ArrayList<>(2);
 
@@ -243,7 +243,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         return readCountTupleList.iterator();
     }
 
-    private Iterator<Tuple2<String, Tuple4<String, Integer, Double, String>>> computeSEReadCount (Tuple2<String, MetasSamPairRecord> tupleKeyValue){
+    private Iterator<Tuple2<String, Tuple4<String, Integer, Double, String>>> computeSEReadCount (Tuple2<String, MetasSAMPairRecord> tupleKeyValue){
 
         ArrayList<Tuple2<String, Tuple4<String, Integer, Double, String>>> readCountTupleList = new ArrayList<>(2);
 

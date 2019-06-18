@@ -7,8 +7,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
-import org.bgi.flexlab.metas.profiling.ProfilingUtils;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import scala.Tuple2;
 
 import java.io.Serializable;
@@ -82,7 +81,7 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Ser
      *
      * @param readMetasSamPairRDD
      */
-    public void training(JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD){
+    public void training(JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD){
         List<WeightedObservedPoint> pointList = readMetasSamPairRDD.values()
                 .filter(pairRec -> pairRec.isProperPaired())
                 .mapToPair(pairRec -> {

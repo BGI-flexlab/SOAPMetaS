@@ -4,7 +4,7 @@ import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
@@ -35,7 +35,7 @@ public abstract class ProfilingMethodBase implements Serializable {
 
     /**
      * The key step of profiling process, including two transformations flatMapToPair() and reduceBykey(),
-     * and the input RDD has type of JavaPairRDD<String, MetasSamPairRecord> while the output type is
+     * and the input RDD has type of JavaPairRDD<String, MetasSAMPairRecord> while the output type is
      * JavaPairRDD<String, ProfilingResultRecord>.
      *
      * The PairFlatMapFunction in flatMapToPair() is for computing the reads count of each marker, the
@@ -51,6 +51,6 @@ public abstract class ProfilingMethodBase implements Serializable {
      * of cluster, recalibrated abundance, and name list of all mapped reads(ProfilingAnalysisLevel.ESTIMATE).
      */
     public abstract JavaPairRDD<String, ProfilingResultRecord> runProfiling(
-            JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD, Partitioner partitioner);
+            JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD, Partitioner partitioner);
 
 }

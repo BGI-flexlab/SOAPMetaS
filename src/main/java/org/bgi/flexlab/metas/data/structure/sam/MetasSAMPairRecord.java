@@ -5,14 +5,14 @@ import htsjdk.samtools.SAMRecord;
 import java.io.Serializable;
 
 /**
- * ClassName: MetasSamPairRecord
+ * ClassName: MetasSAMPairRecord
  * Description: 由于存在paired-end测序的数据，所以需要构建针对pair信息的特殊数据类型，方便对pair信息的封装。为了方便
  * 流程的整合，针对single-end数据也进行同样的处理，并提供了判断pair 状态的适当接口。
  *
  * @author heshixu@genomics.cn
  */
 
-public class MetasSamPairRecord implements Serializable {
+public class MetasSAMPairRecord implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
@@ -38,7 +38,9 @@ public class MetasSamPairRecord implements Serializable {
     //    this.exact2 = false;
     //}
 
-    public MetasSamPairRecord(SAMRecord record1, SAMRecord record2){
+    public MetasSAMPairRecord(){}
+
+    public MetasSAMPairRecord(SAMRecord record1, SAMRecord record2){
         this.record1 = record1;
         this.record2 = record2;
     }

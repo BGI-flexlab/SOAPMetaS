@@ -12,18 +12,18 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 /**
- * ClassName: MetasSamInputFormat
+ * ClassName: MetasSAMInputFormat
  * Description:
  *
  * @author: heshixu@genomics.cn
  */
 
-public class MetasSamInputFormat extends FileInputFormat<Text, SAMRecordWritable> {
+public class MetasSAMInputFormat extends FileInputFormat<Text, SAMRecordWritable> {
 
     @Override
     public RecordReader<Text,SAMRecordWritable> createRecordReader(InputSplit split, TaskAttemptContext ctx)
             throws InterruptedException, IOException {
-        final RecordReader<Text, SAMRecordWritable> rr = new MetasSamRecordReader();
+        final RecordReader<Text, SAMRecordWritable> rr = new MetasSAMRecordReader();
         rr.initialize(split, ctx);
         return rr;
     }

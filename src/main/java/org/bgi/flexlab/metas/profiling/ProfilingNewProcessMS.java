@@ -10,7 +10,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSamInputFormat;
+import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSAMInputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingEveOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.RelativeAbundanceFunction;
@@ -18,7 +18,7 @@ import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitio
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.DataUtils;
@@ -184,7 +184,7 @@ public class ProfilingNewProcessMS {
         partition: defaultPartitoner
          */
         JavaPairRDD<String, SAMRecord> cleanMetasSamRecordRDD = this.jscontext
-                .newAPIHadoopFile(filePath, MetasSamInputFormat.class, Text.class, SAMRecordWritable.class,
+                .newAPIHadoopFile(filePath, MetasSAMInputFormat.class, Text.class, SAMRecordWritable.class,
                         this.jscontext.hadoopConfiguration())
                 .mapToPair(rec -> {
                     //LOG.trace("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Remaining samRecod: " + rec._1.toString());
@@ -210,10 +210,10 @@ public class ProfilingNewProcessMS {
 
         After mapValues && filter:
          key: sampleID\treadName
-         value: MetasSamPairRecord
+         value: MetasSAMPairRecord
          partition: sampleID + readName
         */
-        JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
+        JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
                 .groupByKey(sampleIDClusterNamePartitioner)
                 .mapValues(new SamRecordListMergeFunction(this.metasOpt.getSequencingMode()))
                 .filter(item -> (item._2 != null));

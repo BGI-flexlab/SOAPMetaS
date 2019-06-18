@@ -36,15 +36,15 @@ import htsjdk.samtools.*;
 
 
 /**
- * ClassName: MetasSamRecordReader
+ * ClassName: MetasSAMRecordReader
  * Description:
  *
  * @author: heshixu@genomics.cn
  */
 
-public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> {
+public class MetasSAMRecordReader extends RecordReader<Text, SAMRecordWritable> {
 
-    protected static final Log LOG = LogFactory.getLog(MetasSamRecordReader.class.getName());
+    protected static final Log LOG = LogFactory.getLog(MetasSAMRecordReader.class.getName());
 
     private Text key = new Text();
     private SAMRecordWritable record = new SAMRecordWritable();
@@ -74,7 +74,7 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
         this.start =         split.getStart();
         this.end   = start + split.getLength();
 
-        LOG.trace("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] Current split file: "  +
+        LOG.trace("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] Current split file: "  +
                 split.getPath().getName() + " File position: " + this.start + " Split length: " + split.getLength());
 
         final Configuration conf = ctx.getConfiguration();
@@ -86,7 +86,7 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
         final FileSystem fs = file.getFileSystem(conf);
 
         String samSampleListPath = conf.get("metas.data.mapreduce.input.samsamplelist");
-        LOG.trace("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] SAM sample list configure " +
+        LOG.trace("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] SAM sample list configure " +
                 "metas.data.mapreduce.input.samsamplelist is " + samSampleListPath);
 
         if (samSampleListPath != null && !samSampleListPath.equals("")) {
@@ -94,7 +94,7 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
                     true, true, false);
             sampleID = samMultiSampleList.getSampleID(file.getName());
         } else {
-            LOG.error("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] Please provide multisample " +
+            LOG.error("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] Please provide multisample " +
                     "information list, or the partitioning may be uncontrollable.");
             sampleID = 1;
         }
@@ -153,7 +153,7 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
                 if (iterator.hasNext())
                     iterator.next();
             } catch (SAMFormatException e) {
-                LOG.error("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] SAM format is not correct. File: " + file.getName());
+                LOG.error("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] SAM format is not correct. File: " + file.getName());
             }
         }
     }
@@ -206,7 +206,7 @@ public class MetasSamRecordReader extends RecordReader<Text, SAMRecordWritable> 
             record.set(null);
         }
 
-        //LOG.trace("[SOAPMetas::" + MetasSamRecordReader.class.getName() + "] Record element: key: " + key.toString() +
+        //LOG.trace("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] Record element: key: " + key.toString() +
         //        " || value: " + r.toString());
         return true;
     }

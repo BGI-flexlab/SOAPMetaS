@@ -5,7 +5,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
-import org.bgi.flexlab.metas.data.structure.sam.MetasSamPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
@@ -94,7 +94,7 @@ public class ProfilingProcess {
          * TODO: 注意在最后输出结果时计算相对丰度
          *
          */
-        JavaPairRDD<String, MetasSamPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
+        JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
                 .mapToPair(tuple -> new Tuple2<>(this.pUtil.samRecordNameModifier(tuple._2), tuple._2))
                 .groupByKey()
                 .mapValues(new SamRecordListMergeFunction(this.seqMode))
