@@ -13,7 +13,7 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
-import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordInsertSizeFilter;
+import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordInsertSizeFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelFactory;
@@ -42,7 +42,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
     private static final Logger LOG = LogManager.getLogger(COMGProfilingMethod.class);
 
-    private MetasSamRecordInsertSizeFilter insertSizeFilter;
+    private MetasSAMRecordInsertSizeFilter insertSizeFilter;
 
     private ReferenceInfoMatrix referenceInfoMatrix;
 
@@ -72,7 +72,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         this.referenceInfoMatrix = new ReferenceInfoMatrix(options.getReferenceMatrixFilePath(),
                     options.getSpeciesGenomeGCFilePath());
 
-        this.insertSizeFilter = new MetasSamRecordInsertSizeFilter(options.getInsertSize(), this.referenceInfoMatrix);
+        this.insertSizeFilter = new MetasSAMRecordInsertSizeFilter(options.getInsertSize(), this.referenceInfoMatrix);
 
     }
 
@@ -99,14 +99,14 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
             /*
             Input:
-             key: sampleID\treadName
+             key: sampleID[\treadName]
              value: MetasSAMPairRecord
-             partition: sampleID + readname
+             partition: [sampleID + readname]
 
             After flatMapToPair:
              key: sampleID\tclusterName
              value: Tuple4<SMTag, raw read count (unrecalibrated), recalibrated read count, merged read>
-             partition: sampleID + readname
+             partition: [sampleID + readname]
 
             After reduceByKey:
              key: sampleID\tclusterName

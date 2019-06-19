@@ -16,7 +16,7 @@ import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingResultWrit
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
-import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
+import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.DataUtils;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
@@ -48,7 +48,7 @@ public class ProfilingProcessMS {
     private int numPartitionEachSample;
 
     private boolean doIdentityFiltering = false;
-    private MetasSamRecordIdentityFilter identityFilter;
+    private MetasSAMRecordIdentityFilter identityFilter;
 
     private String tmpDir;
     private String outputHdfsDir;
@@ -71,7 +71,7 @@ public class ProfilingProcessMS {
 
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
         if (this.doIdentityFiltering) {
-            this.identityFilter = new MetasSamRecordIdentityFilter(this.metasOpt.getMinIdentity());
+            this.identityFilter = new MetasSAMRecordIdentityFilter(this.metasOpt.getMinIdentity());
         }
         Configuration conf = this.jscontext.hadoopConfiguration();
 

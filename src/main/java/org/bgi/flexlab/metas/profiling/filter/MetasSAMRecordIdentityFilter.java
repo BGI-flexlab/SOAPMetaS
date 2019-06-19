@@ -10,22 +10,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * ClassName: MetasSamRecordIdentityFilter
+ * ClassName: MetasSAMRecordIdentityFilter
  * Description: Filter SAM by the identity of alignment result.
  *
  * @author heshixu@genomics.cn
  */
 
-public class MetasSamRecordIdentityFilter
-        implements MetasSamRecordFilter, Function<Tuple2<String, SAMRecord>, Boolean> {
+public class MetasSAMRecordIdentityFilter
+        implements MetasSAMRecordFilter, Function<Tuple2<String, SAMRecord>, Boolean> {
 
     private double minimumIdentity;
 
-    public MetasSamRecordIdentityFilter(){
-        this.minimumIdentity = 50;
+    public MetasSAMRecordIdentityFilter(){
+        this.minimumIdentity = 80;
     }
 
-    public MetasSamRecordIdentityFilter(double minIdentity){
+    public MetasSAMRecordIdentityFilter(double minIdentity){
         this.minimumIdentity = minIdentity;
     }
 
@@ -35,6 +35,9 @@ public class MetasSamRecordIdentityFilter
      */
     @Override
     public boolean filter(SAMRecord record){
+        if (record == null){
+            return true;
+        }
         double identity = calculateIdentity(record.getCigarString(), record.getStringAttribute("MD"));
         return identity < this.minimumIdentity;
     }

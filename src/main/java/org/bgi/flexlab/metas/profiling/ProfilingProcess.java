@@ -6,7 +6,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
-import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
+import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
@@ -32,7 +32,7 @@ public class ProfilingProcess {
 
     private boolean doIdentityFiltering = false;
 
-    private MetasSamRecordIdentityFilter identityFilter;
+    private MetasSAMRecordIdentityFilter identityFilter;
 
     public ProfilingProcess(final MetasOptions options, final JavaSparkContext context){
         this.metasOpt = options;
@@ -50,7 +50,7 @@ public class ProfilingProcess {
 
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
         if (this.doIdentityFiltering) {
-            this.identityFilter = new MetasSamRecordIdentityFilter(this.metasOpt.getMinIdentity());
+            this.identityFilter = new MetasSAMRecordIdentityFilter(this.metasOpt.getMinIdentity());
         }
     }
 

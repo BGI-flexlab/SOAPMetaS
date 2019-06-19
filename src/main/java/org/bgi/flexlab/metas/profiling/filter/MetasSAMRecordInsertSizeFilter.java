@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * ClassName: MetasSamRecordInsertSizeFilter
+ * ClassName: MetasSAMRecordInsertSizeFilter
  * Description: Filter for insert size of paired-end sequencing data. The insert size values of
  * paired-end data are not fixed which can be caused by experimental factors, environmental factors
  * or many other factors.
@@ -31,11 +31,11 @@ import java.util.List;
  * @author heshixu@genomics.cn
  */
 
-public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Serializable {
+public class MetasSAMRecordInsertSizeFilter implements MetasSAMRecordFilter, Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    private static final Logger LOG = LogManager.getLogger(MetasSamRecordInsertSizeFilter.class);
+    private static final Logger LOG = LogManager.getLogger(MetasSAMRecordInsertSizeFilter.class);
 
     private int meanInsertSize;
 
@@ -47,7 +47,7 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Ser
 
     private ReferenceInfoMatrix referenceInfoMatrix;
 
-    public MetasSamRecordInsertSizeFilter(int insertSize, ReferenceInfoMatrix refInfo){
+    public MetasSAMRecordInsertSizeFilter(int insertSize, ReferenceInfoMatrix refInfo){
         this.meanInsertSize = insertSize;
         this.referenceInfoMatrix = refInfo;
     }
@@ -63,13 +63,13 @@ public class MetasSamRecordInsertSizeFilter implements MetasSamRecordFilter, Ser
 
     public void setMeanInsertSize(int meanIns){
         this.meanInsertSize = meanIns;
-        LOG.trace("[SOAPMetas::" + MetasSamRecordInsertSizeFilter.class.getName() + "] Trained mean insert size: " +
+        LOG.trace("[SOAPMetas::" + MetasSAMRecordInsertSizeFilter.class.getName() + "] Trained mean insert size: " +
                 meanIns);
     }
 
     public void setInserSizeSD(int insertSizeSD) {
         this.insertSizeSD = insertSizeSD;
-        LOG.trace("[SOAPMetas::" + MetasSamRecordInsertSizeFilter.class.getName() + "] Trained insert size SD: " +
+        LOG.trace("[SOAPMetas::" + MetasSAMRecordInsertSizeFilter.class.getName() + "] Trained insert size SD: " +
                 insertSizeSD);
     }
 

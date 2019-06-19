@@ -5,7 +5,7 @@ import htsjdk.samtools.SAMRecord;
 /**
  * Basic APi for filtering SAMRecord instance.
  */
-public interface MetasSamRecordFilter {
+public interface MetasSAMRecordFilter {
 
     /**
      * Whether the SAMRecord should be filtered out. "true" means the record should be filtered out.

@@ -40,8 +40,16 @@ public class MetasSAMPairRecord implements Serializable {
 
     public MetasSAMPairRecord(){}
 
-    public MetasSAMPairRecord(SAMRecord record1, SAMRecord record2){
+    public MetasSAMPairRecord(SAMRecord record1, SAMRecord record2) {
+        this.setFirstRecord(record1);
+        this.setSecondRecord(record2);
+    }
+
+    public void setFirstRecord(SAMRecord record) {
         this.record1 = record1;
+    }
+
+    public void setSecondRecord(SAMRecord record) {
         this.record2 = record2;
     }
 

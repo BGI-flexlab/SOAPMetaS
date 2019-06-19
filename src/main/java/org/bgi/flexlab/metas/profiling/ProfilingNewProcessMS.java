@@ -10,7 +10,8 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSAMInputFormat;
+import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSAMWFInputFormat;
+import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSESAMWFInputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingEveOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.RelativeAbundanceFunction;
@@ -19,11 +20,12 @@ import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecordWritable;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
-import org.bgi.flexlab.metas.profiling.filter.MetasSamRecordIdentityFilter;
+import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.DataUtils;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
-import org.seqdoop.hadoop_bam.SAMRecordWritable;
+import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 
 
@@ -46,12 +48,13 @@ public class ProfilingNewProcessMS {
 
     private String pipeline;
     private ProfilingAnalysisMode analysisMode;
+    private SequencingMode seqMode;
 
     private SAMMultiSampleList samMultiSampleList;
     private int numPartitionEachSample;
 
     private boolean doIdentityFiltering = false;
-    private MetasSamRecordIdentityFilter identityFilter;
+    private MetasSAMRecordIdentityFilter identityFilter;
 
     private String tmpDir;
     private String outputHdfsDir;
@@ -73,10 +76,11 @@ public class ProfilingNewProcessMS {
 
         this.pipeline = this.metasOpt.getProfilingPipeline();
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
+        this.seqMode = this.metasOpt.getSequencingMode();
 
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
         if (this.doIdentityFiltering) {
-            this.identityFilter = new MetasSamRecordIdentityFilter(this.metasOpt.getMinIdentity());
+            this.identityFilter = new MetasSAMRecordIdentityFilter(this.metasOpt.getMinIdentity());
         }
         Configuration conf = this.jscontext.hadoopConfiguration();
         this.jcf = new JobConf(conf);
@@ -168,58 +172,91 @@ public class ProfilingNewProcessMS {
 
         LOG.trace("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] All input sam file paths: " + filePath);
 
-        /*
-        Note: filter() operation of rdd will return a new RDD containing only the elements that makes the filter return true.
+        ///*
+        //Function: SamRecord reading.
+        //Note: filter() operation of rdd will return a new RDD containing only the elements that makes the filter return true.
+        //---
+        //After newAPIHadoopFile && filter
+        //key: sampleID + "\t" + readName.replaceFirst("/[12]$", "") <Text>
+        //value: SAMRecordWritable
+        //partition: defaultPartitoner
+        //---
+        //After mapToPair:
+        //key: sampleID + "\t" + readName.replaceFirst("/[12]$", "")
+        //value: SAMRecord
+        //partition: defaultPartitoner
+        // */
+        //JavaPairRDD<String, SAMRecord> cleanMetasSamRecordRDD = this.jscontext
+        //        .newAPIHadoopFile(filePath, MetasSAMInputFormat.class, Text.class, SAMRecordWritable.class,
+        //                this.jscontext.hadoopConfiguration())
+        //        .mapToPair(rec -> {
+        //            //LOG.trace("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Remaining samRecod: " + rec._1.toString());
+        //            return new Tuple2<>(rec._1.toString(), rec._2.get());
+        //        })
+        //        .filter(tup -> tup._2 != null);
+        //if (this.doIdentityFiltering){
+        //    cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
+        //}
+        ///*
+        //SamRecord Group and merge.
+        //---
+        //InputRDD:
+        // key: sampleID\treadName
+        // value: SAMRecord
+        // partition: defaultPartition
+        //---
+        //After groupByKey:
+        // key: sampleID\treadName
+        // value: Interable<SAMRecord>
+        // partition: sampleID + readName
+        //---
+        //After mapValues && filter:
+        // key: sampleID\treadName
+        // value: MetasSAMPairRecord
+        // partition: sampleID + readName
+        //*/
+        //JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
+        //        .groupByKey(sampleIDClusterNamePartitioner)
+        //        .mapValues(new SamRecordListMergeFunction(this.metasOpt.getSequencingMode()))
+        //        .filter(item -> (item._2 != null));
 
-        SamRecord reading.
+        JavaPairRDD<String, MetasSAMPairRecord> cleanMetasSamRecordRDD;
 
-        After newAPIHadoopFile && filter
-        key: sampleID + "\t" + readName.replaceFirst("/[12]$", "") <Text>
-        value: SAMRecordWritable
-        partition: defaultPartitoner
+        if (this.seqMode.equals(SequencingMode.PAIREDEND)){
+            cleanMetasSamRecordRDD = this.jscontext.newAPIHadoopFile(filePath, MetasSAMWFInputFormat.class, Text.class, MetasSAMPairRecordWritable.class, this.jscontext.hadoopConfiguration())
+                    .filter(rec -> rec._2 != null)
+                    .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.get()));
+        } else {
+            cleanMetasSamRecordRDD = this.jscontext.newAPIHadoopFile(filePath, MetasSESAMWFInputFormat.class, Text.class, MetasSAMPairRecordWritable.class, this.jscontext.hadoopConfiguration())
+                    .filter(rec -> rec._2 != null)
+                    .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.get()));
+        }
 
-        After mapToPair:
-        key: sampleID + "\t" + readName.replaceFirst("/[12]$", "")
-        value: SAMRecord
-        partition: defaultPartitoner
-         */
-        JavaPairRDD<String, SAMRecord> cleanMetasSamRecordRDD = this.jscontext
-                .newAPIHadoopFile(filePath, MetasSAMInputFormat.class, Text.class, SAMRecordWritable.class,
-                        this.jscontext.hadoopConfiguration())
-                .mapToPair(rec -> {
-                    //LOG.trace("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Remaining samRecod: " + rec._1.toString());
-                    return new Tuple2<>(rec._1.toString(), rec._2.get());
-                })
-                .filter(tup -> tup._2 != null);
         if (this.doIdentityFiltering){
-            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
+            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(v -> {
+                if (this.identityFilter.filter(v.getFirstRecord())){
+                    v.setFirstRecord(null);
+                    v.setPaired(false);
+                    v.setProperPaired(false);
+                }
+                if (this.identityFilter.filter(v.getSecondRecord())) {
+                    v.setSecondRecord(null);
+                    v.setPaired(false);
+                    v.setProperPaired(false);
+                }
+                if (v.getFirstRecord() == null && v.getSecondRecord() == null){
+                    v = null;
+                }
+                return v;
+            }).filter(rec -> rec._2 != null);
         }
 
         /*
-        SamRecord Group and merge.
-
-        InputRDD:
-         key: sampleID\treadName
-         value: SAMRecord
-         partition: defaultPartition
-
-        After groupByKey:
-         key: sampleID\treadName
-         value: Interable<SAMRecord>
-         partition: sampleID + readName
-
-        After mapValues && filter:
-         key: sampleID\treadName
-         value: MetasSAMPairRecord
-         partition: sampleID + readName
-        */
-        JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
-                .groupByKey(sampleIDClusterNamePartitioner)
-                .mapValues(new SamRecordListMergeFunction(this.metasOpt.getSequencingMode()))
-                .filter(item -> (item._2 != null));
-
-        /*
         Since clusterName functions similarly as readName does, so we use the same partitioner.
+        Input:
+         key: sampleID
+         value: MetasSAMPairRecord
+         partition: default (per input file)
 
         After runProfiling:
          key: sampleID
@@ -240,7 +277,7 @@ public class ProfilingNewProcessMS {
          according to the sampleID and clusterName.hash.
         */
         JavaPairRDD<String, ProfilingResultRecord> profilingResultRecordRDD = getProfilingMethod()
-                .runProfiling(readMetasSamPairRDD, sampleIDClusterNamePartitioner);
+                .runProfiling(cleanMetasSamRecordRDD, sampleIDClusterNamePartitioner);
 
         JavaPairRDD<String, ProfilingResultRecord> relAbunResultRDD = profilingResultRecordRDD
                 .partitionBy(sampleIDPartitioner)
