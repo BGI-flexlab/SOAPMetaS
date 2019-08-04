@@ -124,9 +124,9 @@ public class ProfilingProcess {
      */
     public ProfilingMethodBase getProfilingMethod(){
         if(this.pipeline.equals("metaphlan")){
-            return new COMGProfilingMethod(this.metasOpt);
+            return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         } else if (this.pipeline.equals("comg")){
-            return new METAPHLANProfilingMethod(this.metasOpt);
+            return new METAPHLANProfilingMethod(this.metasOpt, this.jscontext);
         } else {
             return null;
         }

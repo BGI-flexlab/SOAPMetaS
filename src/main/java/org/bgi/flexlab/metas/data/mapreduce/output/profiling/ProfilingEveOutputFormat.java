@@ -9,6 +9,7 @@ import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
  * @author: heshixu@genomics.cn
  */
 
+@Deprecated
 public class ProfilingEveOutputFormat<K, V> extends ProfilingOutputFormatBase<K, V> {
 
     @Override

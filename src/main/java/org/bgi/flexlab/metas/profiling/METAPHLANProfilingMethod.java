@@ -2,6 +2,7 @@ package org.bgi.flexlab.metas.profiling;
 
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
@@ -19,8 +20,8 @@ public class METAPHLANProfilingMethod extends ProfilingMethodBase implements Ser
 
     public static final long serialVersionUID = 1L;
 
-    public METAPHLANProfilingMethod(MetasOptions options){
-        super(options);
+    public METAPHLANProfilingMethod(MetasOptions options, JavaSparkContext jsc){
+        super(options, jsc);
     }
 
     /**

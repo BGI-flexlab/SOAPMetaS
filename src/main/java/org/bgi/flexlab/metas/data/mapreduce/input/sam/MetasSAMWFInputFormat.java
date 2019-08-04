@@ -13,7 +13,7 @@ import java.io.IOException;
 
 /**
  * ClassName: MetasSAMWFInputFormat
- * Description: Read SAM file as a whole.
+ * Description: Read SAM file of pair-ended reads as one whole file.
  *
  * @author: heshixu@genomics.cn
  */

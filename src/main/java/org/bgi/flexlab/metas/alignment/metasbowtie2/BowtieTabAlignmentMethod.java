@@ -118,6 +118,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
                 bw1.newLine();
             }
 
+            bw1.flush();
             bw1.close();
 
             //We do not need the input data anymore, as it is written in a local file

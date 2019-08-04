@@ -21,7 +21,7 @@ import java.io.IOException;
 public class MetasSAMPairRecordWritable implements Writable {
     private static final BAMRecordCodec lazyCodec = new BAMRecordCodec(null, new LazyBAMRecordFactory());
 
-    private MetasSAMPairRecord pairRecord;
+    private MetasSAMPairRecord pairRecord = null;
 
     public MetasSAMPairRecord get() {
         return pairRecord;
@@ -63,6 +63,9 @@ public class MetasSAMPairRecordWritable implements Writable {
 
     @Override
     public String toString() {
+        if (pairRecord == null) {
+            return "NULL_Pair_Record";
+        }
         return pairRecord.toString(); // remove trailing newline
     }
 }

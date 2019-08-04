@@ -81,7 +81,7 @@ public class SingleAlignmentMethod extends AlignmentMethodBase implements Serial
             arg1 = null;
 
             // This is where the actual local alignment takes place
-            returnedValues = this.runAlignmentProcess(arg0, fastqFileName1, null);
+            //returnedValues = this.runAlignmentProcess(arg0, fastqFileName1, null);
 
             // Delete the temporary file, as is have now been copied to the output directory
             FastqFile1.delete();

@@ -4,7 +4,7 @@ import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 
 /**
  * ClassName: ProfilingOutputFormat
- * Description:
+ * Description: Set name of profiling output file.
  *
  * @author: heshixu@genomics.cn
  */

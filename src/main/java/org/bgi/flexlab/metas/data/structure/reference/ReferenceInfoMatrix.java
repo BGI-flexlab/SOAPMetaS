@@ -20,7 +20,7 @@ import java.util.Map;
  * @author heshixu@genomics.cn
  */
 
-public class ReferenceInfoMatrix implements Serializable{
+public class ReferenceInfoMatrix implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
@@ -54,7 +54,7 @@ public class ReferenceInfoMatrix implements Serializable{
 
                 String currentLine;
                 while ((currentLine = speciesBR.readLine()) != null) {
-                    LOG.trace("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Species GC file, current line: " + currentLine);
+                    //LOG.trace("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Species GC file, current line: " + currentLine);
                     String[] lineSplit = StringUtils.split(currentLine, '\t');
                     ReferenceSpeciesRecord speciesRecord = new ReferenceSpeciesRecord(null, Integer.parseInt(lineSplit[1]),
                             Double.parseDouble(lineSplit[2]));
@@ -69,6 +69,8 @@ public class ReferenceInfoMatrix implements Serializable{
                 LOG.error("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Can't load species gc file: " + speciesGCFilePath);
             }
         }
+
+        LOG.info("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Construct species gc matrix.");
     }
 
     //public ReferenceInfoMatrix(String referenceMatrixFilePath){
@@ -104,10 +106,9 @@ public class ReferenceInfoMatrix implements Serializable{
                     continue;
                 }
                 this.markerRecordMap.put(lineSplit[1], geneRecord);
-                LOG.trace("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Marker gene matrix file. " +
-                        "Current line: " + currentLine + " || Key of current line: " + lineSplit[1]);
+                //LOG.trace("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Marker gene matrix file. " + "Current line: " + currentLine + " || Key of current line: " + lineSplit[1]);
             }
-
+            LOG.info("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Construct marker gene matrix file.");
             matrixBR.close();
 
         } catch (NumberFormatException e){
@@ -125,7 +126,9 @@ public class ReferenceInfoMatrix implements Serializable{
      */
     public int getGeneLength(String geneName) {
 
-        ReferenceGeneRecord geneRec = markerRecordMap.getOrDefault(geneName, null);
+        ReferenceGeneRecord geneRec = null;//this.markerRecordMap.getOrDefault(geneName, null);
+
+        geneRec = this.markerRecordMap.getOrDefault(geneName, null);
 
         if (geneRec == null){
             LOG.warn("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Gene" + geneName +
@@ -147,18 +150,17 @@ public class ReferenceInfoMatrix implements Serializable{
     }
 
     public String getGeneSpeciesName(String referenceName) {
-        String name = "Unknown";
-        try {
-            ReferenceGeneRecord record = markerRecordMap.get(referenceName);
+        String name = "s__unclassed";
+        ReferenceGeneRecord record  = null;
+
+        record = this.markerRecordMap.getOrDefault(referenceName, null);
+
+        if (record != null){
             name = record.getSpeciesName();
-        } catch (NullPointerException e){
-            LOG.error("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Reference " + referenceName +
-                    " may be omitted in reference matrix file.");
-        }
-        if (name.equals("Unknown")){
+        } else {
             LOG.warn("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Gene " + referenceName +
                     " doesn't has species info. Return \"Unknown\" as species name.");
-            return name.intern();
+            name = name.intern();
         }
         return name;
     }
@@ -167,7 +169,7 @@ public class ReferenceInfoMatrix implements Serializable{
         ReferenceSpeciesRecord speciesRecord = this.refSpeciesRecordMap.getOrDefault(referenceName, null);
         if (speciesRecord == null){
             LOG.warn("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Species " + referenceName +
-                    " doesn't has genome info. Return 1 as genome length.");
+                    " doesn't has genome info. Return 0 as genome length.");
             return 0;
         }
         return speciesRecord.getGenomeLength();

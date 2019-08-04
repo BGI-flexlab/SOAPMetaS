@@ -96,7 +96,7 @@ public class PairedAlignmentMethod extends AlignmentMethodBase implements Serial
             arg1 = null;
 
             // This is where the actual local alignment takes place
-            returnedValues = this.runAlignmentProcess(arg0, fastqFileName1, fastqFileName2);
+            //returnedValues = this.runAlignmentProcess(arg0, fastqFileName1, fastqFileName2);
 
             // Delete temporary files, as they have now been copied to the output directory
             LOG.info("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] " + PairedAlignmentMethod.class.getName() + "] Deleting file: " + fastqFileName1);

@@ -33,7 +33,7 @@ import java.util.Map;
  *
  * @author heshixu@genomics.cn
  */
-
+@Deprecated
 public class ProfilingProcessMS {
 
     private static final Log LOG = LogFactory.getLog(ProfilingProcessMS.class); // The LOG
@@ -117,6 +117,7 @@ public class ProfilingProcessMS {
             }
 
             bw1.close();
+            fos1.close();
         } catch (FileNotFoundException e){
             LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] MultiSampleFileList not found. " + e.toString());
         } catch (IOException e){

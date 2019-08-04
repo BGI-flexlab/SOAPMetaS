@@ -31,7 +31,7 @@ import java.util.List;
  * @author heshixu@genomics.cn
  */
 
-public class MetasSAMRecordInsertSizeFilter implements MetasSAMRecordFilter, Serializable {
+public class MetasSAMRecordInsertSizeFilter implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
@@ -45,32 +45,35 @@ public class MetasSAMRecordInsertSizeFilter implements MetasSAMRecordFilter, Ser
 
     private boolean doTraining = false;
 
-    private ReferenceInfoMatrix referenceInfoMatrix;
-
-    public MetasSAMRecordInsertSizeFilter(int insertSize, ReferenceInfoMatrix refInfo){
-        this.meanInsertSize = insertSize;
-        this.referenceInfoMatrix = refInfo;
+    public MetasSAMRecordInsertSizeFilter(int insertSize){
+        this.setMeanInsertSize(insertSize);
     }
 
-    @Override
-    public boolean filter(SAMRecord record){
-        if (this.doTraining){
-            return this.insertSizeRangeCheck(record);
-        } else {
-            return this.satisfyInsertSizeThreshold(record);
-        }
-    }
+    //@Override
+    //public boolean filter(SAMRecord record){
+    //    if (this.doTraining){
+    //        return this.insertSizeRangeCheck(record);
+    //    } else {
+    //        return this.satisfyInsertSizeThreshold(record);
+    //    }
+    //}
 
-    public void setMeanInsertSize(int meanIns){
+    private void setMeanInsertSize(int meanIns){
         this.meanInsertSize = meanIns;
         LOG.trace("[SOAPMetas::" + MetasSAMRecordInsertSizeFilter.class.getName() + "] Trained mean insert size: " +
                 meanIns);
     }
 
-    public void setInserSizeSD(int insertSizeSD) {
+    private void setInserSizeSD(int insertSizeSD) {
         this.insertSizeSD = insertSizeSD;
         LOG.trace("[SOAPMetas::" + MetasSAMRecordInsertSizeFilter.class.getName() + "] Trained insert size SD: " +
                 insertSizeSD);
+    }
+
+    private void setInsTolerance(int insTolerance) {
+        this.insTolerance = insTolerance;
+        LOG.trace("[SOAPMetas::" + MetasSAMRecordInsertSizeFilter.class.getName() + "] Trained insert fluctuation tolerance: " +
+                insTolerance);
     }
 
     /**
@@ -98,60 +101,71 @@ public class MetasSAMRecordInsertSizeFilter implements MetasSAMRecordFilter, Ser
 
         this.setMeanInsertSize((int) guesser.guess()[1]);
         this.setInserSizeSD((int) guesser.guess()[2]);
-
-        this.doTraining = true;
+        this.setInsTolerance(((int) guesser.guess()[2])*2);
+        //this.doTraining = true;
     }
 
-    /**
-     * Filtering paired-end reads with only one mapped end. If the unmapped end is located outside
-     * the referencce gene, the function will return true.
-     *
-     * Situation of retaining: (only end1 is mapped on reference gene, end2 is unmapped)
-     *                   end1  =====-------------------===== end2              paired-end read
-     * --|-----------------------------------------|--------------             reference gene region
-     *   ^boundary                                 ^boundary
-     *
-     * Situation of filtering: (only end1 is mapped on reference gene, end2 is unmapped)
-     *             end1  =====---------------===== end2                        paired-end read
-     * --|-----------------------------------------|--------------             reference gene region
-     *   ^boundary                                 ^boundary
-     *
-     *
-     * @param samRecord The instance of SAMRecord in pair-end sequencing mode which is not properly
-     *                  mapped as pair.
-     * @return True if the mate read is probably mapped to the sequence region outside around reference marker.
-     */
-    private boolean satisfyInsertSizeThreshold(SAMRecord samRecord){
-        if (samRecord.getReadNegativeStrandFlag()){
-            return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + this.insTolerance);
-        } else {
-            int geneLen = this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName());
-            if (geneLen > 0) {
-                return (geneLen - samRecord.getAlignmentStart()) < (this.meanInsertSize + this.insTolerance);
-            } else {
-                return false;
-            }
-        }
+    ///**
+    // * Filtering paired-end reads with only one mapped end. If the unmapped end is located outside
+    // * the referencce gene, the function will return true.
+    // *
+    // * Situation of retaining: (only end1 is mapped on reference gene, end2 is unmapped)
+    // *                   end1  =====-------------------===== end2              paired-end read
+    // * --|-----------------------------------------|--------------             reference gene region
+    // *   ^boundary                                 ^boundary
+    // *
+    // * Situation of filtering: (only end1 is mapped on reference gene, end2 is unmapped)
+    // *             end1  =====---------------===== end2                        paired-end read
+    // * --|-----------------------------------------|--------------             reference gene region
+    // *   ^boundary                                 ^boundary
+    // *
+    // *
+    // * @param samRecord The instance of SAMRecord in pair-end sequencing mode which is not properly
+    // *                  mapped as pair.
+    // * @return True if the mate read is probably mapped to the sequence region outside around reference marker.
+    // */
+    //private boolean satisfyInsertSizeThreshold(SAMRecord samRecord){
+    //    if (samRecord == null) {
+    //        return false;
+    //    }
+    //    if (samRecord.getReadNegativeStrandFlag()){
+    //        return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + this.insTolerance);
+    //    } else {
+    //        int geneLen = this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName());
+    //        if (geneLen > 0) {
+    //            return (geneLen - samRecord.getAlignmentStart()) < (this.meanInsertSize + this.insTolerance);
+    //        } else {
+    //            return false;
+    //        }
+    //    }
+    //}
+
+    ///**
+    // * More precise method for insert size filtering. As the insert size of reads from paired-end
+    // * sequencing is not "certain"， we will use the mean insert size of all reads pair in the sample
+    // * and 2-sigma rule as the criterion.
+    // *
+    // * @param samRecord SAMRecord instance of the single mapped end that is to be check.
+    // * @return True if the unmapped end is located outside reference gene.
+    // */
+    //private boolean insertSizeRangeCheck(SAMRecord samRecord){
+    //    if (samRecord.getReadNegativeStrandFlag()){
+    //        return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + 2 * this.insertSizeSD);
+    //    } else {
+    //        int geneLen = this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName());
+    //        if (geneLen > 0) {
+    //            return (geneLen - samRecord.getAlignmentStart()) < (this.meanInsertSize + 2 * this.insertSizeSD);
+    //        } else {
+    //            return false;
+    //        }
+    //    }
+    //}
+
+    public int getMeanInsertSize() {
+        return meanInsertSize;
     }
 
-    /**
-     * More precise method for insert size filtering. As the insert size of reads from paired-end
-     * sequencing is not "certain"， we will use the mean insert size of all reads pair in the sample
-     * and 2-sigma rule as the criterion.
-     *
-     * @param samRecord SAMRecord instance of the single mapped end that is to be check.
-     * @return True if the unmapped end is located outside reference gene.
-     */
-    private boolean insertSizeRangeCheck(SAMRecord samRecord){
-        if (samRecord.getReadNegativeStrandFlag()){
-            return samRecord.getAlignmentStart() < (this.meanInsertSize - samRecord.getReadLength() + 2 * this.insertSizeSD);
-        } else {
-            int geneLen = this.referenceInfoMatrix.getGeneLength(samRecord.getReferenceName());
-            if (geneLen > 0) {
-                return (geneLen - samRecord.getAlignmentStart()) < (this.meanInsertSize + 2 * this.insertSizeSD);
-            } else {
-                return false;
-            }
-        }
+    public int getInsTolerance() {
+        return insTolerance;
     }
 }

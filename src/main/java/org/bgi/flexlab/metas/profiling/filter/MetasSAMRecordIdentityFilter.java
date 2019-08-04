@@ -36,7 +36,7 @@ public class MetasSAMRecordIdentityFilter
     @Override
     public boolean filter(SAMRecord record){
         if (record == null){
-            return true;
+            return false;
         }
         double identity = calculateIdentity(record.getCigarString(), record.getStringAttribute("MD"));
         return identity < this.minimumIdentity;

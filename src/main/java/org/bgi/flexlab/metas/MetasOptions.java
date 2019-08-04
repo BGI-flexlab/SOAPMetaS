@@ -128,7 +128,7 @@ public class MetasOptions {
         this.options.addOption(null, "large-index", false,
                 "Bowtie2 large index mode.");
         this.options.addOption("e", "extra-arg", true,
-                "Other parameters for Bowtie2. Please refer to Bowtie2 manual.");
+                "Other parameters for Bowtie2. Please refer to Bowtie2 manual. All parameters should be enclosed together with quotation marks \"\"");
 
         Option partitionPerSam = new Option("n", "partition-per-sam", true,
                 "Partition number of each sample. Default: 10\n" +
@@ -404,7 +404,7 @@ public class MetasOptions {
                 this.alignmentShortIndex = false;
             }
 
-            this.extraAlignmentArguments = commandLine.getOptionValue('e', "");
+            this.extraAlignmentArguments = commandLine.getOptionValue('e', "--very-sensitive --no-unal");
             this.numPartitionEachSample = Integer.parseInt(commandLine.getOptionValue('n', "10"));
 
             if (commandLine.hasOption("merge-sam-sample")){
@@ -490,7 +490,7 @@ public class MetasOptions {
             Filtering arguments parsing.
              */
             this.insertSize = Integer.parseInt(commandLine.getOptionValue("insert-size", "300"));
-            this.minIdentity = Double.parseDouble(commandLine.getOptionValue("min-identity", "0.5"));
+            this.minIdentity = Double.parseDouble(commandLine.getOptionValue("min-identity", "0.8"));
             if (commandLine.hasOption("iden-filt")){
                 this.doIdentityFiltering = true;
             }
@@ -510,8 +510,7 @@ public class MetasOptions {
             Process controling arguments parsing/
              */
             if (commandLine.hasOption("skip-alignment")) {
-                LOG.debug("[SOAPMetas::" + MetasOptions.class.getName() + "] Option \"--skip-alignment\" is set. " +
-                        "Skip alignment process." + this.SAMSampleList);
+                LOG.debug("[SOAPMetas::" + MetasOptions.class.getName() + "] Option \"--skip-alignment\" is set. Skip alignment process. SAM file list: " + this.SAMSampleList);
                 this.doAlignment = false;
                 if (this.SAMSampleList == null) {
                     throw new MissingOptionException("Missing --multi-sam-list option.");

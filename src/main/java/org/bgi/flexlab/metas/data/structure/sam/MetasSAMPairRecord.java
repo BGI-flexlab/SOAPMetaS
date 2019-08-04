@@ -46,11 +46,11 @@ public class MetasSAMPairRecord implements Serializable {
     }
 
     public void setFirstRecord(SAMRecord record) {
-        this.record1 = record1;
+        this.record1 = record;
     }
 
     public void setSecondRecord(SAMRecord record) {
-        this.record2 = record2;
+        this.record2 = record;
     }
 
     public void setProperPaired(boolean properPaired){

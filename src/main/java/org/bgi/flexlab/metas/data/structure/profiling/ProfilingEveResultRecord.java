@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
  * @author: heshixu@genomics.cn
  */
 
+@Deprecated
 public class ProfilingEveResultRecord extends ProfilingResultRecord{
 
     @Override

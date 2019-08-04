@@ -29,10 +29,10 @@ import java.io.InputStream;
 
 public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecordWritable> {
 
-    protected static final Log LOG = LogFactory.getLog(MetasSAMRecordReader.class.getName());
+    protected static final Log LOG = LogFactory.getLog(MetasSESAMWFRecordReader.class.getName());
 
     private Text key = new Text();
-    private MetasSAMPairRecordWritable recordWr;
+    private MetasSAMPairRecordWritable recordWr = new MetasSAMPairRecordWritable();
 
     private FSDataInputStream input;
     private SAMRecordIterator iterator;
@@ -61,9 +61,6 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
         this.start =         split.getStart();
         this.end   = start + split.getLength();
 
-        LOG.trace("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] Current split file: "  +
-                split.getPath().getName() + " File position: " + this.start + " Split length: " + split.getLength());
-
         final Configuration conf = ctx.getConfiguration();
 
         final ValidationStringency stringency =
@@ -72,19 +69,22 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
         final Path file = split.getPath();
         final FileSystem fs = file.getFileSystem(conf);
 
+        LOG.trace("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Current split file: "  +
+                file.getName() + " File position: " + this.start + " Split length: " + split.getLength());
+
         String samSampleListPath = conf.get("metas.data.mapreduce.input.samsamplelist");
-        LOG.trace("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] SAM sample list configure " +
-                "metas.data.mapreduce.input.samsamplelist is " + samSampleListPath);
+        //LOG.trace("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] SAM sample list configure metas.data.mapreduce.input.samsamplelist is " + samSampleListPath);
 
         if (samSampleListPath != null && !samSampleListPath.equals("")) {
             SAMMultiSampleList samMultiSampleList = new SAMMultiSampleList(samSampleListPath,
                     true, true, false);
             sampleID = samMultiSampleList.getSampleID(file.getName());
         } else {
-            LOG.error("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] Please provide multisample " +
-                    "information list, or the partitioning may be uncontrollable.");
+            LOG.error("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Please provide multisample information list, or the partitioning may be uncontrollable.");
             sampleID = 1;
         }
+
+        LOG.trace("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Start read split " + file.getName());
 
         input = fs.open(file);
 
@@ -140,7 +140,7 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
                 if (iterator.hasNext())
                     iterator.next();
             } catch (SAMFormatException e) {
-                LOG.error("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] SAM format is not correct. File: " + file.getName());
+                LOG.error("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] SAM format is not correct. File: " + file.getName());
             }
         }
     }
@@ -194,22 +194,31 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
 
         SAMRecord tempRec = null;
 
+        int count = 0;
+
         String lastReadName;
 
         if (this.lastRecord == null){
             this.lastRecord = iterator.next();
+            while (this.lastRecord.getReadUnmappedFlag()){
+                this.lastRecord = iterator.next();
+            }
         }
 
         rec1 = this.lastRecord;
+        count++;
         lastReadName = this.lastRecord.getReadName();
         this.lastRecord = null;
 
         while (iterator.hasNext()) {
 
             tempRec = iterator.next();
+            if (tempRec.getReadUnmappedFlag()){
+                continue;
+            }
 
             if (tempRec.getReadName().equals(lastReadName)) {
-                rec1 = null;
+                count++;
             } else {
                 this.lastRecord = tempRec;
                 break;
@@ -222,14 +231,14 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
         //    record.set(null);
         //}
 
-        //LOG.trace("[SOAPMetas::" + MetasSAMRecordReader.class.getName() + "] Record element: key: " + key.toString() +
+        //LOG.trace("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Record element: key: " + key.toString() +
         //        " || value: " + r.toString());
 
         tempRec = null;
 
         MetasSAMPairRecord pairRecord = null;
 
-        if (rec1 != null){
+        if (count == 1){
             pairRecord = new MetasSAMPairRecord(rec1, null);
         }
 

@@ -2,6 +2,7 @@ package org.bgi.flexlab.metas.profiling;
 
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
@@ -27,7 +28,8 @@ public abstract class ProfilingMethodBase implements Serializable {
     protected ProfilingAnalysisLevel profilingAnalysisLevel;
     protected SequencingMode sequencingMode;
 
-    public ProfilingMethodBase(MetasOptions options){
+
+    public ProfilingMethodBase(MetasOptions options, JavaSparkContext jsc){
         this.profilingAnalysisMode = options.getProfilingAnalysisMode();
         this.profilingAnalysisLevel = options.getProfilingAnalysisLevel();
         this.sequencingMode = options.getSequencingMode();
@@ -53,4 +55,7 @@ public abstract class ProfilingMethodBase implements Serializable {
     public abstract JavaPairRDD<String, ProfilingResultRecord> runProfiling(
             JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD, Partitioner partitioner);
 
+    public void destroyContent(){
+        return;
+    }
 }

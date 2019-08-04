@@ -6,9 +6,10 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.alignment.AlignmentProcessMS;
-import org.bgi.flexlab.metas.profiling.ProfilingProcessMS;
+import org.bgi.flexlab.metas.profiling.ProfilingNewProcessMS;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasTrainingProcess;
 
+import java.io.*;
 import java.util.List;
 
 /**
@@ -87,7 +88,7 @@ public class SOAPMetas {
         if (metasOptions.doProfiling()) {
             //ProfilingProcess
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing profiling process.");
-            ProfilingProcessMS profilingMS = new ProfilingProcessMS(metasOptions, jsc);
+            ProfilingNewProcessMS profilingMS = new ProfilingNewProcessMS(metasOptions, jsc);
             // Output list format:
             // outputHDFSDir/profiling/<appID>-Profiling-<readGroupID>.abundance[.evaluation]
             if (alignmentOutputList != null) {
@@ -107,6 +108,27 @@ public class SOAPMetas {
             } else {
                 LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Output profiling result files are: " +
                         StringUtils.join(profilingOutputList, ','));
+            }
+        } else if (alignmentOutputList != null) {
+            String multiSamListFile = metasOptions.getAlignmentTmpDir() + "/" + "tmp-multiSampleSAMList-" + jsc.appName();
+
+            File samList = new File(multiSamListFile);
+            FileOutputStream fos1;
+            BufferedWriter bw1;
+
+            try {
+                fos1 = new FileOutputStream(samList);
+                bw1 = new BufferedWriter(new OutputStreamWriter(fos1));
+
+                for (String samInput: alignmentOutputList) {
+                    bw1.write(samInput);
+                    bw1.newLine();
+                }
+
+                bw1.close();
+                fos1.close();
+            } catch (IOException e){
+                LOG.error("[SOAPMetas::" + SOAPMetas.class.getName() + "] MultiSampleFileList IO error. " + e.toString());
             }
         }
 

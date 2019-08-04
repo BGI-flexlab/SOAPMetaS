@@ -12,12 +12,10 @@ import org.apache.spark.storage.StorageLevel;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSAMWFInputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetasSESAMWFInputFormat;
-import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingEveOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.RelativeAbundanceFunction;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
-import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecordWritable;
@@ -35,7 +33,8 @@ import java.util.List;
 
 /**
  * ClassName: ProfilingNewProcessMS
- * Description:
+ * Description: New multiple-sample profiling process class. Exploit new SAM InputFormat for
+ *     paired-ended and single-ended reads respectively.
  *
  * @author: heshixu@genomics.cn
  */
@@ -67,9 +66,6 @@ public class ProfilingNewProcessMS {
         this.processConstruct();
     }
 
-    /**
-     * TODO: Add createOutputDirectory method if needed.
-     */
     private void processConstruct(){
 
         this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartitionEachSample(), 1);
@@ -96,17 +92,17 @@ public class ProfilingNewProcessMS {
         }
 
         this.outputHdfsDir = this.metasOpt.getProfilingOutputHdfsDir();
-        try {
-            DataUtils.createHDFSFolder(conf, this.outputHdfsDir);
-        } catch (IOException e){
-            LOG.error("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Fail to create profiling output directory. " + e.toString());
-        }
+        //try {
+        //    DataUtils.createHDFSFolder(conf, this.outputHdfsDir);
+        //} catch (IOException e){
+        //    LOG.error("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Fail to create profiling output directory. " + e.toString());
+        //}
         LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Profiling process: Temp directory: " + this.tmpDir +
                 " . Output Directpry: " + this.outputHdfsDir);
 
+        // These config items are used in MetasSAMWFInputFormat
         this.jcf.set("metas.profiling.outputHdfsDir", this.outputHdfsDir);
         this.jcf.set("metas.application.name", this.jscontext.appName());
-
     }
 
     /**
@@ -130,6 +126,7 @@ public class ProfilingNewProcessMS {
             }
 
             bw1.close();
+            fos1.close();
         } catch (FileNotFoundException e){
             LOG.error("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] MultiSampleFileList not found. " + e.toString());
         } catch (IOException e){
@@ -142,7 +139,7 @@ public class ProfilingNewProcessMS {
     public void processInitialize(String multiSamListFile){
 
         try {
-            samMultiSampleList = new SAMMultiSampleList(multiSamListFile, true, false, true);
+            samMultiSampleList = new SAMMultiSampleList(multiSamListFile, this.metasOpt.isLocalFS(), false, true);
             this.jscontext.hadoopConfiguration().set("metas.data.mapreduce.input.samsamplelist", multiSamListFile);
 
         } catch (IOException e){
@@ -167,13 +164,16 @@ public class ProfilingNewProcessMS {
         SampleIDReadNamePartitioner sampleIDClusterNamePartitioner = new SampleIDReadNamePartitioner(numPartition,
                 this.numPartitionEachSample);
         SampleIDPartitioner sampleIDPartitioner = new SampleIDPartitioner(sampleCount + 1);
-        LOG.trace("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] SampleCount: " + sampleCount +
+        LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] SampleCount: " + sampleCount +
                 " Partition each sample: " + this.numPartitionEachSample + " Total Partition Number: " + numPartition);
 
-        LOG.trace("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] All input sam file paths: " + filePath);
+        LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] All input sam file paths: " + filePath);
+
+
+        ProfilingMethodBase profilingMethod = getProfilingMethod();
 
         ///*
-        //Function: SamRecord reading.
+        //Function: Read SAM file. No extra operation during reading.
         //Note: filter() operation of rdd will return a new RDD containing only the elements that makes the filter return true.
         //---
         //After newAPIHadoopFile && filter
@@ -222,29 +222,33 @@ public class ProfilingNewProcessMS {
 
         JavaPairRDD<String, MetasSAMPairRecord> cleanMetasSamRecordRDD;
 
+        // New function for reading SAM file. Construct pair-record during input process.
+
         if (this.seqMode.equals(SequencingMode.PAIREDEND)){
             cleanMetasSamRecordRDD = this.jscontext.newAPIHadoopFile(filePath, MetasSAMWFInputFormat.class, Text.class, MetasSAMPairRecordWritable.class, this.jscontext.hadoopConfiguration())
-                    .filter(rec -> rec._2 != null)
-                    .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.get()));
+                    .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.get()))
+                    .filter(tup -> tup._2 != null);
         } else {
             cleanMetasSamRecordRDD = this.jscontext.newAPIHadoopFile(filePath, MetasSESAMWFInputFormat.class, Text.class, MetasSAMPairRecordWritable.class, this.jscontext.hadoopConfiguration())
-                    .filter(rec -> rec._2 != null)
-                    .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.get()));
+                    .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.get()))
+                    .filter(tup -> tup._2 != null);
         }
-
         if (this.doIdentityFiltering){
             cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(v -> {
-                if (this.identityFilter.filter(v.getFirstRecord())){
-                    v.setFirstRecord(null);
-                    v.setPaired(false);
-                    v.setProperPaired(false);
-                }
-                if (this.identityFilter.filter(v.getSecondRecord())) {
+                SAMRecord rec1 = v.getFirstRecord();
+                SAMRecord rec2 = v.getSecondRecord();
+                if (this.identityFilter.filter(rec1)){
+                    v.setFirstRecord(rec2);
                     v.setSecondRecord(null);
-                    v.setPaired(false);
                     v.setProperPaired(false);
+                    rec1 = null;
                 }
-                if (v.getFirstRecord() == null && v.getSecondRecord() == null){
+                if (this.identityFilter.filter(rec2)) {
+                    v.setSecondRecord(null);
+                    v.setProperPaired(false);
+                    rec2 = null;
+                }
+                if (rec1 == null && rec2 == null){
                     v = null;
                 }
                 return v;
@@ -265,7 +269,7 @@ public class ProfilingNewProcessMS {
 
         After partitionBy:
          key: sampleID
-         value: no change
+         value: ProfilingResultRecord (Tuple3<raw read count (unrecalibrated), recalibrated read count, merged read>)
          partition: sampleID
 
         After mapPartitionsToPair:
@@ -276,23 +280,34 @@ public class ProfilingNewProcessMS {
         Note: Result Record doesn't contains relative abundance. And the RDD has been partitioned
          according to the sampleID and clusterName.hash.
         */
-        JavaPairRDD<String, ProfilingResultRecord> profilingResultRecordRDD = getProfilingMethod()
+        if (this.metasOpt.isDoInsRecalibration()) {
+            cleanMetasSamRecordRDD.persist(StorageLevel.MEMORY_AND_DISK());
+        }
+
+        JavaPairRDD<String, ProfilingResultRecord> profilingResultRecordRDD = profilingMethod
                 .runProfiling(cleanMetasSamRecordRDD, sampleIDClusterNamePartitioner);
 
         JavaPairRDD<String, ProfilingResultRecord> relAbunResultRDD = profilingResultRecordRDD
                 .partitionBy(sampleIDPartitioner)
                 .mapPartitionsToPair(new RelativeAbundanceFunction(), true);
 
+        if (this.metasOpt.isDoInsRecalibration()) {
+            cleanMetasSamRecordRDD.unpersist();
+        }
+
         relAbunResultRDD.persist(StorageLevel.MEMORY_AND_DISK());
 
+        //String resultsDir = this.outputHdfsDir + "/results"
+
         // save rdd profiling file
-        if (this.analysisMode.equals(ProfilingAnalysisMode.PROFILE)) {
-            relAbunResultRDD.saveAsHadoopFile(this.outputHdfsDir, String.class,
-                    ProfilingResultRecord.class, ProfilingOutputFormat.class, this.jcf);
-        } else {
-            relAbunResultRDD.saveAsHadoopFile(this.outputHdfsDir, String.class,
-                    ProfilingEveResultRecord.class, ProfilingEveOutputFormat.class, this.jcf);
-        }
+        relAbunResultRDD.saveAsHadoopFile(this.outputHdfsDir, String.class, ProfilingResultRecord.class, ProfilingOutputFormat.class, this.jcf);
+
+        //if (this.analysisMode.equals(ProfilingAnalysisMode.PROFILE)) {
+        //
+        //} else {
+        //    relAbunResultRDD.saveAsHadoopFile(this.outputHdfsDir, String.class,
+        //            ProfilingEveResultRecord.class, ProfilingEveOutputFormat.class, this.jcf);
+        //}
 
 
         ///*
@@ -318,11 +333,11 @@ public class ProfilingNewProcessMS {
      */
     private ProfilingMethodBase getProfilingMethod(){
         if(this.pipeline.equals("comg")){
-            return new COMGProfilingMethod(this.metasOpt);
+            return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         } else if (this.pipeline.equals("metaphlan")){
-            return new METAPHLANProfilingMethod(this.metasOpt);
+            return new METAPHLANProfilingMethod(this.metasOpt, this.jscontext);
         } else {
-            return new COMGProfilingMethod(this.metasOpt);
+            return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         }
     }
 }
