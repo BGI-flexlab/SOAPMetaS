@@ -28,13 +28,18 @@ public class RelativeAbundanceFunction implements Serializable, PairFlatMapFunct
 
         ArrayList<Tuple2<String, ProfilingResultRecord>> relativeProfilingList;
         Tuple2<String, ProfilingResultRecord> tup0;
+        String smTag;
         String sampleID;
         double totalAbun = 0;
 
         if (tuple2Iterator.hasNext()) {
             tup0 = tuple2Iterator.next();
-            sampleID = tup0._1();
+            smTag = tup0._2.getSmTag();
             totalAbun += tup0._2.getAbundance();
+            //LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Abundance of cluster " + tup0._2.getClusterName() + " is " + tup0._2.getAbundance());
+            sampleID = tup0._1;
+            LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Relative abundance calculation for sampleID: " + sampleID + " sample TAG: " + smTag);
+
             relativeProfilingList = new ArrayList<>(128);
             relativeProfilingList.add(tup0);
         } else {
@@ -51,15 +56,18 @@ public class RelativeAbundanceFunction implements Serializable, PairFlatMapFunct
             //}
 
             totalAbun += tup._2.getAbundance();
+            //LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Abundance of cluster " + tup0._2.getClusterName() + " is " + tup0._2.getAbundance());
 
             relativeProfilingList.add(tup);
         }
 
-        LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Total abundance of sample " + sampleID + " is " + totalAbun);
+        LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Total abundance of sample " + smTag + " is " + totalAbun);
 
         for(Tuple2<String, ProfilingResultRecord> tup: relativeProfilingList){
-            tup._2.setRelAbun(tup._2.getAbundance()/totalAbun);
+            tup._2.setRelAbun(tup._2.getAbundance()/totalAbun * 100);
         }
+
+        LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] SampleTAG: " + smTag + " . SampleID recheck: " + relativeProfilingList.get(relativeProfilingList.size()-1)._1);
         return relativeProfilingList.iterator();
     }
 }

@@ -167,7 +167,7 @@ public class ProfilingNewProcessMS {
         LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] SampleCount: " + sampleCount +
                 " Partition each sample: " + this.numPartitionEachSample + " Total Partition Number: " + numPartition);
 
-        LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] All input sam file paths: " + filePath);
+        //LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] All input sam file paths: " + filePath);
 
 
         ProfilingMethodBase profilingMethod = getProfilingMethod();
@@ -234,25 +234,27 @@ public class ProfilingNewProcessMS {
                     .filter(tup -> tup._2 != null);
         }
         if (this.doIdentityFiltering){
-            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(v -> {
-                SAMRecord rec1 = v.getFirstRecord();
-                SAMRecord rec2 = v.getSecondRecord();
-                if (this.identityFilter.filter(rec1)){
-                    v.setFirstRecord(rec2);
-                    v.setSecondRecord(null);
-                    v.setProperPaired(false);
-                    rec1 = null;
-                }
-                if (this.identityFilter.filter(rec2)) {
-                    v.setSecondRecord(null);
-                    v.setProperPaired(false);
-                    rec2 = null;
-                }
-                if (rec1 == null && rec2 == null){
-                    v = null;
-                }
-                return v;
-            }).filter(rec -> rec._2 != null);
+            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(new MetasSAMRecordIdentityFilter(this.metasOpt.getMinIdentity()))
+                    .filter(tup -> ! (tup._2.getFirstRecord() == null && tup._2.getSecondRecord() == null));
+            //cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(v -> {
+            //    SAMRecord rec1 = v.getFirstRecord();
+            //    SAMRecord rec2 = v.getSecondRecord();
+            //    if (this.identityFilter.filter(rec1)){
+            //        v.setFirstRecord(rec2);
+            //        v.setSecondRecord(null);
+            //        v.setProperPaired(false);
+            //        rec1 = null;
+            //    }
+            //    if (this.identityFilter.filter(rec2)) {
+            //        v.setSecondRecord(null);
+            //        v.setProperPaired(false);
+            //        rec2 = null;
+            //    }
+            //    if (rec1 == null && rec2 == null){
+            //        v = null;
+            //    }
+            //    return v;
+            //}).filter(rec -> rec._2 != null);
         }
 
         /*

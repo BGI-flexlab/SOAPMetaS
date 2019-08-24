@@ -69,7 +69,7 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
         final Path file = split.getPath();
         final FileSystem fs = file.getFileSystem(conf);
 
-        LOG.trace("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Current split file: "  +
+        LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Current split file: "  +
                 file.getName() + " File position: " + this.start + " Split length: " + split.getLength());
 
         String samSampleListPath = conf.get("metas.data.mapreduce.input.samsamplelist");
@@ -81,10 +81,10 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
             sampleID = samMultiSampleList.getSampleID(file.getName());
         } else {
             LOG.error("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Please provide multisample information list, or the partitioning may be uncontrollable.");
-            sampleID = 1;
+            sampleID = 0;
         }
 
-        LOG.trace("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Start read split " + file.getName());
+        LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Start read split " + file.getName());
 
         input = fs.open(file);
 
@@ -185,6 +185,8 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
             if (this.lastRecord != null) {
                 key.set(Integer.toString(sampleID));
                 recordWr.set(new MetasSAMPairRecord(this.lastRecord, null));
+
+                this.lastRecord = null;
                 return true;
             }
             return false;

@@ -48,9 +48,9 @@ public class ProfilingPathGenerateFunction implements Serializable,
         if (tuple2Iterator.hasNext()){
             firstTuple = tuple2Iterator.next();
             smTag = firstTuple._2.getSmTag();
-            LOG.info("[SOAPMetas::" + ProfilingPathGenerateFunction.class.getName() + "] Current sample tag: " + smTag);
+            //LOG.info("[SOAPMetas::" + ProfilingPathGenerateFunction.class.getName() + "] Current sample tag: " + smTag);
         } else {
-            LOG.trace("[SOAPMetas::" + ProfilingPathGenerateFunction.class.getName() + "] Empty partition index: " + index);
+            //LOG.trace("[SOAPMetas::" + ProfilingPathGenerateFunction.class.getName() + "] Empty partition index: " + index);
             return new ArrayList<String>(0).iterator();
         }
 

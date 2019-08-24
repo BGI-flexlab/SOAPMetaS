@@ -2,6 +2,8 @@ package org.bgi.flexlab.metas.profiling.filter;
 
 import htsjdk.samtools.SAMRecord;
 import org.apache.spark.api.java.function.Function;
+import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
+import scala.Serializable;
 import scala.Tuple2;
 
 import java.util.Arrays;
@@ -17,12 +19,14 @@ import java.util.regex.Pattern;
  */
 
 public class MetasSAMRecordIdentityFilter
-        implements MetasSAMRecordFilter, Function<Tuple2<String, SAMRecord>, Boolean> {
+        implements Function<MetasSAMPairRecord, MetasSAMPairRecord>, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private double minimumIdentity;
 
     public MetasSAMRecordIdentityFilter(){
-        this.minimumIdentity = 80;
+        this.minimumIdentity = 0.8;
     }
 
     public MetasSAMRecordIdentityFilter(double minIdentity){
@@ -33,7 +37,6 @@ public class MetasSAMRecordIdentityFilter
      * @param record SAMRecord to be evaluated.
      * @return
      */
-    @Override
     public boolean filter(SAMRecord record){
         if (record == null){
             return false;
@@ -44,11 +47,17 @@ public class MetasSAMRecordIdentityFilter
 
 
     @Override
-    public Boolean call(Tuple2<String, SAMRecord> tuple){
-        if (this.filter(tuple._2)){
-            return false;
+    public MetasSAMPairRecord call(MetasSAMPairRecord inputRec){
+        MetasSAMPairRecord pairRec = inputRec;
+        if (this.filter(pairRec.getFirstRecord())){
+            pairRec.setFirstRecord(null);
+            pairRec.setProperPaired(false);
         }
-        return true;
+        if (this.filter(pairRec.getSecondRecord())) {
+            pairRec.setSecondRecord(null);
+            pairRec.setProperPaired(false);
+        }
+        return pairRec;
     }
 
     /**
@@ -79,13 +88,13 @@ public class MetasSAMRecordIdentityFilter
         }
 
         // sum the md field numbers to get the total number of matches.
-        Matcher mdTagMatcher =Pattern.compile("(\\d+)\\D+").matcher(mdTag);
+        Matcher mdTagMatcher =Pattern.compile("\\d+").matcher(mdTag);
         while(mdTagMatcher.find()){
-            mdTagAllCount += Integer.parseInt(mdTagMatcher.group(1));
+            mdTagAllCount += Integer.parseInt(mdTagMatcher.group(0));
         }
 
         if (cigarAllCount > 0){
-            identity = 100.0 * ( mdTagAllCount / (cigarAllCount * 1.0) );
+            identity =  (mdTagAllCount * 1.0) / cigarAllCount ;
         }
 
         return identity;

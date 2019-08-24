@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.function.Function2;
-import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
+//import org.bgi.flexlab.metas.data.structure.profiling.ProfilingEveResultRecord;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import scala.Tuple2;
@@ -108,7 +108,7 @@ public class ProfilingResultWriteFunction implements Serializable,
 
                 bw.write("cluster name(marker/species)|\tfragment number|\trecalibrated frag num|\trelative abundance|\tread Name List");
                 bw.newLine();
-                bw.write(outputFormatEvaluation(sampleID, (ProfilingEveResultRecord) firstTuple._2));
+                bw.write(outputFormatEvaluation(sampleID, firstTuple._2));
                 bw.newLine();
 
                 while (tuple2Iterator.hasNext()) {
@@ -119,7 +119,7 @@ public class ProfilingResultWriteFunction implements Serializable,
                                 " : " + newTuple._2.getInfo());
                         continue;
                     }
-                    bw.write(outputFormatEvaluation(sampleID, (ProfilingEveResultRecord) newTuple._2));
+                    bw.write(outputFormatEvaluation(sampleID, newTuple._2));
                     bw.newLine();
                 }
 
@@ -155,7 +155,7 @@ public class ProfilingResultWriteFunction implements Serializable,
                 .append(result.getAbundance()/this.totalAbundanceMap.get(sampleID))
                 .toString();
     }
-    private String outputFormatEvaluation(String sampleID, ProfilingEveResultRecord result){
+    private String outputFormatEvaluation(String sampleID, ProfilingResultRecord result){
         StringBuilder builder = new StringBuilder(256);
         return builder.append(result.getClusterName())
                 .append('\t').append(result.getRawReadCount()).append('\t')

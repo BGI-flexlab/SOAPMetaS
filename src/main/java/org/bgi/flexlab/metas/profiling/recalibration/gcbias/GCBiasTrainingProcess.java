@@ -113,8 +113,9 @@ public class GCBiasTrainingProcess implements Serializable {
             speciesGCMap.put(refSeq.getName(), new SpeciesGC(refSeq));
         }
         refSeq = null;
+        fastaSeqFile.close();
 
-        LOG.debug("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Input SAM file for training: " + samPathsStB.toString());
+        LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Input SAM file for training: " + samPathsStB.toString());
         List<Tuple2<String, Integer>> recordPosList = jsc.newAPIHadoopFile(samPathsStB.toString(),
                 SAMInputFormat.class, LongWritable.class, SAMRecordWritable.class, jsc.hadoopConfiguration())
                 .mapToPair(rec -> new Tuple2<>(rec._1.get(), rec._2.get())).values()
@@ -130,12 +131,16 @@ public class GCBiasTrainingProcess implements Serializable {
                 })
                 .collect();
         samPathsStB = null;
+        //jsc.close();
+        LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish reading SAM files. Start setting point value.");
+
 
         for (Tuple2<String, Integer> tup: recordPosList){
             speciesGCMap.get(tup._1).addRead(tup._2);
         }
 
         double totalReads = recordPosList.size()/speciesGCMap.size();
+        recordPosList = null;
 
         for (String species: speciesGCMap.keySet()){
 
@@ -152,6 +157,7 @@ public class GCBiasTrainingProcess implements Serializable {
                 }
             }
         }
+        LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish set point value. Start training.");
 
         this.trainer.train();
         this.trainer.getTrainedModel().outputCoefficients(this.trainingResultFile);

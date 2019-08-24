@@ -244,7 +244,7 @@ public class MetasOptions {
                         "will be implemented if set.");
 
         Option minIdentity = new Option(null, "min-identity", true,
-                "Identity threshold for filtering of SAMRecords in profiling process. Default: 0");
+                "Identity threshold for filtering of SAMRecords in profiling process. Default: 0.8");
         minIdentity.setArgName("Double");
         //minIdentity.setType(Double.TYPE);
         this.options.addOption(minIdentity);

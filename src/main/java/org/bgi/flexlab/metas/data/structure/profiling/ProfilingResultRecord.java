@@ -100,6 +100,7 @@ public class ProfilingResultRecord implements Serializable {
         return builder.append(this.getClusterName())
                 .append('\t').append(this.getRawReadCount()).append('\t')
                 .append(this.getrecaliReadCount()).append('\t')
+                .append(this.getAbundance()).append('\t')
                 .append(this.getRelAbun()).append('\t')
                 .append(this.getReadNameString())
                 .toString();

@@ -10,7 +10,7 @@ import org.apache.spark.HashPartitioner;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.broadcast.Broadcast;
+//import org.apache.spark.broadcast.Broadcast;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
@@ -45,7 +45,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
     private MetasSAMRecordInsertSizeFilter insertSizeFilter;
 
-    final private Broadcast<ReferenceInfoMatrix> referenceInfoMatrix;
+    //final private Broadcast<ReferenceInfoMatrix> referenceInfoMatrix;
+    private ReferenceInfoMatrix referenceInfoMatrix;
 
     private boolean doInsRecalibration;
     private boolean doGCRecalibration;
@@ -62,17 +63,18 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         this.doGCRecalibration = options.isDoGcBiasRecalibration();
 
         if (this.doGCRecalibration) {
-            LOG.debug("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Do GC recalibration.");
+            LOG.info("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Do GC recalibration.");
             this.gcBiasRecaliModel = new GCBiasModelFactory(options.getGcBiasRecaliModelType(),
                     options.getGcBiasModelInput()).getGCBiasRecaliModel();
             //this.gcBiasRecaliModel.outputCoefficients(options.getProfilingOutputHdfsDir() + "/builtin_model.json");
         } else {
-            LOG.debug("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Skip GC recalibration.");
+            LOG.info("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Skip GC recalibration.");
 
         }
         //final ReferenceInfoMatrix refMatrix = new ReferenceInfoMatrix(this.metasOpt.getReferenceMatrixFilePath(), this.metasOpt.getSpeciesGenomeGCFilePath());
         //final Broadcast<ReferenceInfoMatrix> broadcastRefMatrix = this.jscontext.broadcast(refMatrix);
-        this.referenceInfoMatrix = jsc.broadcast(new ReferenceInfoMatrix(options.getReferenceMatrixFilePath(), options.getSpeciesGenomeGCFilePath()));
+        //this.referenceInfoMatrix = jsc.broadcast(new ReferenceInfoMatrix(options.getReferenceMatrixFilePath(), options.getSpeciesGenomeGCFilePath()));
+        this.referenceInfoMatrix = new ReferenceInfoMatrix(options.getReferenceMatrixFilePath(), options.getSpeciesGenomeGCFilePath());
 
         this.insertSizeFilter = new MetasSAMRecordInsertSizeFilter(options.getInsertSize());
 
@@ -89,8 +91,6 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
     @Override
     public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD,
                                                                    Partitioner partitioner) {
-
-        LOG.info("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Start COMG Profiling.");
 
         if (partitioner == null) {
             partitioner = new HashPartitioner(200);
@@ -172,20 +172,23 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         resultRecord.setRawReadCount(result._2());
         resultRecord.setrecaliReadCount(result._3());
         if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.MARKERS)) {
-            int geneLen = this.referenceInfoMatrix.value().getGeneLength(clusterName);
+            int geneLen = this.referenceInfoMatrix.getGeneLength(clusterName);
             if (geneLen > 0) {
                 resultRecord.setAbundance(result._3() / geneLen);
             } else {
                 resultRecord.setAbundance(0.0);
             }
         } else {
-            int genoLen = this.referenceInfoMatrix.value().getSpeciesGenoLen(clusterName);
+            int genoLen = this.referenceInfoMatrix.getSpeciesGenoLen(clusterName);
             if (genoLen > 0) {
                 resultRecord.setAbundance(result._3() / genoLen);
             } else {
                 resultRecord.setAbundance(0.0);
             }
         }
+
+        //LOG.info("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Abundance of cluster " + resultRecord.getClusterName() + " is " + resultRecord.getAbundance());
+
         resultRecord.setReadNameString(result._4());
 
         return resultRecord;
@@ -238,9 +241,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
             }
         } else {
             if (this.insertSizeFilter(samRecord1)) {
-                //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Unpaired record in PE mode. " +
-                //        samRecord1.getReadName());
-                readCountTupleList.add(this.singleCountTupleGenerator(sampleID, samRecord1));
+                LOG.error("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Unpaired record in PE mode. " +
+                        tupleKeyValue._2.toString());
             }
         }
 
@@ -266,8 +268,8 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         if (record1 == null || record2 == null) {
             return false;
         }
-        String name1 = this.referenceInfoMatrix.value().getGeneSpeciesName(record1.getReferenceName());
-        String name2 = this.referenceInfoMatrix.value().getGeneSpeciesName(record2.getReferenceName());
+        String name1 = this.referenceInfoMatrix.getGeneSpeciesName(record1.getReferenceName());
+        String name2 = this.referenceInfoMatrix.getGeneSpeciesName(record2.getReferenceName());
         if (name1 == null || name2 == null) {
             return false;
         }
@@ -279,14 +281,13 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         String clusterName;
         Integer rawReadCount = 1;
         Double recaliReadCount;
-        String readNameLine;
 
         String geneName = record.getReferenceName();
 
         //LOG.info("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Count Single Record: " + record.toString() + " || Reference Gene name: " + geneName);
 
         if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES)) {
-            clusterName = this.referenceInfoMatrix.value().getGeneSpeciesName(geneName);
+            clusterName = this.referenceInfoMatrix.getGeneSpeciesName(geneName);
         } else {
             clusterName = geneName;
         }
@@ -298,20 +299,21 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         if (this.doGCRecalibration) {
             recaliReadCount = this.gcBiasRecaliModel.recalibrateForSingle(
                     SequenceUtil.calculateGc(record.getReadBases()),
-                    this.referenceInfoMatrix.value().getSpeciesGenoGC(this.referenceInfoMatrix.value().getGeneSpeciesName(geneName))
+                    this.referenceInfoMatrix.getSpeciesGenoGC(this.referenceInfoMatrix.getGeneSpeciesName(geneName))
             );
         } else {
             recaliReadCount = (double) rawReadCount;
         }
 
-        if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
-            readNameLine = record.getReadName() + ',';
-        } else {
-            readNameLine = "";
-        }
+        //String readNameLine;
+        //if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
+        //    readNameLine = record.getReadName() + ',';
+        //} else {
+        //    readNameLine = "";
+        //}
 
         return new Tuple2<>(sampleID + '\t' + clusterName, new Tuple4<>(getSampleTag(record),
-                rawReadCount, recaliReadCount, readNameLine));
+                rawReadCount, recaliReadCount, ""));
     }
 
     private Tuple2<String, Tuple4<String, Integer, Double, String>> pairedCountTupleGenerator(
@@ -326,7 +328,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
 
         if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES)) {
-            clusterName = this.referenceInfoMatrix.value().getGeneSpeciesName(geneName);
+            clusterName = this.referenceInfoMatrix.getGeneSpeciesName(geneName);
         } else {
             clusterName = geneName;
         }
@@ -337,9 +339,9 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
         if (this.doGCRecalibration) {
             recaliReadCount = this.gcBiasRecaliModel.recalibrateForPair(
-                    SequenceUtil.calculateGc(record1.getReadBases()),
+                    SequenceUtil.calculateGc(record1.getReadBases()), // 注意这里的GC理论上应该是序列窗口GC值
                     SequenceUtil.calculateGc(record2.getReadBases()),
-                    this.referenceInfoMatrix.value().getSpeciesGenoGC(this.referenceInfoMatrix.value().getGeneSpeciesName(geneName))
+                    this.referenceInfoMatrix.getSpeciesGenoGC(this.referenceInfoMatrix.getGeneSpeciesName(geneName))
             );
         } else {
             recaliReadCount = (double) rawReadCount;
@@ -347,16 +349,15 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
         String sampleTag = getSampleTag(record1);
 
-        String readNameLine;
-
-        if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
-            readNameLine = record1.getReadName() + "," + record2.getReadName() + ",";
-        } else {
-            readNameLine = "";
-        }
+        //String readNameLine;
+        //if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
+        //    readNameLine = record1.getReadName() + "," + record2.getReadName() + ",";
+        //} else {
+        //    readNameLine = "";
+        //}
 
         return new Tuple2<>(sampleID + '\t' + clusterName,
-                new Tuple4<>(sampleTag, rawReadCount, recaliReadCount, readNameLine)
+                new Tuple4<>(sampleTag, rawReadCount, recaliReadCount, "")
         );
     }
 
@@ -382,7 +383,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         if (record.getReadNegativeStrandFlag()){
             return record.getAlignmentStart() < (this.insertSizeFilter.getMeanInsertSize() - record.getReadLength() + this.insertSizeFilter.getInsTolerance());
         } else {
-            int geneLen = this.referenceInfoMatrix.value().getGeneLength(record.getReferenceName());
+            int geneLen = this.referenceInfoMatrix.getGeneLength(record.getReferenceName());
             if (geneLen > 0) {
                 return (geneLen - record.getAlignmentStart()) < (this.insertSizeFilter.getMeanInsertSize()  + this.insertSizeFilter.getInsTolerance());
             } else {

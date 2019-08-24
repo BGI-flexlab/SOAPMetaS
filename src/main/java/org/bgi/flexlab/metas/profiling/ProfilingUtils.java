@@ -11,6 +11,7 @@ import org.bgi.flexlab.metas.util.SequencingMode;
  * @author heshixu@genomics.cn
  */
 
+@Deprecated
 public final class ProfilingUtils {
 
     private MetasOptions options;

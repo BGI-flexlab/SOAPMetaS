@@ -74,7 +74,7 @@ public class ProfilingProcess {
                 .filter(tuple -> ! tuple._2.getReadUnmappedFlag());
 
         if (this.doIdentityFiltering){
-            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
+            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD;
         }
 
         /**
