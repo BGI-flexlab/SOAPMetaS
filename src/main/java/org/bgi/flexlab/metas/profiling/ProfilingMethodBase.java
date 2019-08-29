@@ -1,7 +1,9 @@
 package org.bgi.flexlab.metas.profiling;
 
+import htsjdk.samtools.SAMRecord;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
@@ -54,6 +56,9 @@ public abstract class ProfilingMethodBase implements Serializable {
      */
     public abstract JavaPairRDD<String, ProfilingResultRecord> runProfiling(
             JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD, Partitioner partitioner);
+
+    public abstract JavaPairRDD<String, ProfilingResultRecord> runProfiling(
+            JavaRDD<SAMRecord> samRecordJavaRDD, JavaSparkContext ctx);
 
     public void destroyContent(){
         return;

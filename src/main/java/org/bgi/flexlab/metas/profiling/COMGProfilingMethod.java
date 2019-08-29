@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.HashPartitioner;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.broadcast.Broadcast;
 import org.bgi.flexlab.metas.MetasOptions;
@@ -144,6 +145,11 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
                     });
         }
 
+    }
+
+    @Override
+    public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaRDD<SAMRecord> samRecordJavaRDD, JavaSparkContext ctx) {
+        return null;
     }
 
     /**

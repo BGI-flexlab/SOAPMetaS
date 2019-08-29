@@ -76,7 +76,7 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
             dirName = "/tmp/SOAPMetas" + jsc.appName() + "_TEMP/alignment";
             try {
                 DataUtils.createHDFSFolder(conf, "file://" + dirName);
-                new File(dirName).deleteOnExit();
+//                new File(dirName).deleteOnExit();
             } catch (IOException e){
                 LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Fail to create temp directory" + dirName + "for alignment. " + e.toString());
             }
@@ -106,6 +106,7 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
     protected String[] parseArguments(int alnStep) {
         ArrayList<String> arguments = new ArrayList<String>();
         HashSet<String> omissionArgs = new HashSet<>(Arrays.asList(
+                "--no-hd", "--no-sq",
                 "--index", "-x",
                 "-1", "-2", "-U", "--unpaired",
                 "-S", "--output",
@@ -157,6 +158,8 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
         arguments.add("--rg");
         arguments.add("SM:"+this.getSMTag());
+
+        arguments.add("--no-hd");
 
         //if (this.rgArray != null && this.rgArray.size() > 0){
         //    for(String rg: this.rgArray){
