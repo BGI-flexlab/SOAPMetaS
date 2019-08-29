@@ -13,6 +13,7 @@ import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 
 /**
@@ -63,4 +64,6 @@ public abstract class ProfilingMethodBase implements Serializable {
     public void destroyContent(){
         return;
     }
+
+    public abstract void setSampleIDbySampleName (HashMap<String, Integer> sampleIDbySampleName);
 }

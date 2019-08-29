@@ -28,7 +28,9 @@ import scala.Tuple4;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -150,6 +152,11 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
     @Override
     public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaRDD<SAMRecord> samRecordJavaRDD, JavaSparkContext ctx) {
         return null;
+    }
+
+    @Override
+    public void setSampleIDbySampleName(HashMap<String, Integer> sampleIDbySampleName) {
+
     }
 
     /**

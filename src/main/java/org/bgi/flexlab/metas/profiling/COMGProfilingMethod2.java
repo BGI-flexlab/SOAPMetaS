@@ -1,12 +1,10 @@
 package org.bgi.flexlab.metas.profiling;
 
-import htsjdk.samtools.SAMReadGroupRecord;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.util.SequenceUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.spark.HashPartitioner;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -16,18 +14,15 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
-import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordInsertSizeFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
-import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
-import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 import scala.Tuple4;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -44,6 +39,8 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
     private static final Logger LOG = LogManager.getLogger(COMGProfilingMethod2.class);
 
     private Broadcast<ReferenceInfoMatrix> referenceInfoMatrix = null;
+
+    private HashMap<String, Integer> sampleIDbySampleName = null;
 
     private boolean doGCRecalibration;
 
@@ -97,7 +94,12 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
 
         //RGID 作为 sampleName
         //TODO 获取sampleID
-        return reads.mapToPair(samRecord -> countTupleGenerator("0", samRecord))
+        Broadcast<HashMap<String, Integer>>  sampleNamesBroadcast = ctx.broadcast(sampleIDbySampleName);
+
+        return reads.mapToPair(samRecord -> {
+            String rg = samRecord.getStringAttribute("RG");
+            int sampleID = sampleNamesBroadcast.value().get(rg);
+            return countTupleGenerator(String.valueOf(sampleID), samRecord);})
                 .reduceByKey((a, b) -> new Tuple4<>(a._1(), a._2() + b._2(), a._3() + b._3(), ""))
                 .mapToPair(tuple -> {
                     String[] keyStr = StringUtils.split(tuple._1, '\t');
@@ -107,6 +109,11 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
                 });
     }
 
+    @Override
+    public void setSampleIDbySampleName(HashMap<String, Integer> sampleIDbySampleName) {
+        this.sampleIDbySampleName = sampleIDbySampleName;
+
+    }
 
     /**
      * Generate ProfilingResultRecord instance.
@@ -163,18 +170,6 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
         return this.countTupleGenerator(RGID, samRecord);
     }
 
-
-    private Boolean isPairedAtSpeciesLevel(SAMRecord record1, SAMRecord record2) {
-        if (record1 == null || record2 == null) {
-            return false;
-        }
-        String name1 = this.referenceInfoMatrix.value().getGeneSpeciesName(record1.getReferenceName());
-        String name2 = this.referenceInfoMatrix.value().getGeneSpeciesName(record2.getReferenceName());
-        if (name1 == null || name2 == null) {
-            return false;
-        }
-        return name1.equals(name2);
-    }
 
     private Tuple2<String, Tuple4<String, Integer, Double, String>> countTupleGenerator(
             String sampleID, SAMRecord record) {

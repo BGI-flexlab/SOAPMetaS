@@ -8,6 +8,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * ClassName: SAMMultiSampleList
@@ -32,11 +33,12 @@ public class SAMMultiSampleList implements Serializable {
     protected static final Log LOG = LogFactory.getLog(SAMMultiSampleList.class.getName());
 
     private Map<String, Integer> samPathIDMap = null;
+    HashMap<String, Integer> sampleIDbySampleName;
     private int sampleCount = 0;
     private StringBuilder filePath;
 
     public SAMMultiSampleList(String list, boolean isLocal, boolean recordSample, boolean recordPath) throws IOException {
-        HashMap<String, Integer> tagSamCount = new HashMap<>(100);
+        sampleIDbySampleName = new HashMap<>();
 
         if (recordSample){
             samPathIDMap = new HashMap<>(100);
@@ -65,13 +67,13 @@ public class SAMMultiSampleList implements Serializable {
                 }
             }
 
-            if (!tagSamCount.containsKey(sampleTag)){
-                tagSamCount.put(sampleTag, sampleCount);
+            if (!sampleIDbySampleName.containsKey(sampleTag)){
+                sampleIDbySampleName.put(sampleTag, sampleCount);
                 sampleCount++;
             }
 
             if (recordSample) {
-                samPathIDMap.put(items[2], tagSamCount.get(sampleTag));
+                samPathIDMap.put(items[2], sampleIDbySampleName.get(sampleTag));
             }
 
             //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample_line info: " +
@@ -109,5 +111,9 @@ public class SAMMultiSampleList implements Serializable {
         } else {
             return "";
         }
+    }
+
+    public HashMap<String, Integer> getSampleIDbySampleName() {
+        return sampleIDbySampleName;
     }
 }

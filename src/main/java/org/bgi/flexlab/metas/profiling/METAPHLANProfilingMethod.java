@@ -10,6 +10,8 @@ import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * ClassName: METAPHLANProfilingMethod
@@ -40,6 +42,11 @@ public class METAPHLANProfilingMethod extends ProfilingMethodBase implements Ser
     @Override
     public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaRDD<SAMRecord> samRecordJavaRDD, JavaSparkContext ctx) {
         return null;
+    }
+
+    @Override
+    public void setSampleIDbySampleName(HashMap<String, Integer> sampleIDbySampleName) {
+
     }
 
 }

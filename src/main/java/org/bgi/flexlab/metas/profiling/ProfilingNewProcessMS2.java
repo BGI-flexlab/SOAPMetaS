@@ -16,11 +16,13 @@ import org.apache.spark.storage.StorageLevel;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.SOAPMetas;
 import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetaSamSource;
+import org.bgi.flexlab.metas.data.mapreduce.input.sam.SAMFileHeaderFactory;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.RelativeAbundanceFunction;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
+import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
 import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.DataUtils;
@@ -30,6 +32,7 @@ import org.seqdoop.hadoop_bam.util.SAMHeaderReader;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -50,7 +53,7 @@ public class ProfilingNewProcessMS2 {
     private ProfilingAnalysisMode analysisMode;
     private SequencingMode seqMode;
 
-    private SAMMultiSampleList samMultiSampleList;
+    private SAMMultiSampleList samMultiSampleList; //需要简化
     private int numPartitionEachSample;
 
     private boolean doIdentityFiltering = false;
@@ -61,10 +64,18 @@ public class ProfilingNewProcessMS2 {
 
     private JobConf jcf;
 
+    private String referenceMatrixFilePath;
+
+    private String speciesGenomeGCFilePath;
+
     public ProfilingNewProcessMS2(final MetasOptions options, final JavaSparkContext context){
         this.metasOpt = options;
         this.jscontext = context;
         this.processConstruct();
+
+        referenceMatrixFilePath = options.getReferenceMatrixFilePath();
+
+        speciesGenomeGCFilePath = options.getSpeciesGenomeGCFilePath();
     }
 
     private void processConstruct(){
@@ -157,82 +168,20 @@ public class ProfilingNewProcessMS2 {
      */
     public List<String> runProfilingProcess(){
 
-        int sampleCount = samMultiSampleList.getSampleCount();
-        String filePath = this.samMultiSampleList.getAllSAMFilePath();
-
-        // Add one more partition for files without sample information.
-        int numPartition = this.numPartitionEachSample * sampleCount + 1;
-        SampleIDReadNamePartitioner sampleIDClusterNamePartitioner = new SampleIDReadNamePartitioner(numPartition,
-                this.numPartitionEachSample);
-        SampleIDPartitioner sampleIDPartitioner = new SampleIDPartitioner(sampleCount + 1);
-        LOG.info("[SOAPMetas::" + ProfilingNewProcessMS2.class.getName() + "] SampleCount: " + sampleCount +
-                " Partition each sample: " + this.numPartitionEachSample + " Total Partition Number: " + numPartition);
-
+        String filePath = samMultiSampleList.getAllSAMFilePath();
         LOG.info("[SOAPMetas::" + ProfilingNewProcessMS2.class.getName() + "] All input sam file paths: " + filePath);
 
+        HashMap<String, Integer> sampleIDs = samMultiSampleList.getSampleIDbySampleName();
 
         ProfilingMethodBase profilingMethod = getProfilingMethod();
 
-        ///*
-        //Function: Read SAM file. No extra operation during reading.
-        //Note: filter() operation of rdd will return a new RDD containing only the elements that makes the filter return true.
-        //---
-        //After newAPIHadoopFile && filter
-        //key: sampleID + "\t" + readName.replaceFirst("/[12]$", "") <Text>
-        //value: SAMRecordWritable
-        //partition: defaultPartitoner
-        //---
-        //After mapToPair:
-        //key: sampleID + "\t" + readName.replaceFirst("/[12]$", "")
-        //value: SAMRecord
-        //partition: defaultPartitoner
-        // */
-        //JavaPairRDD<String, SAMRecord> cleanMetasSamRecordRDD = this.jscontext
-        //        .newAPIHadoopFile(filePath, MetasSAMInputFormat.class, Text.class, SAMRecordWritable.class,
-        //                this.jscontext.hadoopConfiguration())
-        //        .mapToPair(rec -> {
-        //            //LOG.trace("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Remaining samRecod: " + rec._1.toString());
-        //            return new Tuple2<>(rec._1.toString(), rec._2.get());
-        //        })
-        //        .filter(tup -> tup._2 != null);
-        //if (this.doIdentityFiltering){
-        //    cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
-        //}
-        ///*
-        //SamRecord Group and merge.
-        //---
-        //InputRDD:
-        // key: sampleID\treadName
-        // value: SAMRecord
-        // partition: defaultPartition
-        //---
-        //After groupByKey:
-        // key: sampleID\treadName
-        // value: Interable<SAMRecord>
-        // partition: sampleID + readName
-        //---
-        //After mapValues && filter:
-        // key: sampleID\treadName
-        // value: MetasSAMPairRecord
-        // partition: sampleID + readName
-        //*/
-        //JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD = cleanMetasSamRecordRDD
-        //        .groupByKey(sampleIDClusterNamePartitioner)
-        //        .mapValues(new SamRecordListMergeFunction(this.metasOpt.getSequencingMode()))
-        //        .filter(item -> (item._2 != null));
 
-        // New function for reading SAM file. Construct pair-record during input process.
-
+        final SAMFileHeader header = new SAMFileHeaderFactory().createHeader(referenceMatrixFilePath, sampleIDs.keySet());
 
         // TODO  根据 metasOpt.getReferenceMatrixFilePath() 和 samMultiSampleList 创建header
+//        final SAMFileHeader header = SOAPMetas.getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), jscontext.hadoopConfiguration());
 
-        final SAMFileHeader header = SOAPMetas.getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), jscontext.hadoopConfiguration());
-
-
-//        List<String> sampleNames = new ArrayList<>();
-//        for (SAMReadGroupRecord rg: header.getReadGroups()) {
-//            sampleNames.add(rg.getSample());
-//        }
+        profilingMethod.setSampleIDbySampleName(sampleIDs);
 
         MetaSamSource samSource = new MetaSamSource();
         JavaRDD<SAMRecord> reads = null;
@@ -242,6 +191,7 @@ public class ProfilingNewProcessMS2 {
             e.printStackTrace();
         }
 
+//        放到readCount方法
 //        if (this.doIdentityFiltering){
 //            reads = reads.map(rec -> {
 //                if (this.identityFilter.filter(rec)){
@@ -295,7 +245,7 @@ public class ProfilingNewProcessMS2 {
                 .runProfiling(reads, jscontext);
 
         JavaPairRDD<String, ProfilingResultRecord> relAbunResultRDD = profilingResultRecordRDD
-                .partitionBy(sampleIDPartitioner)
+                .partitionBy(new SampleIDPartitioner(sampleIDs.size() + 1))
                 .mapPartitionsToPair(new RelativeAbundanceFunction(), true);
 
 //        if (this.metasOpt.isDoInsRecalibration()) {
