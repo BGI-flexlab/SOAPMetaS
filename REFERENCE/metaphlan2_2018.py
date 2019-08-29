@@ -1158,6 +1158,11 @@ class TaxTree:
     '''
     ### SHIXU:
     mpa_v20_m200.pkl文件，bzip2(pickle)格式，需要decompress然后pickle.load进行加载。
+    'clade': the clade that the marker belongs to,
+    'ext': {the name of the first external genome where the marker appears, the name of the second external genome where the marker appears},
+    'len': length of the marker,
+    'score': score of the marker,
+    'taxon': the taxon of the marker
     内容：
     key("taxonomy", "markers")
     {

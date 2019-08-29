@@ -25,6 +25,11 @@ public class MetasSAMRecordIdentityFilter
 
     private double minimumIdentity;
 
+    private final HashSet<String> CIGAR_Match_Mismatch_Indel = new HashSet<>(Arrays.asList("M", "=", "X", "I", "D"));
+
+    private Pattern cigarPattern = Pattern.compile("(\\d+)(\\D+)");
+    private Pattern mdTagPattern = Pattern.compile("\\d+");
+
     public MetasSAMRecordIdentityFilter(){
         this.minimumIdentity = 0.8;
     }
@@ -72,15 +77,13 @@ public class MetasSAMRecordIdentityFilter
      */
     public double calculateIdentity(String cigar, String mdTag){
 
-        final HashSet<String> CIGAR_Match_Mismatch_Indel = new HashSet<>(Arrays.asList("M", "=", "X", "I", "D"));
-
         int cigarAllCount = 0;
         int mdTagAllCount = 0;
 
         double identity = 0.0;
 
         // identify the total number of match/mismatch/indel.
-        Matcher cigarMatcher = Pattern.compile("(\\d+)(\\D+)").matcher(cigar);
+        Matcher cigarMatcher = this.cigarPattern.matcher(cigar);
         while(cigarMatcher.find()){
             if (CIGAR_Match_Mismatch_Indel.contains(cigarMatcher.group(2))){
                 cigarAllCount += Integer.parseInt(cigarMatcher.group(1));
@@ -88,7 +91,7 @@ public class MetasSAMRecordIdentityFilter
         }
 
         // sum the md field numbers to get the total number of matches.
-        Matcher mdTagMatcher =Pattern.compile("\\d+").matcher(mdTag);
+        Matcher mdTagMatcher = this.mdTagPattern.matcher(mdTag);
         while(mdTagMatcher.find()){
             mdTagAllCount += Integer.parseInt(mdTagMatcher.group(0));
         }

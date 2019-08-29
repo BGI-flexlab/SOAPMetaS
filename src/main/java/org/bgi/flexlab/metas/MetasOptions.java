@@ -72,6 +72,9 @@ public class MetasOptions {
     private int readLength = 100;
     private boolean doIdentityFiltering = false;
     private double minIdentity = 0;
+    private boolean doAlignLenFiltering = false;
+    private int minAlignLength = 0;
+
     private String profilingTmpDir = null;
     private String profilingOutputHdfsDir;
 
@@ -240,14 +243,21 @@ public class MetasOptions {
         this.options.addOption(insertSize);
 
         this.options.addOption(null, "iden-filt", false,
-                "Switch for identity filtering of SAMRecords in profiling process. The filtering " +
-                        "will be implemented if set.");
+                "Switch for identity filtering of SAMRecords in profiling process. The filtering will be implemented if set.");
 
         Option minIdentity = new Option(null, "min-identity", true,
                 "Identity threshold for filtering of SAMRecords in profiling process. Default: 0.8");
         minIdentity.setArgName("Double");
         //minIdentity.setType(Double.TYPE);
         this.options.addOption(minIdentity);
+
+        this.options.addOption(null, "len-filt", false,
+                "Switch for alignment length filtering of SAMRecords in profiling process. The filtering will be implemented if set.");
+        Option minAlignLen = new Option(null, "min-align-len", true,
+                "Alignment length threshold for filtering of SAMRecords in profiling process. Default: 30");
+        minAlignLen.setArgName("Double");
+        this.options.addOption(minAlignLen);
+
 
         /*
         Profiling analysis arguments group.
@@ -491,8 +501,12 @@ public class MetasOptions {
              */
             this.insertSize = Integer.parseInt(commandLine.getOptionValue("insert-size", "300"));
             this.minIdentity = Double.parseDouble(commandLine.getOptionValue("min-identity", "0.8"));
+            this.minAlignLength = Integer.parseInt(commandLine.getOptionValue("min-align-len", "30"));
             if (commandLine.hasOption("iden-filt")){
                 this.doIdentityFiltering = true;
+            }
+            if (commandLine.hasOption("len-filt")){
+                this.doAlignLenFiltering = true;
             }
 
             /*
@@ -630,6 +644,14 @@ public class MetasOptions {
 
     public boolean isDoIdentityFiltering(){
         return this.doIdentityFiltering;
+    }
+
+    public int getMinAlignLength(){
+        return this.minAlignLength;
+    }
+
+    public boolean isDoAlignLenFiltering(){
+        return this.doAlignLenFiltering;
     }
 
     public int getReadLength(){

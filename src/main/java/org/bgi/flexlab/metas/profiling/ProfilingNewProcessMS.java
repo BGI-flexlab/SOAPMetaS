@@ -20,6 +20,7 @@ import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecordWritable;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
+import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordAlignLenFilter;
 import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.util.DataUtils;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
@@ -53,7 +54,7 @@ public class ProfilingNewProcessMS {
     private int numPartitionEachSample;
 
     private boolean doIdentityFiltering = false;
-    private MetasSAMRecordIdentityFilter identityFilter;
+    private boolean doAlignLenFiltering = false;
 
     private String tmpDir;
     private String outputHdfsDir;
@@ -75,9 +76,8 @@ public class ProfilingNewProcessMS {
         this.seqMode = this.metasOpt.getSequencingMode();
 
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
-        if (this.doIdentityFiltering) {
-            this.identityFilter = new MetasSAMRecordIdentityFilter(this.metasOpt.getMinIdentity());
-        }
+        this.doAlignLenFiltering = this.metasOpt.isDoAlignLenFiltering();
+
         Configuration conf = this.jscontext.hadoopConfiguration();
         this.jcf = new JobConf(conf);
 
@@ -233,9 +233,14 @@ public class ProfilingNewProcessMS {
                     .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.get()))
                     .filter(tup -> tup._2 != null);
         }
-        if (this.doIdentityFiltering){
-            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(new MetasSAMRecordIdentityFilter(this.metasOpt.getMinIdentity()))
-                    .filter(tup -> ! (tup._2.getFirstRecord() == null && tup._2.getSecondRecord() == null));
+        if (this.doIdentityFiltering || this.doAlignLenFiltering){
+            if (this.doIdentityFiltering) {
+                cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(new MetasSAMRecordIdentityFilter(this.metasOpt.getMinIdentity()));
+            }
+            if (this.doAlignLenFiltering) {
+                cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(new MetasSAMRecordAlignLenFilter(this.metasOpt.getMinAlignLength()));
+            }
+            cleanMetasSamRecordRDD.filter(tup -> !(tup._2.getFirstRecord() == null && tup._2.getSecondRecord() == null));
             //cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(v -> {
             //    SAMRecord rec1 = v.getFirstRecord();
             //    SAMRecord rec2 = v.getSecondRecord();

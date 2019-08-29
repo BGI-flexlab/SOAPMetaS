@@ -41,6 +41,8 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
 
     private WorkaroundingStream waInput;
 
+    private String splitFileName;
+
     private int sampleID;
 
     private SAMRecord lastRecord = null;
@@ -68,6 +70,8 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
 
         final Path file = split.getPath();
         final FileSystem fs = file.getFileSystem(conf);
+
+        this.splitFileName = file.getName();
 
         LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Current split file: "  +
                 file.getName() + " File position: " + this.start + " Split length: " + split.getLength());
@@ -189,6 +193,7 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
                 this.lastRecord = null;
                 return true;
             }
+            LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Finish reading SAM of sample " + sampleID + " , split " + this.splitFileName);
             return false;
         }
 
@@ -221,6 +226,7 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
 
             if (tempRec.getReadName().equals(lastReadName)) {
                 count++;
+                rec1 = tempRec;
             } else {
                 this.lastRecord = tempRec;
                 break;
@@ -242,6 +248,8 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
 
         if (count == 1){
             pairRecord = new MetasSAMPairRecord(rec1, null);
+            pairRecord.setPaired(false);
+            pairRecord.setProperPaired(false);
         }
 
         key.set(Integer.toString(sampleID));

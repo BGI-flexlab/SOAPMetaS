@@ -39,6 +39,8 @@ public class GCBiasTrainingProcess implements Serializable {
     private String refFastaFile;
     private String trainingResultFile;
 
+    private boolean localMode;
+
     /**
      * TODO: trainer可以考虑提供工厂类，用于针对不同的model选取不同的trainer。
      *
@@ -51,6 +53,8 @@ public class GCBiasTrainingProcess implements Serializable {
 
         this.refFastaFile = options.getGcBiasTrainerRefFasta();
         this.trainingResultFile = options.getGcBiasModelOutput();
+
+        this.localMode = options.isLocalFS();
     }
 
     public void trainGCBiasModel(JavaSparkContext jsc, String multiSamListFile){
@@ -96,7 +100,7 @@ public class GCBiasTrainingProcess implements Serializable {
         StringBuilder samPathsStB = new StringBuilder(128);
         while(alignmentResults.hasNext()){
             String path = StringUtils.split(alignmentResults.next(), '\t')[2];
-            if (!path.startsWith("file://")){
+            if (this.localMode && !path.startsWith("file://")){
                 samPathsStB.append("file://").append(path).append(',');
             } else {
                 samPathsStB.append(path).append(',');
