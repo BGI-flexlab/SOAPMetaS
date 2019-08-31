@@ -1040,7 +1040,7 @@ class TaxClade:
             if n_rat_nreads < n_ripr and n_tot > n_rat_nreads:
                 rat_nreads += removed[:n_ripr-int(n_rat_nreads)]
 
-
+        ### SHIXU: 按照reads数量对ret_nreads进行排序
         rat_nreads = sorted(rat_nreads, key = lambda x: x[1])
 
         rat_v,nreads_v = zip(*rat_nreads) if rat_nreads else ([],[])
@@ -1056,7 +1056,7 @@ class TaxClade:
                 self.abundance = 0.0
                 return 0.0
 
-        ### SHIXU: 默认的计算方法是tavg_g，会引入quantile参数，该参数用于调节robust平均值的比例。比如设定0.1，则会根据第一次计算得到的readsNumber/markerlLength值从大到小排序，然后排除最大的0.1和最小的0.1，剩下的重新计算average(total_reads_count/total_gene_length).
+        ### SHIXU: 默认的计算方法是tavg_g，会引入quantile参数，该参数用于调节robust平均值的比例。比如设定0.1，则会根据第一次计算得到的readsNumber/markerlLength值从大到小排序，然后排除最大的0.1和最小的0.1，剩下的重新计算 total_reads_count/total_gene_length.
         if rat < 0.0:
             pass
         elif self.stat == 'avg_g' or (not qn and self.stat in ['wavg_g','tavg_g']):
