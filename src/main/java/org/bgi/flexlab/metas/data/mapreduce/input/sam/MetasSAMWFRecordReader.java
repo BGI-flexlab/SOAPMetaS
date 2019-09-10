@@ -81,7 +81,6 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
                     true, true, false);
             sampleID = samMultiSampleList.getSampleID(file.getName());
             //LOG.trace("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] Current sample ID is: " + sampleID);
-
         } else {
             LOG.error("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] Please provide multisample information list, or the partitioning may be uncontrollable.");
             sampleID = 0;
@@ -195,7 +194,6 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
 
                 pairRecord = null;
                 this.lastRecord = null;
-
                 return true;
             }
             LOG.info("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] Finish reading SAM of sample " + sampleID + " , split " + this.splitFileName);
@@ -227,12 +225,6 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
             rec2 = this.lastRecord;
         }
 
-        //if (rec1 == null){
-        //    LOG.trace("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] Dealing lastRecord. Current count1: " + count1 + " @ record1: NULL | count2: " + count2 + " @ record2: " + rec2.toString());
-        //} else {
-        //    LOG.trace("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] Dealing lastRecord. Current count1: " + count1 + " @ record1: " + rec1.toString() + " | count2: " + count2 + " @ record2: NULL");
-        //}
-
         lastReadName = this.lastRecord.getReadName();
         this.lastRecord = null;
 
@@ -246,7 +238,6 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
             //LOG.trace("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] SAM file readin line: " + tempRec);
 
             if (tempRec.getReadName().equals(lastReadName)) {
-
                 if (tempRec.getFirstOfPairFlag()){
                     count1++;
                     rec1 = tempRec;
@@ -254,17 +245,13 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
                     count2++;
                     rec2 = tempRec;
                 }
-
             } else {
-
                 this.lastRecord = tempRec;
                 break;
-
             }
         }
 
         tempRec = null;
-
         //if (!r.getReadUnmappedFlag()) {
         //    record.set(r);
         //} else {

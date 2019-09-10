@@ -9,6 +9,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
+import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.seqdoop.hadoop_bam.SAMInputFormat;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import scala.Tuple2;
@@ -113,17 +114,25 @@ public class GCBiasTrainingProcess implements Serializable {
         FastaSequenceFile fastaSeqFile = new FastaSequenceFile(new File(this.refFastaFile), true);
         Map<String, SpeciesGC> speciesGCMap = new HashMap<>(SPECIES_NUMBER);
         ReferenceSequence refSeq;
+        int totalSeqLen = 0;
         while ((refSeq = fastaSeqFile.nextSequence()) != null){
+            //if(refSeq.length() <= 350){
+            //    continue;
+            //}
+            totalSeqLen += refSeq.length();
             speciesGCMap.put(refSeq.getName(), new SpeciesGC(refSeq));
         }
         refSeq = null;
         fastaSeqFile.close();
+        final MetasSAMRecordIdentityFilter identityFilter = new MetasSAMRecordIdentityFilter(0.97);
 
         LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Input SAM file for training: " + samPathsStB.toString());
         List<Tuple2<String, Integer>> recordPosList = jsc.newAPIHadoopFile(samPathsStB.toString(),
                 SAMInputFormat.class, LongWritable.class, SAMRecordWritable.class, jsc.hadoopConfiguration())
-                .mapToPair(rec -> new Tuple2<>(rec._1.get(), rec._2.get())).values()
+                .values()
+                .map(rec -> rec.get())
                 .filter(rec -> !rec.getReadUnmappedFlag())
+                .filter(rec -> identityFilter.filter(rec))
                 .map(rec -> {
                     int alignmentPos;
                     if (rec.getReadNegativeStrandFlag()){
@@ -135,6 +144,7 @@ public class GCBiasTrainingProcess implements Serializable {
                 })
                 .collect();
         samPathsStB = null;
+
         //jsc.close();
         LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish reading SAM files. Start setting point value.");
 
@@ -142,8 +152,10 @@ public class GCBiasTrainingProcess implements Serializable {
         for (Tuple2<String, Integer> tup: recordPosList){
             speciesGCMap.get(tup._1).addRead(tup._2);
         }
+        //double readsOfLen = (double) recordPosList.size()/totalSeqLen;
 
-        double totalReads = recordPosList.size()/speciesGCMap.size();
+        double totalReads = (double) recordPosList.size()/speciesGCMap.size();
+
         recordPosList = null;
 
         for (String species: speciesGCMap.keySet()){
@@ -154,6 +166,7 @@ public class GCBiasTrainingProcess implements Serializable {
 
             final double totalWindows = sum(windowByGC);
             final double meanReadsPerWindow = totalReads / totalWindows;
+            //double meanReadsPerWindow = (double) readsOfLen * speciesGCMap.get(species).getSeqLength() / totalWindows;
 
             for (int i = 0; i < windowByGC.length; i++){
                 if(windowByGC[i] > 0){
@@ -164,6 +177,8 @@ public class GCBiasTrainingProcess implements Serializable {
         LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish set point value. Start training.");
 
         this.trainer.train();
+        LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish training.");
+
         this.trainer.getTrainedModel().outputCoefficients(this.trainingResultFile);
     }
 
@@ -181,6 +196,7 @@ public class GCBiasTrainingProcess implements Serializable {
         private byte[] gc;
         private int[] windowsByGC;
         private int[] readsByGC;
+        private int seqLength;
 
         SpeciesGC(ReferenceSequence refSequence) {
             this.windowsByGC = GcBiasUtils.calculateRefWindowsByGc(refSequence,
@@ -190,6 +206,7 @@ public class GCBiasTrainingProcess implements Serializable {
                     GCBiasTrainingProcess.this.scanWindowSize);
             this.readsByGC = new int[this.windowsByGC.length];
             this.speGCRate = SequenceUtil.calculateGc(refSequence.getBases());
+            this.seqLength = refSequence.length();
         }
 
         void addRead(int pos) {
@@ -211,6 +228,10 @@ public class GCBiasTrainingProcess implements Serializable {
 
         double getSpeGCRate() {
             return speGCRate;
+        }
+
+        public int getSeqLength() {
+            return seqLength;
         }
     }
 }

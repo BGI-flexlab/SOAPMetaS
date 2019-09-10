@@ -238,6 +238,10 @@ public class MetasGZFastqReader implements RecordReader<Text, Text> {
 				st[i] = tmp.toString();
 			}
 
+			if (iswrongFq){
+				break;
+			}
+
 			if(st[0].charAt(0)=='@' && st[1].charAt(0)=='@'){
 				// st数组元素前移一位
 				System.arraycopy(st, 1, st, 0, 3);

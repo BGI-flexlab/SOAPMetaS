@@ -284,7 +284,7 @@ public class MetasOptions {
 
         Option profilingPipe = new Option(null, "prof-pipe", true,
                 "Pipeline of profiling. Only cOMG is supported currently. Please refer " +
-                        "to doi:10.1038/nbt.2942 for more information.");
+                        "to doi:10.1038/nbt.2942 for more information. Option: comg, metaphlan. Default: comg");
         profilingPipe.setArgName("MODE");
         this.options.addOption(profilingPipe);
 
@@ -357,7 +357,7 @@ public class MetasOptions {
         this.options.addOption(null, "zz-start-value", true, "Start values " +
                 "used in NLS estimation. Refer to manual of nls in RStudio for more information. Default: " +
                 "(\"startvalue\" in SOAPMetas_builtinModel.json). Note: use with \"--gc-model-train\".");
-        this.options.addOption(null, "zz-opoint", false, "Switch option. " +
+        this.options.addOption(null, "zz-point", false, "Switch option. " +
                 "If set, data matrix used in GC Bias model training process will be written into file. And " +
                 "the process will be skipped. Note: use with \"--gc-model-train\".");
         Option pointPath = new Option(null, "zz-point-file", true, "Path of file to " +
@@ -486,7 +486,7 @@ public class MetasOptions {
                 this.nlsControl = commandLine.getOptionValue("zz-control", "maxiter=50,tol=1e-05,minFactor=1/1024");
                 this.startValue = commandLine.getOptionValue("zz-start-value", "p1=0.812093,p2=49.34331,p3=8.886807,p4=6.829778,p5=0.2642576,p6=-0.005291173,p7=3.188492E-5,p8=-2.502158");
 
-                if (commandLine.hasOption("zz-opoint")){
+                if (commandLine.hasOption("zz-point")){
                     this.outputPoint = true;
                     this.pointPath = commandLine.getOptionValue("zz-point-file", this.tmpDir + "./SOAPMetas_nlsPointMatrix");
                 }
@@ -516,8 +516,9 @@ public class MetasOptions {
             this.profilingAnalysisMode = ProfilingAnalysisMode.valueOf(commandLine.getOptionValue("ana-mode", "profile").toUpperCase());
             this.profilingAnalysisLevel = ProfilingAnalysisLevel.valueOf(commandLine.getOptionValue("ana-lev", "species").toUpperCase());
             this.profilingPipeline = commandLine.getOptionValue("prof-pipe", "comg");
-            if (!this.profilingPipeline.equals("comg")) {
-                throw new ParseException("Profiling pipeline mode not supported.");
+            if (this.profilingPipeline.toLowerCase().equals("metaphlan") && this.sequencingMode.equals(SequencingMode.PAIREDEND)){
+                this.sequencingMode = SequencingMode.SINGLEEND;
+                LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] MetaPhlAn mode only supports Single-end (SE) sequence mode.");
             }
 
             /*

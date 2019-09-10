@@ -11,6 +11,7 @@ import java.io.*;
 
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * ClassName: GCBiasDefaultModel
@@ -34,8 +35,8 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
 
     public GCBiasDefaultModel(String inputCoefficientsFilePath){
         this.inputCoefficients(inputCoefficientsFilePath);
-        LOG.debug("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Input model: Function : " +
-                this.modelFunction + " | Coefficients: " + this.coefficients.toString());
+        LOG.info("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Input model: Function : " +
+                this.modelFunction + " | Coefficients: " + Arrays.toString(this.coefficients));
     }
 
     public GCBiasDefaultModel(){
@@ -75,11 +76,14 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
                 coefficients[3] + coefficients[4]*readGCContent + coefficients[5]*Math.pow(readGCContent,2) +
                 coefficients[6]*Math.pow(readGCContent,3) + coefficients[7]*Math.log(genomeGCContent);
 
-        LOG.trace("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Input readGCContent: " +
-                readGCContent.toString() + " | Input genomeGCContent: " + genomeGCContent.toString() +
-                " | Recalibrated value: " + cvalue.toString());
+        //LOG.trace("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Input readGCContent: " +
+        //        readGCContent.toString() + " | Input genomeGCContent: " + genomeGCContent.toString() +
+        //        " | Recalibrated value: " + cvalue.toString());
 
-        return cvalue;
+        if (cvalue < 0.1) {
+            cvalue = 0.1;
+        }
+        return 1/cvalue;
     }
 
     /**
@@ -143,6 +147,11 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
                         }
                         this.setCoefficients(this.readDoublesArray(jsonReader));
                         break;
+                    }
+                    default: {
+                        // The next string must be extracted or the nextName() method will cause an exception.
+                        String currentStr = jsonReader.nextString();
+                        LOG.info("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Json Item Name " + itemName + " value: " + currentStr);
                     }
                 }
             }

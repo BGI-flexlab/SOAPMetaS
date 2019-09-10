@@ -1,6 +1,6 @@
 package org.bgi.flexlab.metas.profiling;
 
-import htsjdk.samtools.SAMRecord;
+//import htsjdk.samtools.SAMRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -240,7 +240,7 @@ public class ProfilingNewProcessMS {
             if (this.doAlignLenFiltering) {
                 cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(new MetasSAMRecordAlignLenFilter(this.metasOpt.getMinAlignLength()));
             }
-            cleanMetasSamRecordRDD.filter(tup -> !(tup._2.getFirstRecord() == null && tup._2.getSecondRecord() == null));
+            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(tup -> (tup._2.getFirstRecord() != null)||(tup._2.getSecondRecord() != null));
             //cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.mapValues(v -> {
             //    SAMRecord rec1 = v.getFirstRecord();
             //    SAMRecord rec2 = v.getSecondRecord();
@@ -291,6 +291,7 @@ public class ProfilingNewProcessMS {
             cleanMetasSamRecordRDD.persist(StorageLevel.MEMORY_AND_DISK());
         }
 
+        //LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Profiling process check.");
         JavaPairRDD<String, ProfilingResultRecord> profilingResultRecordRDD = profilingMethod
                 .runProfiling(cleanMetasSamRecordRDD, sampleIDClusterNamePartitioner);
 
@@ -339,10 +340,10 @@ public class ProfilingNewProcessMS {
      * @return ProfilingMethodBase New profiling pipeline instance of selected software.
      */
     private ProfilingMethodBase getProfilingMethod(){
-        if(this.pipeline.equals("comg")){
+        if(this.pipeline.toLowerCase().equals("comg")){
             return new COMGProfilingMethod(this.metasOpt, this.jscontext);
-        } else if (this.pipeline.equals("metaphlan")){
-            return new METAPHLANProfilingMethod(this.metasOpt, this.jscontext);
+        } else if (this.pipeline.toLowerCase().equals("metaphlan")){
+            return new MEPHProfilingMethod(this.metasOpt, this.jscontext);
         } else {
             return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         }

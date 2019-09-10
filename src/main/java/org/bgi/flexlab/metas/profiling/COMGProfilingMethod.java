@@ -20,7 +20,7 @@ import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 
-import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
+//import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 import scala.Tuple4;
@@ -254,10 +254,11 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         ArrayList<Tuple2<String, Tuple4<String, Integer, Double, String>>> readCountTupleList = new ArrayList<>(2);
 
         String sampleID = StringUtils.split(tupleKeyValue._1, '\t')[0];
+
         SAMRecord samRecord = tupleKeyValue._2.getFirstRecord();
 
-        //LOG.trace("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Record in SE mode. " +
-        //        samRecord.getReadName());
+        //LOG.info("[SOAPMetas::" + COMGProfilingMethod.class.getName() + "] Record in SE mode. " +
+        //        samRecord.getReadName() + "\t" + samRecord.getReferenceName());
         readCountTupleList.add(this.singleCountTupleGenerator(sampleID, samRecord));
 
         return readCountTupleList.iterator();
@@ -279,7 +280,6 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
     private Tuple2<String, Tuple4<String, Integer, Double, String>> singleCountTupleGenerator(
             String sampleID, SAMRecord record) {
         String clusterName;
-        Integer rawReadCount = 1;
         Double recaliReadCount;
 
         String geneName = record.getReferenceName();
@@ -302,7 +302,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
                     this.referenceInfoMatrix.getSpeciesGenoGC(this.referenceInfoMatrix.getGeneSpeciesName(geneName))
             );
         } else {
-            recaliReadCount = (double) rawReadCount;
+            recaliReadCount = 1.0;
         }
 
         //String readNameLine;
@@ -313,13 +313,12 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         //}
 
         return new Tuple2<>(sampleID + '\t' + clusterName, new Tuple4<>(getSampleTag(record),
-                rawReadCount, recaliReadCount, ""));
+                1, recaliReadCount, ""));
     }
 
     private Tuple2<String, Tuple4<String, Integer, Double, String>> pairedCountTupleGenerator(
             String sampleID, SAMRecord record1, SAMRecord record2) {
         final String clusterName;
-        final Integer rawReadCount = 1;
         final Double recaliReadCount;
 
         String geneName = record1.getReferenceName();
@@ -344,7 +343,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
                     this.referenceInfoMatrix.getSpeciesGenoGC(this.referenceInfoMatrix.getGeneSpeciesName(geneName))
             );
         } else {
-            recaliReadCount = (double) rawReadCount;
+            recaliReadCount = 1.0;
         }
 
         String sampleTag = getSampleTag(record1);
@@ -357,7 +356,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
         //}
 
         return new Tuple2<>(sampleID + '\t' + clusterName,
-                new Tuple4<>(sampleTag, rawReadCount, recaliReadCount, "")
+                new Tuple4<>(sampleTag, 1, recaliReadCount, "")
         );
     }
 

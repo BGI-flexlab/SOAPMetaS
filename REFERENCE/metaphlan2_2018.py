@@ -1048,7 +1048,7 @@ class TaxClade:
         quant = int(self.quantile*len(rat_nreads))
         ql,qr,qn = (quant,-quant,quant) if quant else (None,None,0)
 
-        ### SHIXU: 这里根据一个clade的非0-mapping的marker比例来过滤相应的clade丰度，如果一个clade的marker中只有不到0.7的marker被mapping上，则这个clade被视为无丰度。本操作目的；
+        ### SHIXU: 对于t__ rank 的 clade 且其物种有多个 type， 或者物种为_sp 后缀的，需要根据 clade 的非0-mapping的marker比例来过滤相应的clade丰度，如果一个clade的marker中只有不到0.7的 marker 被 mapping 上，则这个 clade 被视为无丰度。
         if self.name[0] == 't' and (len(self.father.children) > 1 or "_sp" in self.father.name or "k__Viruses" in self.get_full_name()):
             non_zeros = float(len([n for r,n in rat_nreads if n > 0]))
             nreads = float(len(rat_nreads))
@@ -1056,7 +1056,7 @@ class TaxClade:
                 self.abundance = 0.0
                 return 0.0
 
-        ### SHIXU: 默认的计算方法是tavg_g，会引入quantile参数，该参数用于调节robust平均值的比例。比如设定0.1，则会根据第一次计算得到的readsNumber/markerlLength值从大到小排序，然后排除最大的0.1和最小的0.1，剩下的重新计算 total_reads_count/total_gene_length.
+        ### SHIXU: 默认的计算方法是tavg_g，会引入quantile参数，该参数用于调节robust平均值的比例。比如设定0.1，则会根据第一次计算得到的readsNumber/markerlLength值从大到小排序，然后排除最大的0.1和最小的0.1，剩下的重新计算 total_reads_count/total_gene_length. 
         if rat < 0.0:
             pass
         elif self.stat == 'avg_g' or (not qn and self.stat in ['wavg_g','tavg_g']):
@@ -1081,6 +1081,7 @@ class TaxClade:
         elif self.stat == 'med':
             loc_ab = np.median(sorted([float(n)/r for r,n in rat_nreads])[ql:qr])
 
+        # SHIXU: rat 是当前 clade 所包含的 marker len 的总和， sum_ab 是当前 clade 的所有 children clade 的 abundance 总和，loc_ab 是当前clade 内计算的 abundance
         self.abundance = loc_ab
         if rat < self.min_cu_len and self.children:
             self.abundance = sum_ab
@@ -1093,6 +1094,7 @@ class TaxClade:
 
         return self.abundance
 
+    # SHIXU: 获取各个节点的节点名称和丰度值， 若当前节点存在未知 children 的丰度，则归为 clade__unclassified 分支，所有节点的丰度信息都以 list 的形式存储并返回
     def get_all_abundances( self ):
         ret = [(self.name,self.abundance)]
         if self.uncl_abundance > 0.0:
@@ -1158,11 +1160,20 @@ class TaxTree:
     '''
     ### SHIXU:
     mpa_v20_m200.pkl文件，bzip2(pickle)格式，需要decompress然后pickle.load进行加载。
+    content:{
+    {taxonomy:
+    ['taxonomy of genome1'] = length of genome1
+    ['taxonomy of genome2'] = length of genome2
+    }
+    {markers:
     'clade': the clade that the marker belongs to,
     'ext': {the name of the first external genome where the marker appears, the name of the second external genome where the marker appears},
     'len': length of the marker,
     'score': score of the marker,
     'taxon': the taxon of the marker
+    }
+    详情参考: <https://bitbucket.org/biobakery/metaphlan2/src/default/#markdown-header-customizing-the-database>
+    }
     内容：
     key("taxonomy", "markers")
     {
@@ -1242,6 +1253,8 @@ class TaxTree:
                     if k.startswith("k__") and not v.uncl])
 
         cl2ab, cl2glen, tot_ab = {}, {}, 0.0
+
+        # SHIXU: 按照 kingdom rank 的丰度值加和来计算总丰度，各个子 rank 的丰度值在这个过程中也会计算完成
         for k,v in cl2ab_n.items():
             tot_ab += v.compute_abundance()
 
@@ -1509,7 +1522,8 @@ def metaphlan2():
 
     map_out = []
     for marker,reads in sorted(markers2reads.items(), key=lambda pars: pars[0]):
-        if marker not in tree.markers2lens:
+        #SHIXU: 之前 marker_to_ignore/exclude 排除掉的 marker 对应的 reads 在这里都会丢掉。
+        if marker not in tree.markers2lens: 
             continue
         tax_seq = tree.add_reads( marker, len(reads),
                                   ignore_viruses = pars['ignore_viruses'],
@@ -1607,3 +1621,36 @@ def metaphlan2():
 
 if __name__ == '__main__':
     metaphlan2()
+
+'''
+metaphlan 计数逻辑
+
++ 过滤掉 sub_alignment_len(CIGAR M) 小于指定阈值的 SamRecord
+
++ sam 转变为 {marker: [read list]} 的模式
+
++ 向 tree.add_reads 传入 marker 和 reads number
+
++ 传入的数据存入对应 marker 的 clade tree 最末端的节点的字典 markers2nreads 中。 {marker: n}
+
+## self.all_clades: {
+    "p__xxxxx": tax_clade1,
+    "s__xxxx": tax_clade2,
+    ...
+}
+
++ 对 tree 计算 relative abundance。 计算方法：
+   + 所有的 kingdom rank，进行compute abundance （相当于对每个 clade 进行丰度计算），计算方法：
+      + 对子节点的 abundance 进行加和 sum_ab
+      + 对当前节点特有的 marker （这些 marker 不在子节点中）的 reads 数量进行循环: 该 marker 的 ext taxa 进行过滤，过滤条件为 ext 的 clade 拥有超过 0.33 的 marker 被比对上，添加到 removed 列表。 未过滤的，则添加到 rat 普通列表。 列表为 [(marker_len, reads_count)]
+      + 检查剩余 marker 的数量，根据需要从 removed 列表中补充
+      + 根据 quantile 确定 marker 列表边界
+      + 对 t rank和 _sp 结尾的 clade 需要保证非 0 marker 的比例大于 0.7, 否则丰度值记为 0
+      + 计算当前 clade 平均丰度 loc_ab，计算方法为 tavg_g
+      + 判断 sum_ab 与 loc_ab 的关系
+   + 将所有 kingdom 的所有物种 （clade rank） 的 clade name 和 abundance 以列表的形式返回，然后计算相对丰度值
+
++ 输出相对丰度值
+
+输出
+'''
