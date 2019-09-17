@@ -343,7 +343,7 @@ public class ProfilingNewProcessMS {
         if(this.pipeline.toLowerCase().equals("comg")){
             return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         } else if (this.pipeline.toLowerCase().equals("metaphlan")){
-            return new MEPHProfilingMethod(this.metasOpt, this.jscontext);
+            return new METAPHLANProfilingMethod(this.metasOpt, this.jscontext);
         } else {
             return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         }

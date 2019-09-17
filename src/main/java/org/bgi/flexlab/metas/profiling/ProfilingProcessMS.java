@@ -321,7 +321,7 @@ public class ProfilingProcessMS {
         if(this.pipeline.equals("comg")){
             return new COMGProfilingMethod(this.metasOpt);
         } else if (this.pipeline.equals("metaphlan")){
-            return new METAPHLANProfilingMethod(this.metasOpt);
+            return new MEPHProfilingMethod(this.metasOpt);
         } else {
             return new COMGProfilingMethod(this.metasOpt);
         }
