@@ -240,4 +240,14 @@ public class METAPHLANProfilingMethod extends ProfilingMethodBase implements Ser
 
         return smTag;
     }
+
+    @Override
+    public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaRDD<SAMRecord> samRecordJavaRDD, JavaSparkContext ctx) {
+        return null;
+    }
+
+    @Override
+    public void setSampleIDbySampleName(HashMap<String, Integer> sampleIDbySampleName) {
+        this.sampleIDbySampleName = sampleIDbySampleName;
+    }
 }

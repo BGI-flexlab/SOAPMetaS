@@ -116,26 +116,31 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
         // read and to stop after the split size. Unfortunately this prevents us
         // from reading the last partial line, so our stream actually allows
         // reading to the next newline after the actual end.
+
+        final SAMFileHeader header = createSamReader(input, stringency).getFileHeader(); // customized header test conceal
+
+        waInput = new WorkaroundingStream(input, header); // customized header test conceal
+
         final boolean firstSplit = this.start == 0;
 
 
-//        if (firstSplit) {
+        if (firstSplit) {
             // Skip the header because we already have it, and adjust the start
             // to match.
-//            final int headerLength = waInput.getRemainingHeaderLength();
-//            final SAMFileHeader splitHeader = createSamReader(input, stringency).getFileHeader();
-//            final int headerLength = getHeaderLength(splitHeader);
-//            input.seek(headerLength);
-//            this.start += headerLength;
-//        } else
-//            input.seek(--this.start);
-
-        if (!firstSplit) {
+            final int headerLength = waInput.getRemainingHeaderLength();
+            ////final SAMFileHeader splitHeader = createSamReader(input, stringency).getFileHeader(); customized header test
+            ////final int headerLength = getHeaderLength(splitHeader); customized header test
+            input.seek(headerLength);
+            this.start += headerLength;
+        } else
             input.seek(--this.start);
-        }
 
-        final SAMFileHeader header = SOAPMetas.getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), conf);
-        waInput = new WorkaroundingStream(input, header);
+        //if (!firstSplit) { customized header test
+        //    input.seek(--this.start); customized header test
+        //} customized header test
+
+        //final SAMFileHeader header = SOAPMetas.getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), conf); customized header test
+        //waInput = new WorkaroundingStream(input, header); customized header test
         // Creating the iterator causes reading from the stream, so make sure
         // to start counting this early.
         waInput.setLength(this.end - this.start);

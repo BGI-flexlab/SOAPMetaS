@@ -1,13 +1,16 @@
 package org.bgi.flexlab.metas.profiling;
 
+import htsjdk.samtools.SAMRecord;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * ClassName: MEPHProfilingMethod
@@ -35,4 +38,13 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
         return null;
     }
 
+    @Override
+    public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaRDD<SAMRecord> samRecordJavaRDD, JavaSparkContext ctx) {
+        return null;
+    }
+
+    @Override
+    public void setSampleIDbySampleName(HashMap<String, Integer> sampleIDbySampleName) {
+        this.sampleIDbySampleName = sampleIDbySampleName;
+    }
 }

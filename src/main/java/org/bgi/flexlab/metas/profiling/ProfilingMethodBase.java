@@ -32,6 +32,9 @@ public abstract class ProfilingMethodBase implements Serializable {
     protected SequencingMode sequencingMode;
 
 
+    protected HashMap<String, Integer> sampleIDbySampleName = null;
+
+
     public ProfilingMethodBase(MetasOptions options, JavaSparkContext jsc){
         this.profilingAnalysisMode = options.getProfilingAnalysisMode();
         this.profilingAnalysisLevel = options.getProfilingAnalysisLevel();

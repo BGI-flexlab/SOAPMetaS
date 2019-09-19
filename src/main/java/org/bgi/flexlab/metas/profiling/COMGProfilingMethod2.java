@@ -40,8 +40,6 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
 
     private Broadcast<ReferenceInfoMatrix> referenceInfoMatrix = null;
 
-    private HashMap<String, Integer> sampleIDbySampleName = null;
-
     private boolean doGCRecalibration;
 
     private GCBiasModelBase gcBiasRecaliModel;
@@ -94,7 +92,7 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
 
         //RGID 作为 sampleName
         //TODO 获取sampleID
-        Broadcast<HashMap<String, Integer>>  sampleNamesBroadcast = ctx.broadcast(sampleIDbySampleName);
+        Broadcast<HashMap<String, Integer>>  sampleNamesBroadcast = ctx.broadcast(this.sampleIDbySampleName);
 
         return reads.mapToPair(samRecord -> {
             String rg = samRecord.getStringAttribute("RG");
