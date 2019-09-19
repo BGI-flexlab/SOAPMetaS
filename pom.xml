@@ -91,6 +91,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.disq-bio</groupId>
+            <artifactId>disq</artifactId>
+            <version>0.3.3</version>
+        </dependency>
 
         <!-- Supplementary dependencies -->
 

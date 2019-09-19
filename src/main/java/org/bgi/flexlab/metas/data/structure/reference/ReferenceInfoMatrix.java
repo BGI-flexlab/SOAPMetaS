@@ -17,6 +17,7 @@ import java.util.Map;
  * replaced with "genome" information, and this is functionally similar to species-level analysis. However,
  * users must pay attention that the builtin GC bias recalibration model won't work as expected.
  *
+ * 该类需要 序列化 & 广播， 没必要包含构建方法
  * @author heshixu@genomics.cn
  */
 

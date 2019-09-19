@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.bgi.flexlab.metas.SOAPMetas;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecordWritable;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
@@ -73,6 +74,7 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
         LOG.info("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] Current split file: "  +
                 file.getName() + " File position: " + this.start + " Split length: " + split.getLength());
 
+        //添加
         String samSampleListPath = conf.get("metas.data.mapreduce.input.samsamplelist");
         //LOG.trace("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] SAM sample list configure metas.data.mapreduce.input.samsamplelist is " + samSampleListPath);
 
@@ -114,22 +116,26 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
         // read and to stop after the split size. Unfortunately this prevents us
         // from reading the last partial line, so our stream actually allows
         // reading to the next newline after the actual end.
-
-        final SAMFileHeader header = createSamReader(input, stringency).getFileHeader();
-
-        waInput = new WorkaroundingStream(input, header);
-
         final boolean firstSplit = this.start == 0;
 
-        if (firstSplit) {
+
+//        if (firstSplit) {
             // Skip the header because we already have it, and adjust the start
             // to match.
-            final int headerLength = waInput.getRemainingHeaderLength();
-            input.seek(headerLength);
-            this.start += headerLength;
-        } else
-            input.seek(--this.start);
+//            final int headerLength = waInput.getRemainingHeaderLength();
+//            final SAMFileHeader splitHeader = createSamReader(input, stringency).getFileHeader();
+//            final int headerLength = getHeaderLength(splitHeader);
+//            input.seek(headerLength);
+//            this.start += headerLength;
+//        } else
+//            input.seek(--this.start);
 
+        if (!firstSplit) {
+            input.seek(--this.start);
+        }
+
+        final SAMFileHeader header = SOAPMetas.getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), conf);
+        waInput = new WorkaroundingStream(input, header);
         // Creating the iterator causes reading from the stream, so make sure
         // to start counting this early.
         waInput.setLength(this.end - this.start);
@@ -289,6 +295,23 @@ public class MetasSAMWFRecordReader extends RecordReader<Text, MetasSAMPairRecor
         //LOG.info("[SOAPMetas::" + MetasSAMWFRecordReader.class.getName() + "] Current recordWr: " + recordWr.toString() + " | Current pairRecord: " + pairRecord.toString());
 
         return true;
+    }
+
+    public int getHeaderLength(SAMFileHeader header){
+        String text = header.getTextHeader();
+        if (text == null) {
+            StringWriter writer = new StringWriter();
+            new SAMTextHeaderCodec().encode(writer, header);
+            text = writer.toString();
+        }
+        byte[] b;
+        try {
+            b = text.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            b = null;
+            assert false;
+        }
+        return b.length;
     }
 }
 

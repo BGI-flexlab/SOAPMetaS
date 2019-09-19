@@ -1,12 +1,18 @@
 package org.bgi.flexlab.metas;
 
+import htsjdk.samtools.SAMFileHeader;
+import htsjdk.samtools.SAMTextHeaderCodec;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.alignment.AlignmentProcessMS;
+import org.bgi.flexlab.metas.data.mapreduce.input.sam.HdfsHeaderLineReader;
 import org.bgi.flexlab.metas.profiling.ProfilingNewProcessMS;
+import org.bgi.flexlab.metas.profiling.ProfilingNewProcessMS2;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasTrainingProcess;
 
 import java.io.*;
@@ -28,6 +34,7 @@ public class SOAPMetas {
     public static void main(String[] args){
 
         SparkConf sconf = new SparkConf().setAppName("SOAPMetas-" + System.nanoTime());
+        sconf.set("spark.network.timeout", "600");
                 //.set("spark.eventLog.dir", "/tmp/SOAPMetas/spark-events");
         JavaSparkContext jsc = new JavaSparkContext(sconf);
         //jsc.hadoopConfiguration().set("metas.application.name", jsc.appName());
@@ -63,6 +70,11 @@ public class SOAPMetas {
             }
         }
 
+
+        //create multi-header
+//        SAMFileHeader samFileHeader = getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), jsc.hadoopConfiguration());
+
+
         //GC Training control
         //if gc training, no profiling process (standard data)
         if (metasOptions.isGCBiasTrainingMode()){
@@ -88,7 +100,7 @@ public class SOAPMetas {
         if (metasOptions.doProfiling()) {
             //ProfilingProcess
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing profiling process.");
-            ProfilingNewProcessMS profilingMS = new ProfilingNewProcessMS(metasOptions, jsc);
+            ProfilingNewProcessMS2 profilingMS = new ProfilingNewProcessMS2(metasOptions, jsc);
             // Output list format:
             // outputHDFSDir/profiling/<appID>-Profiling-<readGroupID>.abundance[.evaluation]
             if (alignmentOutputList != null) {
@@ -139,4 +151,19 @@ public class SOAPMetas {
         jsc.close();
         System.exit(0);
     }
+
+    public static SAMFileHeader getHeader(Path headerPath, Configuration conf) {
+
+        SAMFileHeader header = null;
+        try {
+            HdfsHeaderLineReader reader = new HdfsHeaderLineReader(headerPath, conf);
+            SAMTextHeaderCodec codec = new SAMTextHeaderCodec();
+            header = codec.decode(reader, null);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return header;
+    }
+
 }

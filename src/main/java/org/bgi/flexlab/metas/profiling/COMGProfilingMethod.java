@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.HashPartitioner;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 //import org.apache.spark.broadcast.Broadcast;
 import org.bgi.flexlab.metas.MetasOptions;
@@ -27,7 +28,9 @@ import scala.Tuple4;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -143,6 +146,16 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
                                 this.profilingResultGenerator(keyStr[1], tuple._2));
                     });
         }
+
+    }
+
+    @Override
+    public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaRDD<SAMRecord> samRecordJavaRDD, JavaSparkContext ctx) {
+        return null;
+    }
+
+    @Override
+    public void setSampleIDbySampleName(HashMap<String, Integer> sampleIDbySampleName) {
 
     }
 
