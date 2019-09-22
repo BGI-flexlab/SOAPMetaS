@@ -98,6 +98,7 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
             String rg = samRecord.getStringAttribute("RG");
             int sampleID = sampleNamesBroadcast.value().get(rg);
             return countTupleGenerator(String.valueOf(sampleID), samRecord);})
+                .filter(tuple -> tuple._1 != null)
                 .reduceByKey((a, b) -> new Tuple4<>(a._1(), a._2() + b._2(), a._3() + b._3(), ""))
                 .mapToPair(tuple -> {
                     String[] keyStr = StringUtils.split(tuple._1, '\t');

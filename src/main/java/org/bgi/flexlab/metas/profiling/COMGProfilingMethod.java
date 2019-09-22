@@ -56,7 +56,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
     private GCBiasModelBase gcBiasRecaliModel;
 
-    public COMGProfilingMethod(MetasOptions options, JavaSparkContext jsc) {
+    public COMGProfilingMethod(final MetasOptions options, final JavaSparkContext jsc) {
 
         super(options, jsc);
 
@@ -156,7 +156,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
     @Override
     public void setSampleIDbySampleName(HashMap<String, Integer> sampleIDbySampleName) {
-
+        return;
     }
 
     /**
