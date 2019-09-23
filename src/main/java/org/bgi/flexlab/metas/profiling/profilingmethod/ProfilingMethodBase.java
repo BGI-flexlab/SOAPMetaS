@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.profiling;
+package org.bgi.flexlab.metas.profiling.profilingmethod;
 
 import htsjdk.samtools.SAMRecord;
 import org.apache.spark.Partitioner;

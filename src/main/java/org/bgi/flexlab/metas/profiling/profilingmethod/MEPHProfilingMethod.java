@@ -1,11 +1,14 @@
-package org.bgi.flexlab.metas.profiling;
+package org.bgi.flexlab.metas.profiling.profilingmethod;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.util.SequenceUtil;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
@@ -29,12 +32,13 @@ import java.util.*;
 public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializable {
 
     public static final long serialVersionUID = 1L;
+    private static final Logger LOG = LogManager.getLogger(MEPHProfilingMethod.class);
 
     private boolean doGCRecalibration;
     private GCBiasModelBase gcBiasRecaliModel;
 
-    private final HashMap<String, ArrayList<String>>> markers2exts;
-    private final HashMap<String, Integer>> markers2len;
+    private Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad = null;
+    private Broadcast<HashMap<String, Integer>> markers2lenBroad = null;
 
     public MEPHProfilingMethod(MetasOptions options, JavaSparkContext jsc){
         super(options, jsc);
@@ -60,7 +64,6 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
       Partition: default
 
      After reduceByKey:
-      Type:
       key: sampleID
       value: HashMap<markerName, tuple<count, gc_recali_count>>
 
@@ -77,6 +80,11 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
         Broadcast<HashMap<String, Integer>>  sampleNamesBroadcast = ctx.broadcast(this.sampleIDbySampleName);
 
+        if (markers2extsBroad == null){
+            markers2extsBroad = ctx.broadcast();
+        }
+        final Broadcast<HashMap<String, Integer>> markers2lenBroad;
+
         return samRecordJavaRDD.mapToPair(samRecord -> {
             String rg = samRecord.getStringAttribute("RG");
             int sampleID = sampleNamesBroadcast.value().get(rg);
@@ -91,7 +99,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
                 b.forEach((k, v) -> c.merge(k, v,  (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
             }
             return c;
-        }).mapPartitionsToPair(, true)
+        }).mapPartitionsToPair(new MEPHComputeAbundanceFunction(markers2extsBroad, markers2lenBroad), true);
     }
 
     private Tuple2<String, HashMap<String, Tuple2<Integer, Double>>> countTupleGenerator(String sampleID, SAMRecord record) {
@@ -161,11 +169,4 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
         this.sampleIDbySampleName = sampleIDbySampleName;
     }
 
-    private class CladeNode {
-        int cladeGenomeLen; // Average genome length of sub-taxas of the clade.
-        int kingdom; // 1: archaea; 2: bacteria; 3: eukaryotes; 4: viruses
-        CladeNode fatherClade;
-        HashSet<String> childCladeNameSet;
-        HashMap<String, Integer> markers2nreads;
-    }
 }

@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.profiling;
+package org.bgi.flexlab.metas.profiling.profilingmethod;
 
 import htsjdk.samtools.SAMReadGroupRecord;
 import htsjdk.samtools.SAMRecord;
@@ -30,7 +30,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 
 /**

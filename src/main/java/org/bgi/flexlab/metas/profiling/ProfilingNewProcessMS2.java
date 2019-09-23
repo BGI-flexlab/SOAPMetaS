@@ -1,34 +1,30 @@
 package org.bgi.flexlab.metas.profiling;
 
 import htsjdk.samtools.SAMFileHeader;
-import htsjdk.samtools.SAMReadGroupRecord;
 import htsjdk.samtools.SAMRecord;
-import htsjdk.samtools.ValidationStringency;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
 import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.SOAPMetas;
 import org.bgi.flexlab.metas.data.mapreduce.input.sam.MetaSamSource;
 import org.bgi.flexlab.metas.data.mapreduce.input.sam.SAMFileHeaderFactory;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.ProfilingOutputFormat;
 import org.bgi.flexlab.metas.data.mapreduce.output.profiling.RelativeAbundanceFunction;
 import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDPartitioner;
-import org.bgi.flexlab.metas.data.mapreduce.partitioner.SampleIDReadNamePartitioner;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
-import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
 import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
+import org.bgi.flexlab.metas.profiling.profilingmethod.COMGProfilingMethod2;
+import org.bgi.flexlab.metas.profiling.profilingmethod.METAPHLANProfilingMethod;
+import org.bgi.flexlab.metas.profiling.profilingmethod.ProfilingMethodBase;
 import org.bgi.flexlab.metas.util.DataUtils;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
-import org.seqdoop.hadoop_bam.util.SAMHeaderReader;
 
 import java.io.*;
 import java.util.ArrayList;

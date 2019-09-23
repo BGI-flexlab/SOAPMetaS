@@ -1,4 +1,4 @@
-package org.bgi.flexlab.metas.profiling;
+package org.bgi.flexlab.metas.profiling.profilingmethod;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.util.SequenceUtil;
@@ -22,7 +22,6 @@ import scala.Tuple4;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 
 
 /**
