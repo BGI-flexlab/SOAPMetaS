@@ -33,9 +33,10 @@ public class SampleIDPartitioner extends Partitioner {
     @Override
     public int getPartition(Object key) {
         if (key instanceof String){
-            return Math.min(Integer.parseInt((String) key), this.numPartitions - 1);
+            int sampleID = Integer.parseInt(((String) key).split("\t")[0]);
+            return Math.min(sampleID, this.numPartitions - 1);
         } else {
-            return this.numPartitions - 1;
+            return 0;
         }
     }
 

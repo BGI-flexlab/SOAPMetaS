@@ -5,8 +5,10 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
+import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import scala.Tuple2;
 import scala.Tuple3;
+import scala.Tuple4;
 
 import java.io.Serializable;
 import java.util.*;
@@ -23,11 +25,13 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
     public static final long serialVersionUID = 1L;
     private static final Logger LOG = LogManager.getLogger(MEPHProfilingMethod.class);
 
-    private final Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad;
+    private final Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad; 注意ext的名称需要添加t__前缀
     private final Broadcast<HashMap<String, Integer>> markers2lenBroad;
+    private final Broadcast<HashMap<String, String>> cladeName2FullNameBroad;
     private boolean doDisqm = true;
     private double quantile = 0.1;
     private int minNucLen = 2000;
+    private String taxaLevel = "a";
 
     /**
      * Statistical type:
@@ -41,44 +45,99 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
      **/
     private final int statType = 8;
 
-    public MEPHComputeAbundanceFunction(final Broadcast<HashMap<String, ArrayList<String>>> markers2exts, final Broadcast<HashMap<String, Integer>> markers2len){
+    public MEPHComputeAbundanceFunction(final Broadcast<HashMap<String, ArrayList<String>>> markers2exts,
+                                        final Broadcast<HashMap<String, Integer>> markers2len,
+                                        final Broadcast<HashMap<String, String>> cladeName2FullName){
         this.markers2extsBroad = markers2exts;
         this.markers2lenBroad = markers2len;
+        this.cladeName2FullNameBroad = cladeName2FullName;
 
         // markers2clades/exts/lens: 1035649
         // taxa2clades: 16904
-        // all_clades: 27085
+        // allClades: 27085
     }
 
     @Override
     public Iterator<Tuple2<String, ProfilingResultRecord>> call(Iterator<Tuple2<String, HashMap<String, Tuple2<Integer, Double>>>> tuple2Iterator) throws Exception {
 
+        String keyStr = null;
+
         HashMap<String, HashMap<String, Tuple2<Integer, Double>>> cladeMarkers2nreads;
-        HashMap<String, CladeNode> all_clades = new HashMap<>(27086);
+        HashMap<String, CladeNode> allClades = new HashMap<>(27086);
+
+        allClades的初始化考虑放到compute函数中，在函数中第一个children循环采用外部的hashset来获取子节点名称。所以广播变量还需要提供一个外部的taxa_tree
 
         ArrayList<String> kingdomList = new ArrayList<>(5);
 
         try {
             for (String kingdom : kingdomList) {
-                this.computeNodeAbundance(kingdom, cladeMarkers2nreads, all_clades);
+                this.computeNodeAbundance(kingdom, cladeMarkers2nreads, allClades);
             }
         } catch (NullPointerException e){
             LOG.error("[SOAPMetas::" + MEPHComputeAbundanceFunction.class.getName() + "] " + e.toString());
         }
 
-        ArrayList<Tuple2<String, ProfilingResultRecord>> results = new ArrayList<>(28000);
+        ArrayList<Tuple2<String, ProfilingResultRecord>> results = new ArrayList<>(28000); //key: sampleID; value: ProfilingResultRecord
 
         // 获取各个 node 的 abundace，此处包括获取 unclassified 的信息。 生成的 ProfilingResult 也要包含 genoLen 信息？
         // 注意对 get_full_name 的需求，可能要考虑存储各个 node 的全名称。 此外，此过程需要考虑是否保存某个分类层级，因为后续
         // 进行 relative abundance 计算de时候，如果每个层级都计算，结果可能会出错
 
+        if (taxaLevel.equals("a")) {
+            for (HashMap.Entry<String, CladeNode> entry : allClades.entrySet()) {
+                String cladeName = entry.getKey();
+                CladeNode node = entry.getValue();
+                results.add(new Tuple2<>(keyStr, ))
+                if (node.abundance == null || node.abundance == 0.0) {
+                    continue;
+                }
+
+                String name;
+                String unclSuffix = "_unclassified".intern();
+                if (node.uncl_abundance > 0.0) {
+                    name = node.children.keySet().iterator().next().substring(0, 3) + cladeName.substring(3) + unclSuffix;
+                    results.add(new Tuple2<>(keyStr, ));
+                }
+                if (node.subcl_uncl && !cladeName.startsWith("s")) {
+                    name = getNextTaxaLevel(cladeName) + cladeName.substring(1) + unclSuffix;
+                    results.add(new Tuple2<>(keyStr, ));
+                }
+            }
+        } else {
+            for (HashMap.Entry<String, CladeNode> entry : allClades.entrySet()) {
+                String cladeName = entry.getKey();
+                if (cladeName.startsWith(taxaLevel)) {
+                    CladeNode node = entry.getValue();
+
+                }
+            }
+        }
+
         return null;
     }
 
+    private String getNextTaxaLevel(String cladeName){
+        if (cladeName.startsWith("g")) {
+            return "s";
+        } else if (cladeName.startsWith("f")) {
+            return "g";
+        } else if (cladeName.startsWith("o")) {
+            return "f";
+        } else if (cladeName.startsWith("c")) {
+            return "o";
+        } else if (cladeName.startsWith("p")) {
+            return "c";
+        } else if (cladeName.startsWith("k")) {
+            return "p";
+        } else {
+            return "k";
+        }
+    }
+
     // core algorithm of MetaPhlAn2
-    private double computeNodeAbundance(String clade, HashMap<String, HashMap<String, Tuple2<Integer, Double>>> cladeMarkers2nreads, HashMap<String, CladeNode> all_clades)
+    private double computeNodeAbundance(String clade, HashMap<String, HashMap<String, Tuple2<Integer, Double>>> cladeMarkers2nreads, HashMap<String, CladeNode> allClades)
             throws NullPointerException {
-        CladeNode node = all_clades.get(clade);
+        CladeNode node = allClades.get(clade);
         if (node == null) {
             throw new NullPointerException("Clade " + clade + " has no CladeNode record.");
         } else {
@@ -95,8 +154,8 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
 
         try {
             for (String childClade : node.children.keySet()) {
-                sumAbun += this.computeNodeAbundance(childClade, cladeMarkers2nreads, all_clades);
-                //sumAbun += all_clades.get(childClade).abundance;
+                sumAbun += this.computeNodeAbundance(childClade, cladeMarkers2nreads, allClades);
+                //sumAbun += allClades.get(childClade).abundance;
             }
         } catch (NullPointerException e) {
             LOG.error("[SOAPMetas::" + MEPHComputeAbundanceFunction.class.getName() + "] Current clade: "
@@ -119,7 +178,7 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
 
             if (doDisqm) {
                 for (String extCladeName : markers2extsBroad.value().get(markerName)) {
-                    extClade = all_clades.getOrDefault(extCladeName, null);
+                    extClade = allClades.getOrDefault(extCladeName, null);
                     if (extClade == null) break;
                     extClade = extClade.fatherClade;
                     while (extClade.children.size() == 1) {
@@ -147,7 +206,7 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         int nRetain = retainLenCountList.size();
         if (doDisqm && nDiscard > 0){
             int nRipr = 10;
-            if (terminalCountCheck(node)) {
+            if (isSingleTerminal(node)) {
                 nRipr = 0;
             }
             if ((node.kingdom & 32) > 0){
@@ -275,20 +334,16 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         return node.abundance;
     }
 
-    private boolean terminalCountCheck(CladeNode cladeNode) {
-        boolean bol = true;
+    private boolean isSingleTerminal(CladeNode cladeNode) {
         HashMap<String, CladeNode> childrenMap = cladeNode.children;
         if (childrenMap == null){
-            return bol;
+            return true;
         }
         Collection<MEPHComputeAbundanceFunction.CladeNode> children = childrenMap.values();
         if (children.size() > 1){
             return false;
         }
-        for (CladeNode childNode: children){
-            bol = bol && terminalCountCheck(childNode);
-        }
-        return bol;
+        return isSingleTerminal(children.iterator().next());
     }
 
     private class CladeNode {
@@ -302,5 +357,43 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         int genoLen = 0;
         CladeNode fatherClade = null;
         HashMap<String, CladeNode> children = null; // key: clade name, value: CladeNode
+    }
+
+    private ProfilingResultRecord profilingResultGenerator(String smTag,
+            String clusterName, CladeNode cladeNode) {
+
+        ProfilingResultRecord resultRecord;
+
+        //if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
+        //    resultRecord = new ProfilingEveResultRecord();
+        //} else {
+        //
+        //}
+        resultRecord = new ProfilingResultRecord();
+
+        resultRecord.setClusterName(clusterName);
+
+        resultRecord.setSmTag(result._1());
+
+        resultRecord.setRawReadCount(result._2());
+        resultRecord.setrecaliReadCount(result._3());
+        if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.MARKERS)) {
+            int geneLen = this.referenceInfoMatrix.value().getGeneLength(clusterName);
+            if (geneLen > 0) {
+                resultRecord.setAbundance(result._3() / geneLen);
+            } else {
+                resultRecord.setAbundance(0.0);
+            }
+        } else {
+            int genoLen = this.referenceInfoMatrix.value().getSpeciesGenoLen(clusterName);
+            if (genoLen > 0) {
+                resultRecord.setAbundance(result._3() / genoLen);
+            } else {
+                resultRecord.setAbundance(0.0);
+            }
+        }
+        resultRecord.setReadNameString(result._4());
+
+        return resultRecord;
     }
 }

@@ -39,6 +39,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
     private Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad = null;
     private Broadcast<HashMap<String, Integer>> markers2lenBroad = null;
+    private Broadcast<HashMap<String, String>> cladeName2FullNameBroad = null;
 
     public MEPHProfilingMethod(MetasOptions options, JavaSparkContext jsc){
         super(options, jsc);
@@ -59,12 +60,12 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
      Input:
 
      After mapToPair:
-      key: sampleID
+      key: sampleID + rgID
       value: HashMap<markerName, tuple<1, gc_recali_value>>
       Partition: default
 
      After reduceByKey:
-      key: sampleID
+      key: sampleID + rgID
       value: HashMap<markerName, tuple<count, gc_recali_count>>
 
 
@@ -80,29 +81,22 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
         Broadcast<HashMap<String, Integer>>  sampleNamesBroadcast = ctx.broadcast(this.sampleIDbySampleName);
 
-        if (markers2extsBroad == null){
-            markers2extsBroad = ctx.broadcast();
-        }
-        final Broadcast<HashMap<String, Integer>> markers2lenBroad;
 
-        return samRecordJavaRDD.mapToPair(samRecord -> {
-            String rg = samRecord.getStringAttribute("RG");
-            int sampleID = sampleNamesBroadcast.value().get(rg);
-            return countTupleGenerator(String.valueOf(sampleID), samRecord);
-        }).reduceByKey(sampleIDPartitioner, (a, b) -> {
-            HashMap<String, Tuple2<Integer, Double>> c;
-            if (a.size() < b.size()) {
-                c = new HashMap<>(b);
-                a.forEach((k, v) -> c.merge(k, v, (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
-            } else {
-                c = new HashMap<>(a);
-                b.forEach((k, v) -> c.merge(k, v,  (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
-            }
-            return c;
-        }).mapPartitionsToPair(new MEPHComputeAbundanceFunction(markers2extsBroad, markers2lenBroad), true);
+        return samRecordJavaRDD.mapToPair(samRecord -> countTupleGenerator(samRecord.getStringAttribute("RG"), samRecord))
+                .reduceByKey(sampleIDPartitioner, (a, b) -> {
+                    HashMap<String, Tuple2<Integer, Double>> c;
+                    if (a.size() < b.size()) {
+                        c = new HashMap<>(b);
+                        a.forEach((k, v) -> c.merge(k, v, (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
+                    } else {
+                        c = new HashMap<>(a);
+                        b.forEach((k, v) -> c.merge(k, v,  (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
+                    }
+                    return c;
+                }).mapPartitionsToPair(new MEPHComputeAbundanceFunction(markers2extsBroad, markers2lenBroad, cladeName2FullNameBroad), true);
     }
 
-    private Tuple2<String, HashMap<String, Tuple2<Integer, Double>>> countTupleGenerator(String sampleID, SAMRecord record) {
+    private Tuple2<String, HashMap<String, Tuple2<Integer, Double>>> countTupleGenerator(String rgID, SAMRecord record) {
 
         String markerName = record.getReferenceName();
         Double recaliReadCount = 1.0;
@@ -123,45 +117,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
         HashMap<String, Tuple2<Integer, Double>> readCount = new HashMap<>(2);
         readCount.put(markerName, new Tuple2<>(1, recaliReadCount));
-        return new Tuple2<>(sampleID, readCount);
-    }
-
-    private ProfilingResultRecord profilingResultGenerator(
-            String clusterName, Tuple4<String, Integer, Double, String> result) {
-
-        ProfilingResultRecord resultRecord;
-
-        //if (this.profilingAnalysisMode.equals(ProfilingAnalysisMode.EVALUATION)) {
-        //    resultRecord = new ProfilingEveResultRecord();
-        //} else {
-        //
-        //}
-        resultRecord = new ProfilingResultRecord();
-
-        resultRecord.setClusterName(clusterName);
-
-        resultRecord.setSmTag(result._1());
-
-        resultRecord.setRawReadCount(result._2());
-        resultRecord.setrecaliReadCount(result._3());
-        if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.MARKERS)) {
-            int geneLen = this.referenceInfoMatrix.value().getGeneLength(clusterName);
-            if (geneLen > 0) {
-                resultRecord.setAbundance(result._3() / geneLen);
-            } else {
-                resultRecord.setAbundance(0.0);
-            }
-        } else {
-            int genoLen = this.referenceInfoMatrix.value().getSpeciesGenoLen(clusterName);
-            if (genoLen > 0) {
-                resultRecord.setAbundance(result._3() / genoLen);
-            } else {
-                resultRecord.setAbundance(0.0);
-            }
-        }
-        resultRecord.setReadNameString(result._4());
-
-        return resultRecord;
+        return new Tuple2<>(this.sampleIDbySampleName.get(rgID) + '\t' + rgID, readCount);
     }
 
     @Override
