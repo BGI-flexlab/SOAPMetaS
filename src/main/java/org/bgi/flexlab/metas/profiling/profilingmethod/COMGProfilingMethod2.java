@@ -74,7 +74,8 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
     }
 
     @Override
-    public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD, Partitioner partitioner) {
+    public JavaPairRDD<String, ProfilingResultRecord> runProfiling(JavaPairRDD<String, MetasSAMPairRecord> readMetasSamPairRDD,
+                                                                   Partitioner partitioner) {
         return null;
     }
 

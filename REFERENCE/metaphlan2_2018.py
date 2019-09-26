@@ -1040,6 +1040,7 @@ class TaxClade:
             if n_rat_nreads < n_ripr and n_tot > n_rat_nreads:
                 rat_nreads += removed[:n_ripr-int(n_rat_nreads)]
 
+
         ### SHIXU: 按照reads数量对ret_nreads进行排序
         rat_nreads = sorted(rat_nreads, key = lambda x: x[1])
 
@@ -1226,6 +1227,7 @@ class TaxTree:
                 return ""
         while len(cl.children) == 1:
             cl = list(cl.children.values())[0]
+        // SHIXU 如果一个marker的参考clade是高层级，但clade的子节点也只有一个，那岂不是这个marker的数据也要被交给子节点？
         cl.markers2nreads[marker] = n
         return cl.get_full_name()
 
@@ -1280,6 +1282,7 @@ class TaxTree:
                     continue
                 cl2ab[cl] = ab
                 cl2glen[cl] = glen
+                # SHIXU: 此处如果设定了tax_lev且刚好属于此lev时，glen并未进行更新， 因此后续与glen有关的输出结果会出问题
 
         ret_d = dict([( k, float(v) / tot_ab if tot_ab else 0.0) for k,v in cl2ab.items()])
         ret_r = dict([( k, (v,cl2glen[k],float(v)*cl2glen[k])) for k,v in cl2ab.items()])

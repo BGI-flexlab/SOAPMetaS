@@ -102,7 +102,6 @@ public class ProfilingResultRecord implements Serializable {
                 .append(this.getrecaliReadCount()).append('\t')
                 .append(this.getAbundance()).append('\t')
                 .append(this.getRelAbun()).append('\t')
-                .append(this.getReadNameString())
                 .toString();
     }
 

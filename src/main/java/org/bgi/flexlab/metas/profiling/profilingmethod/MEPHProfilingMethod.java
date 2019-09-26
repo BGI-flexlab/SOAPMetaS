@@ -39,10 +39,12 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
     private Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad = null;
     private Broadcast<HashMap<String, Integer>> markers2lenBroad = null;
-    private Broadcast<HashMap<String, String>> cladeName2FullNameBroad = null;
+    private Broadcast<HashMap<String, String>> cladeName2HighRankBroad = null; // "s__Species_name: k__xxx|p__xxx|c__xxx|o_xxx|f__xxx|g__xxx|"
+    private final MetasOptions option;
 
     public MEPHProfilingMethod(MetasOptions options, JavaSparkContext jsc){
         super(options, jsc);
+        option = options;
     }
 
     /**
@@ -93,7 +95,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
                         b.forEach((k, v) -> c.merge(k, v,  (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
                     }
                     return c;
-                }).mapPartitionsToPair(new MEPHComputeAbundanceFunction(markers2extsBroad, markers2lenBroad, cladeName2FullNameBroad), true);
+                }).mapPartitionsToPair(new MEPHComputeAbundanceFunction(markers2extsBroad, markers2lenBroad, cladeName2HighRankBroad, this.option), true);
     }
 
     private Tuple2<String, HashMap<String, Tuple2<Integer, Double>>> countTupleGenerator(String rgID, SAMRecord record) {
