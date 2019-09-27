@@ -26,14 +26,18 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
     public static final long serialVersionUID = 1L;
     private static final Logger LOG = LogManager.getLogger(MEPHProfilingMethod.class);
 
-    private final Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad; 注意ext的名称需要添加t__前缀
-    private final Broadcast<HashMap<String, Integer>> markers2lenBroad;
+    //private final Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad;
+    //private final Broadcast<HashMap<String, Integer>> markers2lenBroad;
+    //private Broadcast<HashMap<String, String>> markers2cladeBroad = null;
+    private final Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad; 注意ext的名称需要添加t__前缀
     private final Broadcast<HashMap<String, String>> cladeName2HighRankBroad;
+    private final Broadcast<ArrayList<Tuple2<ArrayList<String>, Integer>>> taxonomyInformationBroad; 后续改成在每个partition读取文件
     private boolean doDisqm = true;
     private double quantile = 0.1;
     private int minNucLen = 2000;
     private String taxaLevel = "a__";
     private final MetasOptions options;
+    private ArrayList<String> kingdomList = null;
 
     /**
      * Statistical type:
@@ -47,47 +51,89 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
      **/
     private final int statType = 8;
 
-    public MEPHComputeAbundanceFunction(final Broadcast<HashMap<String, ArrayList<String>>> markers2exts,
-                                        final Broadcast<HashMap<String, Integer>> markers2len,
+    public MEPHComputeAbundanceFunction(final Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad,
+                                        final Broadcast<ArrayList<Tuple2<ArrayList<String>, Integer>>> taxonomyInformationBroad,
                                         final Broadcast<HashMap<String, String>> cladeName2HighRank, MetasOptions options){
-        this.markers2extsBroad = markers2exts;
-        this.markers2lenBroad = markers2len;
+        //this.markers2extsBroad = markers2exts;
+        //this.markers2lenBroad = markers2len;
+        this.markersInformationBroad = markersInformationBroad;
+        this.taxonomyInformationBroad = taxonomyInformationBroad;
         this.cladeName2HighRankBroad = cladeName2HighRank;
         this.options = options;
+        this.kingdomList = (ArrayList<String>) Arrays.asList("k__Archaea", "k__Bacteria", "k__Eukaryota", "k__Viruses");
 
         // markers2clades/exts/lens: 1035649
         // taxa2clades: 16904
         // allClades: 27085
     }
 
+    /**
+     * Input:
+     *  key: sampleID"\t"rgID
+     *  value: marker2nreads (including rawNreads and recaliNreads)
+     *
+     *
+     *
+     * @param tuple2Iterator
+     * @return
+     * @throws Exception
+     */
     @Override
     public Iterator<Tuple2<String, ProfilingResultRecord>> call(Iterator<Tuple2<String, HashMap<String, Tuple2<Integer, Double>>>> tuple2Iterator) throws Exception {
 
-        String sampleID = null;
-        String smTag = null;
+        String sampleID;
+        String smTag;
 
         if (!tuple2Iterator.hasNext()){
             return new ArrayList<Tuple2<String, ProfilingResultRecord>>(0).iterator();
         }
-        Tuple2<String, HashMap<String, Tuple2<Integer, Double>>> tuple0 = tuple2Iterator.next();
-        String[] keyEleTemp = tuple0._1.split("\t");
+
+        HashMap<String, CladeNode> allClades = new HashMap<>(27086); //cladename: CladeNode
+        allCladesInitialize(allClades);
+
+        Tuple2<String, HashMap<String, Tuple2<Integer, Double>>> tupleTemp = tuple2Iterator.next();
+        HashMap<String, Tuple2<Integer, Double>> marker2NreadsTemp;
+        String cladeNameTemp;
+        CladeNode cladeNodeTemp;
+        int nonzeroMarkerCountTemp = 0;
+
+        String[] keyEleTemp = tupleTemp._1.split("\t");
         sampleID = keyEleTemp[0];
         smTag = keyEleTemp[1];
+        cladeNameTemp = keyEleTemp[2];
         keyEleTemp = null;
+        marker2NreadsTemp = tupleTemp._2;
 
-        HashMap<String, HashMap<String, Tuple2<Integer, Double>>> cladeMarkers2nreads;
-        HashMap<String, CladeNode> allClades = new HashMap<>(27086);
+        HashMap<String, HashMap<String, Tuple2<Integer, Double>>> cladeMarkers2nreads = new HashMap<>(27086);
 
+        cladeMarkers2nreads.put(cladeNameTemp, marker2NreadsTemp);
+        cladeNodeTemp = allClades.get(cladeNameTemp);
+        cladeNodeTemp.markerCount = marker2NreadsTemp.size();
+        for (Tuple2<Integer, Double> countTuple: marker2NreadsTemp.values()) {
+            if (countTuple._2 > 0) nonzeroMarkerCountTemp++;
+        }
+        cladeNodeTemp.nonZeroMarkerCount = nonzeroMarkerCountTemp;
 
+        //tupleTemp = null;
+        //cladeNameTemp = null;
 
-
-        allClades的初始化考虑放到compute函数中，在函数中第一个children循环采用外部的hashset来获取子节点名称。所以广播变量还需要提供一个外部的taxa_tree
-
-        ArrayList<String> kingdomList = (ArrayList<String>) Arrays.asList("k__Archaea", "k__Bacteria", "k__Eukaryota", "k__Viruses");
+        while (tuple2Iterator.hasNext()){
+            nonzeroMarkerCountTemp = 0;
+            tupleTemp = tuple2Iterator.next();
+            cladeNameTemp = tupleTemp._1.split("\t")[2];
+            cladeMarkers2nreads.put(cladeNameTemp, tupleTemp._2);
+            cladeNodeTemp = allClades.get(cladeNameTemp);
+            cladeNodeTemp.markerCount = marker2NreadsTemp.size();
+            for (Tuple2<Integer, Double> countTuple: marker2NreadsTemp.values()) {
+                if (countTuple._2 > 0) nonzeroMarkerCountTemp++;
+            }
+            cladeNodeTemp.nonZeroMarkerCount = nonzeroMarkerCountTemp;
+        }
+        // allClades的初始化能否放到compute函数中，在函数中第一个children循环采用外部的hashset来获取子节点名称。所以广播变量还需要提供一个外部的taxa_tree
 
         double totalAbun = 0.0;
         try {
-            totalAbun = kingdomList.parallelStream().mapToDouble(kingdom -> this.computeNodeAbundance(kingdom, cladeMarkers2nreads, allClades)).sum();
+            totalAbun = this.kingdomList.parallelStream().mapToDouble(kingdom -> this.computeNodeAbundance(kingdom, cladeMarkers2nreads, allClades)).sum();
             //for (String kingdom : kingdomList) {
             //    totalAbun += this.computeNodeAbundance(kingdom, cladeMarkers2nreads, allClades);
             //}
@@ -105,25 +151,26 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         // 注意对 get_full_name 的需求，可能要考虑存储各个 node 的全名称。 此外，此过程需要考虑是否保存某个分类层级，因为后续
         // 进行 relative abundance 计算de时候，如果每个层级都计算，结果可能会出错
 
+        cladeNameTemp = null;
         if (taxaLevel.startsWith("a")) {
             for (HashMap.Entry<String, CladeNode> entry : allClades.entrySet()) {
-                String cladeName = entry.getKey();
+                cladeNameTemp = entry.getKey();
                 CladeNode node = entry.getValue();
                 if (node.abundance == null || node.abundance == 0.0) {
                     continue;
                 }
-                results.add(new Tuple2<>(sampleID, profilingResultGenerator(this.cladeName2HighRankBroad.value().get(cladeName) + cladeName, smTag, node.rawnreads, node.recaliNreads, node.abundance, node.abundance/totalAbun)));
+                results.add(new Tuple2<>(sampleID, profilingResultGenerator(this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp, smTag, node.rawnreads, node.recaliNreads, node.abundance, node.abundance/totalAbun)));
 
                 String name;
                 String unclSuffix = "_unclassified".intern();
                 if (node.uncl_abundance > 0.0) {
-                    name = this.cladeName2HighRankBroad.value().get(cladeName) + cladeName + "|" + node.children.keySet().iterator().next().substring(0, 3) + cladeName.substring(3) + unclSuffix;
+                    name = this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp + "|" + node.children.keySet().iterator().next().substring(0, 3) + cladeNameTemp.substring(3) + unclSuffix;
 
                     // The two "nreads" are zero because the uncl_abundance is calculated by substraction of sumAbun from node.abundance, the correlated "nreads" are not calculated.
                     results.add(new Tuple2<>(sampleID, profilingResultGenerator(name, smTag, 0, 0, node.uncl_abundance, node.uncl_abundance/totalAbun)));
                 }
-                if (node.subcl_uncl && !cladeName.startsWith("s")) {
-                    name = this.cladeName2HighRankBroad.value().get(cladeName) + cladeName + "|" + getNextTaxaLevel(cladeName) + cladeName.substring(1) + unclSuffix;
+                if (node.subcl_uncl && !cladeNameTemp.startsWith("s")) {
+                    name = this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp + "|" + getNextTaxaLevel(cladeNameTemp) + cladeNameTemp.substring(1) + unclSuffix;
                     results.add(new Tuple2<>(sampleID, profilingResultGenerator(name, smTag, node.rawnreads, node.recaliNreads, node.abundance, node.abundance/totalAbun)));
                 }
             }
@@ -131,23 +178,23 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
             double sumLevRelAbun = 0.0;
             double relAbun;
             for (HashMap.Entry<String, CladeNode> entry : allClades.entrySet()) {
-                String cladeName = entry.getKey();
-                if (cladeName.startsWith(taxaLevel)) {
+                cladeNameTemp = entry.getKey();
+                if (cladeNameTemp.startsWith(taxaLevel)) {
                     CladeNode node = entry.getValue();
-                    results.add(new Tuple2<>(sampleID, profilingResultGenerator(this.cladeName2HighRankBroad.value().get(cladeName) + cladeName, smTag, node.rawnreads, node.recaliNreads, node.abundance, node.abundance/totalAbun)));
+                    results.add(new Tuple2<>(sampleID, profilingResultGenerator(this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp, smTag, node.rawnreads, node.recaliNreads, node.abundance, node.abundance/totalAbun)));
 
                     String name;
                     String unclSuffix = "_unclassified".intern();
                     if (node.uncl_abundance > 0.0) {
-                        name = this.cladeName2HighRankBroad.value().get(cladeName) + cladeName + "|" + node.children.keySet().iterator().next().substring(0, 3) + cladeName.substring(3) + unclSuffix;
+                        name = this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp + "|" + node.children.keySet().iterator().next().substring(0, 3) + cladeNameTemp.substring(3) + unclSuffix;
                         relAbun = node.uncl_abundance/totalAbun;
                         results.add(new Tuple2<>(sampleID, profilingResultGenerator(name, smTag, 0, 0, node.uncl_abundance, relAbun)));
                         sumLevRelAbun += relAbun;
                     }
-                    if (node.subcl_uncl && !cladeName.startsWith("s")) {
-                        name = this.cladeName2HighRankBroad.value().get(cladeName) + cladeName + "|" + getNextTaxaLevel(cladeName) + cladeName.substring(1) + unclSuffix;
+                    if (node.subcl_uncl && !cladeNameTemp.startsWith("s")) {
+                        name = this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp + "|" + getNextTaxaLevel(cladeNameTemp) + cladeNameTemp.substring(1) + unclSuffix;
                         relAbun = node.abundance/totalAbun;
-                        results.add(new Tuple2<>(sampleID, profilingResultGenerator(cladeName, smTag, node.rawnreads, node.recaliNreads, node.abundance, relAbun)));
+                        results.add(new Tuple2<>(sampleID, profilingResultGenerator(cladeNameTemp, smTag, node.rawnreads, node.recaliNreads, node.abundance, relAbun)));
                         sumLevRelAbun += relAbun;
                     }
                 }
@@ -156,6 +203,39 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         }
 
         return results.iterator();
+    }
+
+    private void allCladesInitialize(HashMap<String, CladeNode> allClades) {
+        int cladeGenoLen;
+        CladeNode rootNode = new CladeNode();
+        CladeNode fatherNode = rootNode;
+        CladeNode temp;
+        for (Tuple2<ArrayList<String>, Integer> tuple: this.taxonomyInformationBroad.value()){
+            cladeGenoLen = tuple._2;
+            for (String taxLevName: tuple._1){
+                if (!fatherNode.children.containsKey(taxLevName)){
+                    temp = new CladeNode();
+                    fatherNode.children.put(taxLevName, temp);
+                    allClades.put(taxLevName, temp);
+                    temp.fatherClade = fatherNode;
+                }
+                fatherNode = fatherNode.children.get(taxLevName);
+                if (taxLevName.startsWith("t")) {
+                    fatherNode.cladeGenomeLen = cladeGenoLen;
+                }
+            }
+        }
+        rootNode.children.entrySet().parallelStream().map(entry -> calculateNodeGenoLen(entry.getValue()));
+    }
+
+    private double calculateNodeGenoLen(CladeNode node) {
+        if (node.children.size() < 1) {
+            return node.cladeGenomeLen;
+        }
+        node.cladeGenomeLen = node.children.entrySet().parallelStream()
+                .mapToDouble(entry -> calculateNodeGenoLen(entry.getValue()))
+                .average().getAsDouble();
+        return node.cladeGenomeLen;
     }
 
     private String getNextTaxaLevel(String cladeName){
@@ -218,11 +298,11 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
             markerName = entry.getKey();
             rawnread = entry.getValue()._1;
             nread = entry.getValue()._2;
-            markerLen = markers2lenBroad.value().get(markerName);
+            markerLen = markersInformationBroad.value().get(markerName)._2();
             discard = false;
 
             if (doDisqm) {
-                for (String extCladeName : markers2extsBroad.value().get(markerName)) {
+                for (String extCladeName : markersInformationBroad.value().get(markerName)._3()) {
                     extClade = allClades.getOrDefault(extCladeName, null);
                     if (extClade == null) break;
                     extClade = extClade.fatherClade;
@@ -396,7 +476,7 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
     }
 
     private class CladeNode {
-        int cladeGenomeLen = 0; // Average genome length of sub-taxas of the clade.
+        double cladeGenomeLen = 0.0; // Average genome length of sub-taxas of the clade.
         int kingdom = 0; // 0: not define 1: _sp in name 2: un_classified 4: k__Archaea; 8: k__Bacteria; 16: k__Eukaryota; 32: k__Viruses
         Double abundance = null;
         double uncl_abundance = 0.0;
@@ -406,7 +486,7 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         int rawnreads = 0;
         double recaliNreads;
         CladeNode fatherClade = null;
-        HashMap<String, CladeNode> children = null; // key: clade name, value: CladeNode
+        HashMap<String, CladeNode> children = new HashMap<>(5); // key: clade name, value: CladeNode
     }
 
     private ProfilingResultRecord profilingResultGenerator(

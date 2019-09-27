@@ -17,6 +17,7 @@ import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import scala.Tuple2;
+import scala.Tuple3;
 import scala.Tuple4;
 
 import java.io.Serializable;
@@ -37,14 +38,16 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
     private boolean doGCRecalibration;
     private GCBiasModelBase gcBiasRecaliModel;
 
-    private Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad = null;
-    private Broadcast<HashMap<String, Integer>> markers2lenBroad = null;
+    //private Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad = null;
+    //private Broadcast<HashMap<String, Integer>> markers2lenBroad = null;
+    //private Broadcast<HashMap<String, String>> markers2cladeBroad = null;
+    private Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad = null; // marker: cladename, len, extsList
     private Broadcast<HashMap<String, String>> cladeName2HighRankBroad = null; // "s__Species_name: k__xxx|p__xxx|c__xxx|o_xxx|f__xxx|g__xxx|"
-    private final MetasOptions option;
+    private final MetasOptions options;
 
     public MEPHProfilingMethod(MetasOptions options, JavaSparkContext jsc){
         super(options, jsc);
-        option = options;
+        this.options = options;
     }
 
     /**
@@ -62,13 +65,14 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
      Input:
 
      After mapToPair:
-      key: sampleID + rgID
+      key: sampleID"\t"rgID"\t"cladeName
       value: HashMap<markerName, tuple<1, gc_recali_value>>
       Partition: default
 
      After reduceByKey:
-      key: sampleID + rgID
+      key: sampleID"\t"rgID"\t"cladeName
       value: HashMap<markerName, tuple<count, gc_recali_count>>
+      Partition: sampleID
 
 
      Output:
@@ -95,7 +99,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
                         b.forEach((k, v) -> c.merge(k, v,  (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
                     }
                     return c;
-                }).mapPartitionsToPair(new MEPHComputeAbundanceFunction(markers2extsBroad, markers2lenBroad, cladeName2HighRankBroad, this.option), true);
+                }).mapPartitionsToPair(new MEPHComputeAbundanceFunction(markersInformationBroad, cladeName2HighRankBroad, this.options), true);
     }
 
     private Tuple2<String, HashMap<String, Tuple2<Integer, Double>>> countTupleGenerator(String rgID, SAMRecord record) {
@@ -119,7 +123,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
         HashMap<String, Tuple2<Integer, Double>> readCount = new HashMap<>(2);
         readCount.put(markerName, new Tuple2<>(1, recaliReadCount));
-        return new Tuple2<>(this.sampleIDbySampleName.get(rgID) + '\t' + rgID, readCount);
+        return new Tuple2<>(this.sampleIDbySampleName.get(rgID) + "\t" + rgID + "\t" + this.markersInformationBroad.getValue().get(markerName)._1(), readCount);
     }
 
     @Override
