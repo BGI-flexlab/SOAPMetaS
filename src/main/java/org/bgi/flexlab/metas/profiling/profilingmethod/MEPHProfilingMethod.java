@@ -42,12 +42,21 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
     //private Broadcast<HashMap<String, Integer>> markers2lenBroad = null;
     //private Broadcast<HashMap<String, String>> markers2cladeBroad = null;
     private Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad = null; // marker: cladename, len, extsList
+
+    private Broadcast<ArrayList<Tuple2<ArrayList<String>, Integer>>> taxonomyInformationBroad = null;
     private Broadcast<HashMap<String, String>> cladeName2HighRankBroad = null; // "s__Species_name: k__xxx|p__xxx|c__xxx|o_xxx|f__xxx|g__xxx|"
+
     private final MetasOptions options;
+    //private String metaphlanMpaDBFile;
+    private String mpaMarkersListFile; // MetaPhlAn2 markers list file extracted from mpa_v20_m200.pkl "marker"
+    private String mpaTaxonomyListFile; // MetaPhlAn2 taxonomy list file extracted from mpa_v20_m200.pkl "taxonomy"
 
     public MEPHProfilingMethod(MetasOptions options, JavaSparkContext jsc){
         super(options, jsc);
         this.options = options;
+
+        this.mpaMarkersListFile = this.options.getMPAMarkersListFile();
+        this.mpaTaxonomyListFile = this.option.getMPATaxonomyListFile();
     }
 
     /**
@@ -87,6 +96,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
         Broadcast<HashMap<String, Integer>>  sampleNamesBroadcast = ctx.broadcast(this.sampleIDbySampleName);
 
+        
 
         return samRecordJavaRDD.mapToPair(samRecord -> countTupleGenerator(samRecord.getStringAttribute("RG"), samRecord))
                 .reduceByKey(sampleIDPartitioner, (a, b) -> {

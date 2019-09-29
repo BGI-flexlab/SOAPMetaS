@@ -1,5 +1,6 @@
 package org.bgi.flexlab.metas.profiling.profilingmethod;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
@@ -210,18 +211,26 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         CladeNode rootNode = new CladeNode();
         CladeNode fatherNode = rootNode;
         CladeNode temp;
+        String kingdom;
         for (Tuple2<ArrayList<String>, Integer> tuple: this.taxonomyInformationBroad.value()){
             cladeGenoLen = tuple._2;
             for (String taxLevName: tuple._1){
+                if (taxLevName.startsWith("k")) {
+                    kingdom = taxLevName;
+                }
                 if (!fatherNode.children.containsKey(taxLevName)){
                     temp = new CladeNode();
                     fatherNode.children.put(taxLevName, temp);
                     allClades.put(taxLevName, temp);
                     temp.fatherClade = fatherNode;
+                    temp.kingdom = kingdom;
                 }
                 fatherNode = fatherNode.children.get(taxLevName);
                 if (taxLevName.startsWith("t")) {
                     fatherNode.cladeGenomeLen = cladeGenoLen;
+                }
+                if (taxLevName.contains("_sp")) {
+                    fatherNode.spInClade = true;
                 }
             }
         }
@@ -336,7 +345,7 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
             if (isSingleTerminal(node)) {
                 nRipr = 0;
             }
-            if ((node.kingdom & 32) > 0){
+            if (node.kingdom.equals("k__Viruses")){
                 nRipr = 0;
             }
             if (nRetain < nRipr) {
@@ -360,7 +369,7 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         int rBoundIndex = nRetain - lBoundIndex - 1;
 
         CladeNode fatherClade = node.fatherClade;
-        if (clade.startsWith("t") && fatherClade.children.size() > 1 || (fatherClade.kingdom & 33)>0){
+        if (clade.startsWith("t") && fatherClade.children.size() > 1 || fatherClade.spInClade || (node.kingdom.equals("k__Viruses"))){
             if (nRetain == 0 || nonZeroCount/(double) nRetain < 0.7) {
                 node.abundance = 0.0;
                 return 0.0;
@@ -477,7 +486,8 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
 
     private class CladeNode {
         double cladeGenomeLen = 0.0; // Average genome length of sub-taxas of the clade.
-        int kingdom = 0; // 0: not define 1: _sp in name 2: un_classified 4: k__Archaea; 8: k__Bacteria; 16: k__Eukaryota; 32: k__Viruses
+        String kingdom = "UNKNOWN"; // k__Archaea; k__Bacteria; k__Eukaryota;  k__Viruses
+        boolean spInClade = false;
         Double abundance = null;
         double uncl_abundance = 0.0;
         boolean subcl_uncl = false;
