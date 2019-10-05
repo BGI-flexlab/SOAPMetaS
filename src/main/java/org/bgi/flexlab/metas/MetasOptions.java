@@ -78,6 +78,9 @@ public class MetasOptions {
     private String profilingTmpDir = null;
     private String profilingOutputHdfsDir;
 
+    private String mpaMarkersListFile;
+    private String mpaTaxonomyListFile;
+
     // Process control arguments
     private boolean mergeSamBySample = false;
     private boolean doAlignment = true;
@@ -283,7 +286,7 @@ public class MetasOptions {
         this.options.addOption(analysisLevel);
 
         Option profilingPipe = new Option(null, "prof-pipe", true,
-                "Pipeline of profiling. Only cOMG is supported currently. Please refer " +
+                "Pipeline of profiling. Please refer " +
                         "to doi:10.1038/nbt.2942 for more information. Option: comg, metaphlan. Default: comg");
         profilingPipe.setArgName("MODE");
         this.options.addOption(profilingPipe);
@@ -304,6 +307,16 @@ public class MetasOptions {
                         "...");
         referenceMatrix.setArgName("FILE");
         this.options.addOption(referenceMatrix);
+
+        Option mpaMarkerList = new Option(null, "mpa-marker-list", true,
+                "Marker information list extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in json format. User may generate the file with python3 json.dump(mpa_pkl[\"markers\"])");
+        mpaMarkerList.setArgName("FILE");
+        this.options.addOption(mpaMarkerList);
+        Option mpaTaxonomyList = new Option(null, "mpa-taxon-list", true,
+                "Taxonomy information list extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in tab-seperated format. User may generate the file with python3 json.dump(mpa_pkl[\"taxonomy\"])");
+        mpaTaxonomyList.setArgName("FILE");
+        this.options.addOption(mpaTaxonomyList);
+
 
         Option outputDir = new Option("o", "output-hdfs-dir", true,
                 "Output directory, in HDFS, of SAM result and Profiling result. Note that the \"alignment\" and " +
@@ -440,6 +453,8 @@ public class MetasOptions {
             IO arguments parsing.
              */
             this.referenceMatrixFilePath = commandLine.getOptionValue('r', null);
+            this.mpaMarkersListFile = commandLine.getOptionValue("mpa-marker-list", null);
+            this.mpaTaxonomyListFile = commandLine.getOptionValue("mpa-taxon-list", null);
 
             this.hdfsOutputDir = commandLine.getOptionValue('o', null);
             if (this.hdfsOutputDir == null) {
@@ -515,10 +530,10 @@ public class MetasOptions {
             this.sequencingMode = SequencingMode.getValue(commandLine.getOptionValue("seq-mode").toUpperCase());
             this.profilingAnalysisMode = ProfilingAnalysisMode.valueOf(commandLine.getOptionValue("ana-mode", "profile").toUpperCase());
             this.profilingAnalysisLevel = ProfilingAnalysisLevel.valueOf(commandLine.getOptionValue("ana-lev", "species").toUpperCase());
-            this.profilingPipeline = commandLine.getOptionValue("prof-pipe", "comg");
+            this.profilingPipeline = commandLine.getOptionValue("prof-pipe", "comg").toLowerCase();
             if (this.profilingPipeline.toLowerCase().equals("metaphlan") && this.sequencingMode.equals(SequencingMode.PAIREDEND)){
                 this.sequencingMode = SequencingMode.SINGLEEND;
-                LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] MetaPhlAn mode only supports Single-end (SE) sequence mode.");
+                LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] MetaPhlAn mode only supports Single-end (SE) sequence mode.");
             }
 
             /*
@@ -542,7 +557,10 @@ public class MetasOptions {
                 this.doProfiling = false;
             } else {
                 if (this.referenceMatrixFilePath == null) {
-                    throw new MissingOptionException("Missing -r (--ref-matrix) option.");
+                    throw new MissingOptionException("Missing -r (--ref-matrix) or --mpa-marker-list|--mpa-taxon-list option.");
+                }
+                if (this.profilingPipeline.equals("metaphlan")  && (this.mpaTaxonomyListFile == null || this.mpaMarkersListFile == null)) {
+                    throw new MissingOptionException("Missing --mpa-marker-list or --mpa-taxon-list option.");
                 }
                 if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
                         this.speciesGenomeGCFilePath == null){
@@ -589,7 +607,13 @@ public class MetasOptions {
         return speciesGenomeGCFilePath;
     }
 
+    public String getMpaMarkersListFile() {
+        return this.mpaMarkersListFile;
+    }
 
+    public String getMpaTaxonomyListFile() {
+        return mpaTaxonomyListFile;
+    }
 
     /*
     Profiling analysis arguments group.

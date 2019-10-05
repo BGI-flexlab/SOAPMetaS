@@ -92,8 +92,8 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
      * @param outputFilePath Output stream.
      */
     public void outputCoefficients(String outputFilePath){
-        try {
-            JsonWriter jsonWriter = new JsonWriter(new FileWriter(outputFilePath));
+        try (JsonWriter jsonWriter = new JsonWriter(new FileWriter(outputFilePath))){
+
             jsonWriter.setIndent("\t");
             jsonWriter.beginObject();
 
@@ -114,7 +114,6 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
 
 
             jsonWriter.endObject();
-            jsonWriter.close();
 
         } catch (IOException e){
             LOG.error("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Fail to write coefficients " +
@@ -129,8 +128,7 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
      */
     public void inputCoefficients(String inputFilePath){
 
-        try {
-            JsonReader jsonReader = new JsonReader(new FileReader(inputFilePath));
+        try (JsonReader jsonReader = new JsonReader(new FileReader(inputFilePath))) {
 
             jsonReader.beginObject();
 
@@ -157,7 +155,7 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
             }
 
             jsonReader.endObject();
-            jsonReader.close();
+
         } catch (FileNotFoundException e){
             LOG.error("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Can't find input " +
                     "coefficients file: " + inputFilePath + " . " + e.toString());

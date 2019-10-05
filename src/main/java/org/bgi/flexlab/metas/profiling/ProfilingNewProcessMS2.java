@@ -20,7 +20,7 @@ import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.SAMMultiSampleList;
 import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.profiling.profilingmethod.COMGProfilingMethod2;
-import org.bgi.flexlab.metas.profiling.profilingmethod.METAPHLANProfilingMethod;
+import org.bgi.flexlab.metas.profiling.profilingmethod.MEPHProfilingMethod;
 import org.bgi.flexlab.metas.profiling.profilingmethod.ProfilingMethodBase;
 import org.bgi.flexlab.metas.util.DataUtils;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
@@ -288,7 +288,7 @@ public class ProfilingNewProcessMS2 {
         if(this.pipeline.equals("comg")){
             return new COMGProfilingMethod2(this.metasOpt, this.jscontext);
         } else if (this.pipeline.equals("metaphlan")){
-            return new METAPHLANProfilingMethod(this.metasOpt, this.jscontext);
+            return new MEPHProfilingMethod(this.metasOpt, this.jscontext);
         } else {
             return new COMGProfilingMethod2(this.metasOpt, this.jscontext);
         }

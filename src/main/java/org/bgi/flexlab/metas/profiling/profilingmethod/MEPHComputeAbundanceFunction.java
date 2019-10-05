@@ -1,16 +1,13 @@
 package org.bgi.flexlab.metas.profiling.profilingmethod;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
-import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import scala.Tuple2;
 import scala.Tuple3;
-import scala.Tuple4;
 
 import java.io.Serializable;
 import java.util.*;
@@ -30,9 +27,9 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
     //private final Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad;
     //private final Broadcast<HashMap<String, Integer>> markers2lenBroad;
     //private Broadcast<HashMap<String, String>> markers2cladeBroad = null;
-    private final Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad; 注意ext的名称需要添加t__前缀
+    private final Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad;
     private final Broadcast<HashMap<String, String>> cladeName2HighRankBroad;
-    private final Broadcast<ArrayList<Tuple2<ArrayList<String>, Integer>>> taxonomyInformationBroad; 后续改成在每个partition读取文件
+    private final Broadcast<ArrayList<Tuple2<ArrayList<String>, Integer>>> taxonomyInformationBroad; //TODO: 后续改成在每个partition读取文件
     private boolean doDisqm = true;
     private double quantile = 0.1;
     private int minNucLen = 2000;
@@ -211,7 +208,7 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
         CladeNode rootNode = new CladeNode();
         CladeNode fatherNode = rootNode;
         CladeNode temp;
-        String kingdom;
+        String kingdom = "UNKNOWN";
         for (Tuple2<ArrayList<String>, Integer> tuple: this.taxonomyInformationBroad.value()){
             cladeGenoLen = tuple._2;
             for (String taxLevName: tuple._1){
