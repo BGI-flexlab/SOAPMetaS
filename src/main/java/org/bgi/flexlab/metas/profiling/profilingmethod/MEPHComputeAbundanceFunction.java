@@ -34,8 +34,7 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
     private double quantile = 0.1;
     private int minNucLen = 2000;
     private String taxaLevel = "a__";
-    private final MetasOptions options;
-    private ArrayList<String> kingdomList = null;
+    private ArrayList<String> kingdomList;
 
     /**
      * Statistical type:
@@ -51,14 +50,13 @@ public class MEPHComputeAbundanceFunction implements PairFlatMapFunction<Iterato
 
     public MEPHComputeAbundanceFunction(final Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad,
                                         final Broadcast<ArrayList<Tuple2<ArrayList<String>, Integer>>> taxonomyInformationBroad,
-                                        final Broadcast<HashMap<String, String>> cladeName2HighRank, MetasOptions options){
+                                        final Broadcast<HashMap<String, String>> cladeName2HighRank){
         //this.markers2extsBroad = markers2exts;
         //this.markers2lenBroad = markers2len;
         this.markersInformationBroad = markersInformationBroad;
         this.taxonomyInformationBroad = taxonomyInformationBroad;
         this.cladeName2HighRankBroad = cladeName2HighRank;
-        this.options = options;
-        this.kingdomList = (ArrayList<String>) Arrays.asList("k__Archaea", "k__Bacteria", "k__Eukaryota", "k__Viruses");
+        this.kingdomList = new ArrayList<>(Arrays.asList("k__Archaea", "k__Bacteria", "k__Eukaryota", "k__Viruses"));
 
         // markers2clades/exts/lens: 1035649
         // taxa2clades: 16904

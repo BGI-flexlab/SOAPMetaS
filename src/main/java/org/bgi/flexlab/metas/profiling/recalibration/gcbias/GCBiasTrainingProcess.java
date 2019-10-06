@@ -132,7 +132,7 @@ public class GCBiasTrainingProcess implements Serializable {
                 .values()
                 .map(rec -> rec.get())
                 .filter(rec -> !rec.getReadUnmappedFlag())
-                .filter(rec -> identityFilter.filter(rec))
+                .filter(rec -> !identityFilter.filter(rec))
                 .map(rec -> {
                     int alignmentPos;
                     if (rec.getReadNegativeStrandFlag()){

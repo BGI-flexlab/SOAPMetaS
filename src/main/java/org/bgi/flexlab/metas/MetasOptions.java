@@ -516,7 +516,7 @@ public class MetasOptions {
              */
             this.insertSize = Integer.parseInt(commandLine.getOptionValue("insert-size", "300"));
             this.minIdentity = Double.parseDouble(commandLine.getOptionValue("min-identity", "0.8"));
-            this.minAlignLength = Integer.parseInt(commandLine.getOptionValue("min-align-len", "30"));
+            this.minAlignLength = Integer.parseInt(commandLine.getOptionValue("min-align-len", "0"));
             if (commandLine.hasOption("iden-filt")){
                 this.doIdentityFiltering = true;
             }
@@ -557,9 +557,9 @@ public class MetasOptions {
                 this.doProfiling = false;
             } else {
                 if (this.referenceMatrixFilePath == null) {
-                    throw new MissingOptionException("Missing -r (--ref-matrix) or --mpa-marker-list|--mpa-taxon-list option.");
+                    throw new MissingOptionException("Missing -r (--ref-matrix) option.");
                 }
-                if (this.profilingPipeline.equals("metaphlan")  && (this.mpaTaxonomyListFile == null || this.mpaMarkersListFile == null)) {
+                if (this.profilingPipeline.equals("metaphlan") && (this.mpaTaxonomyListFile == null || this.mpaMarkersListFile == null)) {
                     throw new MissingOptionException("Missing --mpa-marker-list or --mpa-taxon-list option.");
                 }
                 if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&

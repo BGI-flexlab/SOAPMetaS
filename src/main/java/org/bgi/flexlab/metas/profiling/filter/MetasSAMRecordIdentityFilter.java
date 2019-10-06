@@ -40,11 +40,11 @@ public class MetasSAMRecordIdentityFilter
 
     /**
      * @param record SAMRecord to be evaluated.
-     * @return
+     * @return true if cast off.
      */
     public boolean filter(SAMRecord record){
         if (record == null){
-            return false;
+            return true;
         }
         double identity = calculateIdentity(record.getCigarString(), record.getStringAttribute("MD"));
         return identity < this.minimumIdentity;

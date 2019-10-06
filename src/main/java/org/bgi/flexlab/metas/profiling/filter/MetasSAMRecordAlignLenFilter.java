@@ -38,11 +38,11 @@ public class MetasSAMRecordAlignLenFilter implements Function<MetasSAMPairRecord
 
     /**
      * @param record SAMRecord to be evaluated.
-     * @return
+     * @return true if cast off.
      */
     public boolean filter(SAMRecord record){
         if (record == null){
-            return false;
+            return true;
         }
         double len = calculateAlignLen(record.getCigarString());
         return len < this.minAlignLength;

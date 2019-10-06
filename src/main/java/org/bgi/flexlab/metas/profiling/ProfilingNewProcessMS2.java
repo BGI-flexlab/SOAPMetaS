@@ -82,10 +82,6 @@ public class ProfilingNewProcessMS2 {
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
         this.seqMode = this.metasOpt.getSequencingMode();
 
-        this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
-        if (this.doIdentityFiltering) {
-            this.identityFilter = new MetasSAMRecordIdentityFilter(this.metasOpt.getMinIdentity());
-        }
         Configuration conf = this.jscontext.hadoopConfiguration();
         this.jcf = new JobConf(conf);
 
