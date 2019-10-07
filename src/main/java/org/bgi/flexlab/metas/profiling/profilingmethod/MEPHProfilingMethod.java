@@ -540,7 +540,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
                 for (int i = 0; i < count; i++) {
                     cladeName2HighRank.put(taxonLev[i], highRank.toString());
-                    highRank.append(taxonLev[i]);
+                    highRank.append(taxonLev[i]).append('|');
                 }
             }
         } catch (FileNotFoundException e) {

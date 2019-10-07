@@ -23,9 +23,18 @@ public class RelativeAbundanceFunction implements Serializable, PairFlatMapFunct
 
     public static final long serialVersionUID = 1L;
 
+    private boolean skip = false;
+
+    public RelativeAbundanceFunction(boolean skip) {
+        this.skip = skip;
+    }
+
     @Override
     public Iterator<Tuple2<String, ProfilingResultRecord>> call(Iterator<Tuple2<String, ProfilingResultRecord>> tuple2Iterator) throws Exception {
 
+        if (this.skip) {
+            return tuple2Iterator;
+        }
         ArrayList<Tuple2<String, ProfilingResultRecord>> relativeProfilingList;
         Tuple2<String, ProfilingResultRecord> tup0;
         String smTag;

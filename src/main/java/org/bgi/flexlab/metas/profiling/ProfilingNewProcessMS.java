@@ -300,7 +300,7 @@ public class ProfilingNewProcessMS {
 
         JavaPairRDD<String, ProfilingResultRecord> relAbunResultRDD = profilingResultRecordRDD
                 .partitionBy(sampleIDPartitioner)
-                .mapPartitionsToPair(new RelativeAbundanceFunction(), true);
+                .mapPartitionsToPair(new RelativeAbundanceFunction(false), true);
 
         if (this.metasOpt.isDoInsRecalibration()) {
             cleanMetasSamRecordRDD.unpersist();

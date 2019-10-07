@@ -12,10 +12,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.disq-bio:disq:0.3.3" level="project" />
-    <orderEntry type="library" name="Maven: de.javakaffee:kryo-serializers:0.42" level="project" />
-    <orderEntry type="library" name="Maven: com.esotericsoftware:kryo:4.0.0" level="project" />
-    <orderEntry type="library" name="Maven: com.esotericsoftware:reflectasm:1.11.3" level="project" />
     <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.spark:spark-sql_2.12:2.4.0" level="project" />
     <orderEntry type="library" name="Maven: com.univocity:univocity-parsers:2.7.3" level="project" />

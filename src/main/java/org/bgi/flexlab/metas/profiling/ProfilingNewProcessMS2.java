@@ -64,6 +64,8 @@ public class ProfilingNewProcessMS2 {
 
     private String speciesGenomeGCFilePath;
 
+    private boolean skipRelAbun = false;
+
     public ProfilingNewProcessMS2(final MetasOptions options, final JavaSparkContext context){
         this.metasOpt = options;
         this.jscontext = context;
@@ -81,6 +83,9 @@ public class ProfilingNewProcessMS2 {
         this.pipeline = this.metasOpt.getProfilingPipeline();
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
         this.seqMode = this.metasOpt.getSequencingMode();
+        if (this.pipeline.equals("metaphlan")) {
+            this.skipRelAbun = true;
+        }
 
         Configuration conf = this.jscontext.hadoopConfiguration();
         this.jcf = new JobConf(conf);
@@ -238,7 +243,7 @@ public class ProfilingNewProcessMS2 {
 
         JavaPairRDD<String, ProfilingResultRecord> relAbunResultRDD = profilingResultRecordRDD
                 .partitionBy(new SampleIDPartitioner(sampleIDs.size() + 1))
-                .mapPartitionsToPair(new RelativeAbundanceFunction(), true);
+                .mapPartitionsToPair(new RelativeAbundanceFunction(this.skipRelAbun), true);
 
 //        if (this.metasOpt.isDoInsRecalibration()) {
 //            cleanMetasSamRecordRDD.unpersist();

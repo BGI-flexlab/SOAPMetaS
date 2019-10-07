@@ -135,6 +135,7 @@
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
                     <excludes>
+                        <exclude>org/bgi/flexlab/metas/profiling/ProfilingNewProcessMS.java</exclude>
                         <exclude>org/bgi/flexlab/metas/profiling/ProfilingProcessMS.java</exclude>
                         <exclude>org/bgi/flexlab/metas/profiling/ProfilingProcess.java</exclude>
                         <exclude>org/bgi/flexlab/metas/profiling/ProfilingUtils.java</exclude>
