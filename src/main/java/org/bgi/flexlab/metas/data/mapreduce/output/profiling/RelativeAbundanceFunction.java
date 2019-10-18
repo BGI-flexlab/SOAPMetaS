@@ -33,6 +33,7 @@ public class RelativeAbundanceFunction implements Serializable, PairFlatMapFunct
     public Iterator<Tuple2<String, ProfilingResultRecord>> call(Iterator<Tuple2<String, ProfilingResultRecord>> tuple2Iterator) throws Exception {
 
         if (this.skip) {
+            LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Skip relative abundance computing. (metaphlan pipeline)");
             return tuple2Iterator;
         }
         ArrayList<Tuple2<String, ProfilingResultRecord>> relativeProfilingList;
@@ -52,6 +53,7 @@ public class RelativeAbundanceFunction implements Serializable, PairFlatMapFunct
             relativeProfilingList = new ArrayList<>(128);
             relativeProfilingList.add(tup0);
         } else {
+            LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Skip null partition.");
             return new ArrayList<Tuple2<String, ProfilingResultRecord>>(0).iterator();
         }
 

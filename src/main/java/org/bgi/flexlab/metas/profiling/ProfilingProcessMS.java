@@ -187,7 +187,7 @@ public class ProfilingProcessMS {
                 })
                 .filter(tup -> tup._2 != null);
         if (this.doIdentityFiltering){
-            cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter(this.identityFilter);
+            //cleanMetasSamRecordRDD = cleanMetasSamRecordRDD.filter();
         }
 
         /*
@@ -322,11 +322,11 @@ public class ProfilingProcessMS {
      */
     private ProfilingMethodBase getProfilingMethod(){
         if(this.pipeline.equals("comg")){
-            return new COMGProfilingMethod(this.metasOpt);
+            return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         } else if (this.pipeline.equals("metaphlan")){
-            return new MEPHProfilingMethod(this.metasOpt);
+            return new MEPHProfilingMethod(this.metasOpt, this.jscontext);
         } else {
-            return new COMGProfilingMethod(this.metasOpt);
+            return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         }
     }
 }

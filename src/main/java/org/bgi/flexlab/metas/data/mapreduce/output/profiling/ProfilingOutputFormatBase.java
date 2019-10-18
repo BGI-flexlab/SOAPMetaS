@@ -76,7 +76,8 @@ public abstract class ProfilingOutputFormatBase<K, V> extends MultipleOutputForm
                     rw = getBaseRecordWriter(myFS, myJob, finalPath, myProgressable);
                     this.recordWriters.put(finalPath, rw);
                 }
-                rw.write(actualKey, actualValue);
+                //rw.write(actualKey, actualValue);
+                rw.write(null, actualValue);
             }
 
             public void close(Reporter reporter) throws IOException {

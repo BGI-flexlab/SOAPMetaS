@@ -188,27 +188,6 @@ public class ProfilingNewProcessMS2 {
             e.printStackTrace();
         }
 
-//        TODO: 放到readCount方法
-//        if (this.doIdentityFiltering){
-//            reads = reads.map(rec -> {
-//                if (this.identityFilter.filter(rec)){
-//                    v.setFirstRecord(rec2);
-//                    v.setSecondRecord(null);
-//                    v.setProperPaired(false);
-//                    rec1 = null;
-//                }
-//                if (this.identityFilter.filter(rec2)) {
-//                    v.setSecondRecord(null);
-//                    v.setProperPaired(false);
-//                    rec2 = null;
-//                }
-//                if (rec1 == null && rec2 == null){
-//                    v = null;
-//                }
-//                return v;
-//            }).filter(rec -> rec._2 != null);
-//        }
-
         /*
         Since clusterName functions similarly as readName does, so we use the same partitioner.
         Input:

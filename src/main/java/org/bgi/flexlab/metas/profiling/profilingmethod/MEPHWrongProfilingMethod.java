@@ -27,16 +27,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * ClassName: MEPHProfilingMethod
+ * ClassName: MEPHWrongProfilingMethod
  * Description:
  *
- * @author: heshixu@genomics.cn
+ * @author heshixu@genomics.cn
  */
 
-public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializable {
+@Deprecated
+public class MEPHWrongProfilingMethod extends ProfilingMethodBase implements Serializable {
 
     public static final long serialVersionUID = 1L;
-    private static final Logger LOG = LogManager.getLogger(MEPHProfilingMethod.class);
+    private static final Logger LOG = LogManager.getLogger(MEPHWrongProfilingMethod.class);
 
     private boolean doGCRecalibration;
     private GCBiasModelBase gcBiasRecaliModel;
@@ -69,7 +70,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
     private MetasOptions options;
 
-    public MEPHProfilingMethod(MetasOptions options, JavaSparkContext jsc){
+    public MEPHWrongProfilingMethod(MetasOptions options, JavaSparkContext jsc){
         super(options, jsc);
 
         this.options = options;
@@ -358,9 +359,9 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
                     excludeMarkers.add(currentline);
                 }
             } catch (FileNotFoundException e) {
-                LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Markers-to-exclude list file not found. " + e.toString());
+                LOG.error("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] Markers-to-exclude list file not found. " + e.toString());
             } catch (IOException e) {
-                LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Markers-to-exclude file IO error. " + e.toString());
+                LOG.error("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] Markers-to-exclude file IO error. " + e.toString());
             }
         }
     }
@@ -414,13 +415,13 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
          JavaRDD<SAMRecord>
 
         After mapToPair: (read2marker)
-         key: sampleID"\t"rgID"\t"cladeName"\t"markerName
-         value: tuple<1, gc_recali_value>
+         key: sampleID"\t"rgID"\t"cladeName
+         value: HashMap<markerName, tuple<1, gc_recali_value>>
          Partition: default
 
         After reduceByKey: (marker2)
-         key: sampleID"\t"rgID"\t"cladeName"\t"markerName
-         value: tuple<count, gc_recali_count>
+         key: sampleID"\t"rgID"\t"cladeName
+         value: HashMap<markerName, tuple<count, gc_recali_count>>
          Partition: sampleID
 
 
@@ -431,15 +432,24 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
         */
         return samRecordJavaRDD.mapToPair(samRecord -> countTupleGenerator(samRecord.getStringAttribute("RG"), samRecord))
                 .filter(tuple -> tuple._1 != null)
-                .reduceByKey(sampleIDPartitioner, ((v1, v2) -> new Tuple2<>(v1._1+v2._1, v1._2+v2._2)))
-                .mapPartitionsToPair(new MEPHAbundanceFunction(this.markersInformationBroad, this.taxonomyInformationBroad, this.cladeName2HighRankBroad, this.options), true);
+                .reduceByKey(sampleIDPartitioner, (a, b) -> {
+                    HashMap<String, Tuple2<Integer, Double>> c;
+                    if (a.size() < b.size()) {
+                        c = new HashMap<>(b);
+                        a.forEach((k, v) -> c.merge(k, v, (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
+                    } else {
+                        c = new HashMap<>(a);
+                        b.forEach((k, v) -> c.merge(k, v,  (v1, v2) -> new Tuple2<>(v1._1 + v2._1, v1._2 + v2._2)));
+                    }
+                    return c;
+                }).mapPartitionsToPair(new MEPHWrongAbundanceFunction(this.markersInformationBroad, this.taxonomyInformationBroad, this.cladeName2HighRankBroad, this.options), true);
     }
 
-    private Tuple2<String, Tuple2<Integer, Double>> countTupleGenerator(String rgID, SAMRecord record) {
+    private Tuple2<String, HashMap<String, Tuple2<Integer, Double>>> countTupleGenerator(String rgID, SAMRecord record) {
 
         String markerName = record.getReferenceName();
         if (this.excludeMarkers.contains(markerName)) {
-            LOG.info("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Exclude special marker " + markerName);
+            LOG.info("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] Exclude special marker " + markerName);
             return new Tuple2<>(null, null);
         }
 
@@ -474,10 +484,10 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
             //);
         }
 
-        Tuple2<Integer, Double> readCount = new Tuple2<>(1, recaliReadCount);
-
+        HashMap<String, Tuple2<Integer, Double>> readCount = new HashMap<>(2);
+        readCount.put(markerName, new Tuple2<>(1, recaliReadCount));
         return new Tuple2<>(
-                this.sampleIDbySampleName.get(rgID) + "\t" + rgID + "\t" + this.markersInformationBroad.value().get(markerName)._1() + "\t" + markerName,
+                this.sampleIDbySampleName.get(rgID) + "\t" + rgID + "\t" + this.markersInformationBroad.getValue().get(markerName)._1(),
                 readCount
         );
     }
@@ -550,7 +560,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
                 }
                 jsonReader.endObject();
                 if (markerLen < 0 || cladeName == null) {
-                    LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Gene " + markerName + "doesn't has information.");
+                    LOG.error("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] Gene " + markerName + "doesn't has information.");
                     continue;
                 }
                 extArray.trimToSize();
@@ -560,9 +570,9 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
             jsonReader.endObject();
         } catch (FileNotFoundException e) {
-            LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] mpa markers information file not found. " + e.toString());
+            LOG.error("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] mpa markers information file not found. " + e.toString());
         } catch (IOException e) {
-            LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] mpa markers information reader error. " + e.toString());
+            LOG.error("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] mpa markers information reader error. " + e.toString());
         }
     }
 
@@ -628,9 +638,10 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
             //    }
             //}
         } catch (FileNotFoundException e) {
-            LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] mpa taxonomy list file not found. " + e.toString());
+            LOG.error("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] mpa taxonomy list file not found. " + e.toString());
         } catch (IOException e) {
-            LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] mpa taxonomy list file reader error. " + e.toString());
+            LOG.error("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] mpa taxonomy list file reader error. " + e.toString());
         }
     }
+
 }

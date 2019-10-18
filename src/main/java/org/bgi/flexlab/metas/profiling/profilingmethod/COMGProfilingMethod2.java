@@ -14,6 +14,8 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.reference.ReferenceInfoMatrix;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
+import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordAlignLenFilter;
+import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelFactory;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
@@ -47,6 +49,12 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
 
     private String speciesGenomeGCFilePath;
 
+    private boolean doIdentityFiltering = false;
+    private boolean doAlignLenFiltering = false;
+
+    private MetasSAMRecordIdentityFilter identityFilter;
+    private MetasSAMRecordAlignLenFilter alignLenFilter;
+
     public COMGProfilingMethod2(MetasOptions options, JavaSparkContext jsc) {
         super(options, jsc);
 
@@ -62,6 +70,16 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
         } else {
             LOG.debug("[SOAPMetas::" + COMGProfilingMethod2.class.getName() + "] Skip GC recalibration.");
 
+        }
+
+        this.doIdentityFiltering = options.isDoIdentityFiltering();
+        this.doAlignLenFiltering = options.isDoAlignLenFiltering();
+
+        if (doIdentityFiltering) {
+            this.identityFilter = new MetasSAMRecordIdentityFilter(options.getMinIdentity());
+        }
+        if (doAlignLenFiltering) {
+            this.alignLenFilter = new MetasSAMRecordAlignLenFilter(options.getMinAlignLength());
         }
 
         referenceMatrixFilePath = options.getReferenceMatrixFilePath();
@@ -172,6 +190,19 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
 
     private Tuple2<String, Tuple4<String, Integer, Double, String>> countTupleGenerator(
             String sampleID, SAMRecord record) {
+
+        if (record.isSecondaryAlignment() || record.getMappingQuality() <= 5 ) { //TODO: 添加质量分数的 option
+            return new Tuple2<>(null, null);
+        }
+
+        if (doIdentityFiltering && this.identityFilter.filter(record)){
+            return new Tuple2<>(null, null);
+        }
+
+        if (doAlignLenFiltering && this.alignLenFilter.filter(record)) {
+            return new Tuple2<>(null, null);
+        }
+
         String clusterName;
         Integer rawReadCount = 1;
         Double recaliReadCount;

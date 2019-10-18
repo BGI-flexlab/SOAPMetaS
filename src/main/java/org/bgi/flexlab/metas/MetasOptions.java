@@ -7,6 +7,8 @@ import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
+import java.io.Serializable;
+
 /**
  * ClassName: MetasOptions
  * Description:
@@ -14,7 +16,9 @@ import org.bgi.flexlab.metas.util.SequencingMode;
  * @author heshixu@genomics.cn
  */
 
-public class MetasOptions {
+public class MetasOptions implements Serializable {
+
+    public static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LogManager.getLogger(MetasOptions.class);
 
@@ -74,12 +78,14 @@ public class MetasOptions {
     private double minIdentity = 0;
     private boolean doAlignLenFiltering = false;
     private int minAlignLength = 0;
+    private boolean doDisqm = true;
 
     private String profilingTmpDir = null;
     private String profilingOutputHdfsDir;
 
     private String mpaMarkersListFile;
     private String mpaTaxonomyListFile;
+    private String mpaExcludeMarkersFile;
 
     // Process control arguments
     private boolean mergeSamBySample = false;
@@ -261,6 +267,9 @@ public class MetasOptions {
         minAlignLen.setArgName("Double");
         this.options.addOption(minAlignLen);
 
+        this.options.addOption(null, "no-disqm", false,
+                "Switch for the procedure of disambiguating the quasi-markers. Refer to MetaPhlAn2 manual for detail description.");
+
 
         /*
         Profiling analysis arguments group.
@@ -316,6 +325,10 @@ public class MetasOptions {
                 "Taxonomy information list extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in tab-seperated format. User may generate the file with python3 json.dump(mpa_pkl[\"taxonomy\"])");
         mpaTaxonomyList.setArgName("FILE");
         this.options.addOption(mpaTaxonomyList);
+        Option excludeMarkers = new Option(null, "mpa-exclude-list", true,
+                "Markers to exclude, one marker gene per line. Please reference to MetaPhlAn2 markers_to_exclude/ingnore_markers.");
+        excludeMarkers.setArgName("FILE");
+        this.options.addOption(excludeMarkers);
 
 
         Option outputDir = new Option("o", "output-hdfs-dir", true,
@@ -455,6 +468,7 @@ public class MetasOptions {
             this.referenceMatrixFilePath = commandLine.getOptionValue('r', null);
             this.mpaMarkersListFile = commandLine.getOptionValue("mpa-marker-list", null);
             this.mpaTaxonomyListFile = commandLine.getOptionValue("mpa-taxon-list", null);
+            this.mpaExcludeMarkersFile = commandLine.getOptionValue("mpa-exclude-list", null);
 
             this.hdfsOutputDir = commandLine.getOptionValue('o', null);
             if (this.hdfsOutputDir == null) {
@@ -522,6 +536,9 @@ public class MetasOptions {
             }
             if (commandLine.hasOption("len-filt")){
                 this.doAlignLenFiltering = true;
+            }
+            if (commandLine.hasOption("no-disqm")) {
+                this.doDisqm = false;
             }
 
             /*
@@ -615,6 +632,10 @@ public class MetasOptions {
         return mpaTaxonomyListFile;
     }
 
+    public String getMpaExcludeMarkersFile() {
+        return mpaExcludeMarkersFile;
+    }
+
     /*
     Profiling analysis arguments group.
      */
@@ -677,6 +698,10 @@ public class MetasOptions {
 
     public boolean isDoAlignLenFiltering(){
         return this.doAlignLenFiltering;
+    }
+
+    public boolean isDoDisqm(){
+        return this.doDisqm;
     }
 
     public int getReadLength(){
