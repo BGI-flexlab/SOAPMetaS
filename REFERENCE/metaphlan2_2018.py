@@ -1003,7 +1003,7 @@ class TaxClade:
             misidentified = False
 
             if not self.avoid_disqm:
-                ### SHIXU: 对于当前clade（需要计算丰度的clade）的每个marker，都要进行quasi-marker的过滤。过滤方法：每个当前clade的marker都会有ext，即external genome，则对每个external genome，检测其相应的clade的有mapped-reads的marker数量，如果这一clade的mapped-reads大于0的marker占比超过0.33，那么这个ext clade对应的当前的clade中的marker就被记录removed。
+                ### SHIXU: 对于当前clade（需要计算丰度的clade）的每个marker，都要进行quasi-marker的过滤。过滤方法：每个当前clade的marker都会有ext，即external genome，则对每个external genome，检测其相应的clade的有mapped-reads的marker数量，如果这一clade的mapped-reads大于0的marker占比超过0.33，那么这个ext clade对应的当前的clade中的marker就被记录removed。
 
                 for e in self.markers2exts[m]:
                     toclade = self.taxa2clades[e]
@@ -1526,7 +1526,7 @@ def metaphlan2():
     map_out = []
     for marker,reads in sorted(markers2reads.items(), key=lambda pars: pars[0]):
         #SHIXU: 之前 marker_to_ignore/exclude 排除掉的 marker 对应的 reads 在这里都会丢掉。
-        if marker not in tree.markers2lens: 
+        if marker not in tree.markers2lens:
             continue
         tax_seq = tree.add_reads( marker, len(reads),
                                   ignore_viruses = pars['ignore_viruses'],

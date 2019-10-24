@@ -79,6 +79,7 @@ public class MetasOptions implements Serializable {
     private boolean doAlignLenFiltering = false;
     private int minAlignLength = 0;
     private boolean doDisqm = true;
+    private int statType = 8;
 
     private String profilingTmpDir = null;
     private String profilingOutputHdfsDir;
@@ -268,7 +269,9 @@ public class MetasOptions implements Serializable {
         this.options.addOption(minAlignLen);
 
         this.options.addOption(null, "no-disqm", false,
-                "Switch for the procedure of disambiguating the quasi-markers. Refer to MetaPhlAn2 manual for detail description.");
+                "Switch for the procedure of disambiguating the quasi-markers. Refer to MetaPhlAn2 --avoid_disqm parameter for detail description.");
+        this.options.addOption(null, "meph-abun-algorithm", false,
+                "Algorithm used to compute abundance. Refer to MetaPhlAn2 --stat parameter for details.");
 
 
         /*
@@ -540,6 +543,16 @@ public class MetasOptions implements Serializable {
             if (commandLine.hasOption("no-disqm")) {
                 this.doDisqm = false;
             }
+            switch (commandLine.getOptionValue("meph-abun-algorithm", "tavg_g")) {
+                case "avg_g": this.statType = 2; break;
+                case "avg_l": this.statType = 4; break;
+                //case "tavg_g": this.statType = 8; break;
+                case "tavg_l": this.statType = 16; break;
+                case "wavg_g": this.statType = 32; break;
+                case "wavg_l": this.statType = 64; break;
+                case "med": this.statType = 128; break;
+                default: this.statType = 8;
+            }
 
             /*
             Profiling analysis arguments parsing.
@@ -702,6 +715,10 @@ public class MetasOptions implements Serializable {
 
     public boolean isDoDisqm(){
         return this.doDisqm;
+    }
+
+    public int getStatType() {
+        return this.statType;
     }
 
     public int getReadLength(){

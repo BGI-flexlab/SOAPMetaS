@@ -25,7 +25,7 @@ import java.util.*;
 public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple2<String, Tuple2<Integer, Double>>>, String, ProfilingResultRecord>, Serializable {
 
     public static final long serialVersionUID = 1L;
-    private static final Logger LOG = LogManager.getLogger(MEPHWrongProfilingMethod.class);
+    private static final Logger LOG = LogManager.getLogger(MEPHAbundanceFunction.class);
 
     //private final Broadcast<Hash  Map<String, ArrayList<String>>> markers2extsBroad;
     //private final Broadcast<HashMap<String, Integer>> markers2lenBroad;
@@ -50,7 +50,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
      * 64: wavg_l
      * 128: med
      **/
-    private final int statType = 8;
+    private final int statType;
 
     public MEPHAbundanceFunction(final Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad,
                                  final Broadcast<ArrayList<Tuple2<ArrayList<String>, Integer>>> taxonomyInformationBroad,
@@ -63,6 +63,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         this.kingdomList = new ArrayList<>(Arrays.asList("k__Archaea", "k__Bacteria", "k__Eukaryota", "k__Viruses"));
 
         this.doDisqm = options.isDoDisqm();
+        this.statType = options.getStatType();
 
         // MetaPhlAn2 2018 database:
         // markers2clades/exts/lens: 1035649
@@ -139,17 +140,24 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
          */
         //double totalAbun = this.kingdomList.stream().mapToDouble(kingdom -> this.computeNodeAbundance(kingdom, cladeMarkers2nreads, allClades)).sum();
         double totalAbun = 0.0;
-        try {
-            double kingdomAbun;
-            for (String kingdom : kingdomList) {
-                kingdomAbun = this.computeNodeAbundance(kingdom, allClades);
-                totalAbun += kingdomAbun;
-                LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun);
-            }
-            LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun);
-        } catch (NullPointerException e) {
-            LOG.error("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] computeAbundance null pointer. " + e.toString());
+        double kingdomAbun;
+        for (String kingdom : kingdomList) {
+            kingdomAbun = this.computeNodeAbundance(kingdom, allClades);
+            totalAbun += kingdomAbun;
+            LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun);
         }
+        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun);
+        //try {
+        //    double kingdomAbun;
+        //    for (String kingdom : kingdomList) {
+        //        kingdomAbun = this.computeNodeAbundance(kingdom, allClades);
+        //        totalAbun += kingdomAbun;
+        //        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun);
+        //    }
+        //    LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun);
+        //} catch (NullPointerException e) {
+        //    LOG.error("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] computeAbundance null pointer. " + e.toString());
+        //}
 
         LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Finish computing abundance and start relative abunadnce computing for sample " + smTag);
 
@@ -173,9 +181,10 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
                 unclAbun = currentnode.unclassifiedAbun;
                 markercount = currentnode.markersRCMap.size();
                 nonzeromc = getNonZeroMarkerCount(currentnode);
-                if (abun != null) {
-                    bw.write(cName + "\t|Abun: " + String.format("%.2e", abun) + "\t|unclAbun: " + String.format("%.2e", unclAbun) + "\t|MarkerCount: " + markercount + "\t|nonZeroMarkerCount: " + nonzeromc);
+                if (abun == null) {
+                    abun = 0.0;
                 }
+                bw.write(cName + "\t|Abun: " + String.format("%.2e", abun) + "\t|unclAbun: " + String.format("%.2e", unclAbun) + "\t|MarkerCount: " + markercount + "\t|nonZeroMarkerCount: " + nonzeromc);
                 bw.newLine();
                 //for (HashMap.Entry<String, Tuple2<Integer, Double>> markerEntry: markers2nreads.entrySet()) {
                 //    mName = markerEntry.getKey();
@@ -217,7 +226,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
                     name = this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp + "|" + node.children.keySet().iterator().next().substring(0, 3) + cladeNameTemp.substring(3) + unclSuffix;
 
                     // The two "nreads" are zero because the unclassifiedAbun is calculated by substraction of sumChildAbun from node.abundance, the correlated "nreads" are not calculated.
-                    results.add(new Tuple2<>(sampleID, profilingResultGenerator(name, smTag, 0, 0, node.unclassifiedAbun, node.unclassifiedAbun/totalAbun)));
+                    results.add(new Tuple2<>(sampleID, profilingResultGenerator(name, smTag, 0, 0, node.unclassifiedAbun, node.unclassifiedAbun/totalAbun * 100)));
                 }
                 if (node.subclUnclassified && !cladeNameTemp.startsWith("s")) {
                     name = this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp + "|" + getNextTaxaLevel(cladeNameTemp) + cladeNameTemp.substring(1) + unclSuffix;
@@ -231,19 +240,15 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
                 cladeNameTemp = entry.getKey();
                 if (cladeNameTemp.startsWith(taxaLevel)) {
                     CladeNode node = entry.getValue();
-                    results.add(new Tuple2<>(sampleID, profilingResultGenerator(this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp, smTag, node.rawRC, node.recaliRC, node.abundance, node.abundance/totalAbun * 100)));
+                    relAbun = node.abundance/totalAbun * 100;
+                    results.add(new Tuple2<>(sampleID, profilingResultGenerator(this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp, smTag, node.rawRC, node.recaliRC, node.abundance, relAbun)));
+                    sumLevRelAbun += relAbun;
 
                     String name;
                     if (node.unclassifiedAbun > 0.0) {
                         name = this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp + "|" + node.children.keySet().iterator().next().substring(0, 3) + cladeNameTemp.substring(3) + unclSuffix;
-                        relAbun = node.unclassifiedAbun/totalAbun;
+                        relAbun = node.unclassifiedAbun/totalAbun * 100;
                         results.add(new Tuple2<>(sampleID, profilingResultGenerator(name, smTag, 0, 0, node.unclassifiedAbun, relAbun)));
-                        sumLevRelAbun += relAbun;
-                    }
-                    if (node.subclUnclassified && !cladeNameTemp.startsWith("s")) {
-                        name = this.cladeName2HighRankBroad.value().get(cladeNameTemp) + cladeNameTemp + "|" + getNextTaxaLevel(cladeNameTemp) + cladeNameTemp.substring(1) + unclSuffix;
-                        relAbun = node.abundance/totalAbun * 100;
-                        results.add(new Tuple2<>(sampleID, profilingResultGenerator(cladeNameTemp, smTag, node.rawRC, node.recaliRC, node.abundance, relAbun)));
                         sumLevRelAbun += relAbun;
                     }
                 }
@@ -348,21 +353,19 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
     private double computeNodeAbundance(String clade, HashMap<String, CladeNode> allClades)
             throws NullPointerException {
         CladeNode node = allClades.get(clade);
-        if (node == null) {
-            LOG.error("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Null node error in computor function.");
-            throw new NullPointerException("Clade " + clade + " has no CladeNode record.");
-        } else {
-            if (node.abundance != null) {
-                return node.abundance;
-            }
+        if (node.abundance != null) {
+            return node.abundance;
         }
+        //if (node == null) {
+        //    LOG.error("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Null node error in computor function.");
+        //    //throw new NullPointerException("Clade " + clade + " has no CladeNode record.");
+        //} else {
+        //    if (node.abundance != null) {
+        //        return node.abundance;
+        //    }
+        //}
 
         double sumChildAbun = 0.0;
-        int markerLenSum = -1;
-        double recaliRCSum = 0.0;
-        double locAbun = 0.0;
-        int nonZeroCount = 0;
-
         try {
             //sumChildAbun = node.children.keySet().stream().mapToDouble(childClade -> this.computeNodeAbundance(childClade, cladeMarkers2nreads, allClades)).sum();
             for (String childClade : node.children.keySet()) {
@@ -374,55 +377,55 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
                     + clade + " has null child or child has no abundance record. " + e.toString());
         }
 
+        int markerLenSum = -1;
+        double recaliRCSum = 0.0;
+        int nonZeroCount = 0;
+
         ArrayList<Tuple3<Integer, Double, Integer>> discardLenCountList = new ArrayList<>(3); // marker_len, nreads, rawnreads
         ArrayList<Tuple3<Double, Integer, Double>> retainLenCountList = new ArrayList<>(10); // nreads/marker_len, marker_len, nreads
 
         HashMap<String, Tuple2<Integer, Double>> markersRCMap = node.markersRCMap;
-        if (markersRCMap != null) {
-            boolean discard = false;
-            String markerName = null;
-            CladeNode extSpeClade = null;
-            int markerLen = 0;
-            double recaliRC = 0.0;
-            int rawRC = 0;
-            //LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Current clade " + clade + " is under raw reads counting. ");
-            for (HashMap.Entry<String, Tuple2<Integer, Double>> entry : markersRCMap.entrySet()) {
-                markerName = entry.getKey();
-                rawRC = entry.getValue()._1;
-                recaliRC = entry.getValue()._2;
-                markerLen = markersInformationBroad.value().get(markerName)._2();
-                discard = false;
+        //if (markersRCMap != null) {
+        boolean discard = false;
+        String markerName = null;
+        CladeNode extSpeClade = null;
+        int markerLen = 0;
+        double recaliRC = 0.0;
+        int rawRC = 0;
+        //LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Current clade " + clade + " is under raw reads counting. ");
+        for (HashMap.Entry<String, Tuple2<Integer, Double>> entry : markersRCMap.entrySet()) { // WARN: 这一步在 metaphlan 中进行了 sort, 会影响后续的 record 回收顺序, 从而影响最终丰度值
+            markerName = entry.getKey();
+            rawRC = entry.getValue()._1;
+            recaliRC = entry.getValue()._2;
+            markerLen = markersInformationBroad.value().get(markerName)._2();
+            discard = false;
 
-                if (doDisqm) {
-                    for (String extCladeName : markersInformationBroad.value().get(markerName)._3()) {
-                        extSpeClade = allClades.get(extCladeName);
-                        extSpeClade = extSpeClade.fatherClade;
-                        while (extSpeClade.children.size() == 1) {
-                            extSpeClade = extSpeClade.children.values().iterator().next();
-                        }
-                        int mc = extSpeClade.markersRCMap.size();
-                        int nonZeroMC = this.getNonZeroMarkerCount(extSpeClade);
-                        if ((mc > 0) && (nonZeroMC / (double) mc > this.nonZeroPercent)) {
-                            discard = true;
-                            discardLenCountList.add(new Tuple3<>(markerLen, recaliRC, rawRC));
-                            break;
-                        }
+            if (doDisqm) {
+                for (String extCladeName : markersInformationBroad.value().get(markerName)._3()) {
+                    extSpeClade = allClades.get(extCladeName).fatherClade;
+                    while (extSpeClade.children.size() == 1) {
+                        extSpeClade = extSpeClade.children.values().iterator().next();
+                    }
+                    int mc = extSpeClade.markersRCMap.size();
+                    int nonZeroMC = this.getNonZeroMarkerCount(extSpeClade);
+                    if ((mc > 0) && (nonZeroMC / (double) mc > this.nonZeroPercent)) {
+                        discard = true;
+                        discardLenCountList.add(new Tuple3<>(markerLen, recaliRC, rawRC));
+                        break;
                     }
                 }
-
-                if (discard) continue;
-                retainLenCountList.add(new Tuple3<>(recaliRC / markerLen, markerLen, recaliRC));
-                node.recaliRC += recaliRC;
-                node.rawRC += rawRC;
-                if (recaliRC > 0) {
-                    nonZeroCount++;
-                }
-                markerLenSum += markerLen;
-                recaliRCSum += entry.getValue()._2;
             }
-        } //else {
-        //    LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Current clade: " + clade + " doesn't have markers2nreads information. ");
-        //}
+
+            if (discard) continue;
+            retainLenCountList.add(new Tuple3<>(recaliRC / markerLen, markerLen, recaliRC));
+            node.recaliRC += recaliRC;
+            node.rawRC += rawRC;
+            if (recaliRC > 0) {
+                nonZeroCount++;
+            }
+            markerLenSum += markerLen;
+            recaliRCSum += entry.getValue()._2;
+        }
 
         int nDiscard = discardLenCountList.size();
         int nRetain = retainLenCountList.size();
@@ -434,12 +437,13 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
             if (node.kingdom.equals("k__Viruses")){
                 nRipr = 0;
             }
-            if (nRetain < nRipr && nDiscard > 0) {
+            if (nRetain < nRipr) {
                 int upBound = Math.min(nRipr - nRetain, nDiscard);
+                double recaliRCTemp;
                 for (int i=0; i<upBound; i++){
                     Tuple3<Integer, Double, Integer> item = discardLenCountList.get(i);
-                    double recaliRCTemp = item._2();
-                    retainLenCountList.add(new Tuple3<>(item._2()/item._1(), item._1(), recaliRCTemp));
+                    recaliRCTemp = item._2();
+                    retainLenCountList.add(new Tuple3<>(recaliRCTemp/(double) item._1(), item._1(), recaliRCTemp));
                     node.recaliRC += recaliRCTemp;
                     node.rawRC += item._3();
                     markerLenSum += item._1();
@@ -452,6 +456,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         }
 
         nRetain = retainLenCountList.size();
+        double locAbun = 0.0;
         int lBoundIndex = (int) (this.quantile * nRetain);
         int rBoundIndex = nRetain - lBoundIndex - 1;
         if (markerLenSum == 0) markerLenSum = -1;
@@ -464,14 +469,10 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
             }
         }
 
-        if (markerLenSum >= 0) {
+        if (markerLenSum > 0) {
             if ((statType & 2) > 0 || (lBoundIndex == 0 && (statType & 40) > 0)){
                 // avg_g
-                if (markerLenSum > 0) {
-                    locAbun = recaliRCSum / markerLenSum;
-                } else {
-                    locAbun = 0.0;
-                }
+                locAbun = recaliRCSum / markerLenSum;
             } else if ((statType & 4) > 0 || (lBoundIndex == 0 && (statType & 80) > 0)) {
                 // avg_l
                 double sumv = 0;

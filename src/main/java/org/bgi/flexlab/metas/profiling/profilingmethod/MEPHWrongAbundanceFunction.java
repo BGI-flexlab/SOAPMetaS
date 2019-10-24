@@ -26,7 +26,7 @@ import java.util.*;
 public class MEPHWrongAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple2<String, HashMap<String, Tuple2<Integer, Double>>>>, String, ProfilingResultRecord>, Serializable {
 
     public static final long serialVersionUID = 1L;
-    private static final Logger LOG = LogManager.getLogger(MEPHWrongProfilingMethod.class);
+    private static final Logger LOG = LogManager.getLogger(MEPHWrongAbundanceFunction.class);
 
     //private final Broadcast<HashMap<String, ArrayList<String>>> markers2extsBroad;
     //private final Broadcast<HashMap<String, Integer>> markers2lenBroad;

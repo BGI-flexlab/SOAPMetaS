@@ -22,8 +22,16 @@ public class ProfilingResultRecord implements Serializable {
     private Double abundance; // recaliReadCount divided by marker length
     private Double relAbun; // Relative abundance.
     private byte[] readNameStringBytes; //后续需要考虑采用更合适的方式来存储read name字符串
+    private int outType = 2;
 
     public ProfilingResultRecord(){}
+
+    public ProfilingResultRecord(int outType){
+        // 2: relative abundance only
+        // 4: detailed relative abundance
+        // 8: CAMI format
+        this.outType = outType;
+    }
 
     public void setClusterName(String name){
         this.clusterName = name;
@@ -96,13 +104,28 @@ public class ProfilingResultRecord implements Serializable {
     @Override
     public String toString() {
         //return this.getClusterName() + '\t' + this.getRelAbun();
+        // Return type:
+        // 2: relative abundance only
+        // 4: detailed relative abundance
+        // 8: CAMI format
         StringBuilder builder = new StringBuilder(64);
-        return builder.append(this.getClusterName())
-                .append('\t').append(this.getRawReadCount()).append('\t')
-                .append(this.getrecaliReadCount()).append('\t')
-                .append(this.getAbundance()).append('\t')
-                .append(this.getRelAbun()).append('\t')
-                .toString();
+        if ((outType & 2) > 0) {
+            return builder.append(this.getClusterName()).append('\t')
+                    .append(String.format("%.2f", this.getRelAbun()))
+                    .toString();
+        } else if ((outType & 4) > 0){
+            return builder.append(this.getClusterName())
+                    .append('\t').append(this.getRawReadCount()).append('\t')
+                    .append(this.getrecaliReadCount()).append('\t')
+                    .append(this.getAbundance()).append('\t')
+                    .append(String.format("%.2f", this.getRelAbun()))
+                    .toString();
+        } else {
+            return builder.append(this.getClusterName()).append('\t')
+                    .append(String.format("%.2f", this.getRelAbun()))
+                    .toString();
+        }
+
     }
 
     public String getInfo(){
