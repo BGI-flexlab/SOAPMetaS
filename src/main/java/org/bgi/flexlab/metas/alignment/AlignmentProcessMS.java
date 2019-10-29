@@ -352,7 +352,7 @@ public class AlignmentProcessMS {
                                 alignmentToolWrapper), true)
                 .collect();
 
-        partitionedTab5RDD.unpersist();
+        //partitionedTab5RDD.unpersist();
 
 
         return returnedValues;

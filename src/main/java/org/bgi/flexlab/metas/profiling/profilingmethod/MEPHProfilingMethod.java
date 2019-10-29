@@ -573,9 +573,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
         try (JsonReader jsonReader = new JsonReader(new FileReader(mpaTaxonomyListFile))) {
 
-            String[] taxonLev;
             String tempItem;
-            String taxIDs;
             int genoLen = 0;
             int count;
 
@@ -583,9 +581,8 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
             while (jsonReader.hasNext()) {
 
-                taxonLev = jsonReader.nextName().split("\\|");
                 ArrayList<String> taxonList = new ArrayList<>(9);
-                Collections.addAll(taxonList, taxonLev);
+                Collections.addAll(taxonList, jsonReader.nextName().split("\\|"));
 
                 jsonReader.beginObject();
                 while (jsonReader.hasNext()) {
@@ -596,19 +593,19 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
                             break;
                         }
                         case "taxid": {
-                            taxIDs = jsonReader.nextString();
+                            jsonReader.nextString();
                             break;
                         }
                     }
                 }
                 jsonReader.endObject();
-                taxonomyInformation.add(new Tuple2<>(new ArrayList<>(taxonList), genoLen));
+                taxonomyInformation.add(new Tuple2<>(taxonList, genoLen));
 
-                count = taxonLev.length;
+                count = taxonList.size();
                 StringBuilder highRank = new StringBuilder();
                 for (int i = 0; i < count; i++) {
-                    cladeName2HighRank.put(taxonLev[i], highRank.toString());
-                    highRank.append(taxonLev[i]).append('|');
+                    cladeName2HighRank.put(taxonList.get(i), highRank.toString());
+                    highRank.append(taxonList.get(i)).append('|');
                 }
 
             }

@@ -78,12 +78,14 @@ public class MetasOptions implements Serializable {
     private double minIdentity = 0;
     private boolean doAlignLenFiltering = false;
     private int minAlignLength = 0;
-    private boolean doDisqm = true;
-    private int statType = 8;
 
     private String profilingTmpDir = null;
     private String profilingOutputHdfsDir;
 
+    // MetaPhlAn algorithm arguments group
+    private boolean doDisqm = true;
+    private int statType = 8;
+    private int totalNReads = 0;
     private String mpaMarkersListFile;
     private String mpaTaxonomyListFile;
     private String mpaExcludeMarkersFile;
@@ -299,10 +301,15 @@ public class MetasOptions implements Serializable {
 
         Option profilingPipe = new Option(null, "prof-pipe", true,
                 "Pipeline of profiling. Please refer " +
-                        "to doi:10.1038/nbt.2942 for more information. Option: comg, metaphlan. Default: comg");
+                        "to doi:10.1038/nbt.2942 for more information. Option: comg, metaphlan, metaphlan2019. Default: comg");
         profilingPipe.setArgName("MODE");
         this.options.addOption(profilingPipe);
 
+        Option readsCount = new Option(null, "total-nreads", true,
+                "The total number of reads. Used for CAMI format generation in MetaPhlAn2 2019 version. "+
+                        "Note that for PE input you should add the count of each fastq file, because MetaPhlAn2 will process PE as SE.");
+        readsCount.setArgName("INTEGER");
+        this.options.addOption(readsCount);
 
         /*
         IO files/directory arguments.
@@ -565,6 +572,10 @@ public class MetasOptions implements Serializable {
                 this.sequencingMode = SequencingMode.SINGLEEND;
                 LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] MetaPhlAn mode only supports Single-end (SE) sequence mode.");
             }
+            this.totalNReads = Integer.parseInt(commandLine.getOptionValue("total-nreads", "0"));
+            if (this.profilingPipeline.toLowerCase().equals("metaphlan2019")) {
+                this.totalNReads = 1;
+            }
 
             /*
             Process controling arguments parsing/
@@ -679,6 +690,10 @@ public class MetasOptions implements Serializable {
 
     public String getProfilingOutputHdfsDir() {
         return profilingOutputHdfsDir;
+    }
+
+    public int getTotalNReads() {
+        return totalNReads;
     }
 
     /*

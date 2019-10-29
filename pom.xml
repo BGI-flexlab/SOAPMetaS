@@ -149,6 +149,8 @@
                         <exclude>org/bgi/flexlab/metas/data/mapreduce/output/profiling/ProfilingTempOutputFormatBase.java</exclude>
                         <exclude>org/bgi/flexlab/metas/data/mapreduce/output/profiling/profilingmethod/MEPHWrongAbundanceFunction.java</exclude>
                         <exclude>org/bgi/flexlab/metas/data/mapreduce/output/profiling/profilingmethod/MEPHWrongProfilingMethod.java</exclude>
+                        <exclude>org/bgi/flexlab/metas/data/mapreduce/output/profiling/profilingmethod/MEPHNewAbundanceFunction.java</exclude>
+                        <exclude>org/bgi/flexlab/metas/data/mapreduce/output/profiling/profilingmethod/MEPHNewProfilingMethod.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
