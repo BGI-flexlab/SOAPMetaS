@@ -347,8 +347,11 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
                 count = taxonList.size();
                 StringBuilder highNameRank = new StringBuilder();
                 StringBuilder highIDRank = new StringBuilder();
-                for (int i = 0; i < count; i++) {
-                    cladeName2HighRank.put(taxonList.get(i), new Tuple2<>(highNameRank.toString(), highIDRank.toString()));
+                cladeName2HighRank.put(taxonList.get(0), new Tuple2<>("", ""));
+                highNameRank.append(taxonList.get(0)).append('|');
+                highIDRank.append(taxIDList.get(0)).append('|');
+                for (int i = 1; i < count; i++) {
+                    cladeName2HighRank.put(taxonList.get(i), new Tuple2<>(highNameRank.toString().substring(3), highIDRank.toString()));
                     highNameRank.append(taxonList.get(i)).append('|');
                     highIDRank.append(taxIDList.get(i)).append('|');
                 }

@@ -86,6 +86,8 @@ public class MetasOptions implements Serializable {
     private boolean doDisqm = true;
     private int statType = 8;
     private int totalNReads = 0;
+    private boolean ignoreUnknown = true;
+    private String outputFormat = "other";
     private String mpaMarkersListFile;
     private String mpaTaxonomyListFile;
     private String mpaExcludeMarkersFile;
@@ -310,6 +312,11 @@ public class MetasOptions implements Serializable {
                         "Note that for PE input you should add the count of each fastq file, because MetaPhlAn2 will process PE as SE.");
         readsCount.setArgName("INTEGER");
         this.options.addOption(readsCount);
+
+        this.options.addOption(null, "unknown-estimation", false,
+                "Switch option. If set, the unmapped reads and reads mapped to unknown clade will be considered.");
+        this.options.addOption(null, "output-format", true,
+                "Output profiling file format. Options: CAMI, (others). Default: (legacy MetaPhlAn2 format).");
 
         /*
         IO files/directory arguments.
@@ -574,7 +581,14 @@ public class MetasOptions implements Serializable {
             }
             this.totalNReads = Integer.parseInt(commandLine.getOptionValue("total-nreads", "0"));
             if (this.profilingPipeline.toLowerCase().equals("metaphlan2019")) {
-                this.totalNReads = 1;
+                if (this.totalNReads == 0) {
+                    LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] total-nreads must be provided in \"metaphlan2019\" prof-pipe. Here we reset its value to 1");
+                    this.totalNReads = 1;
+                }
+                if (commandLine.hasOption("unknown-estimation")) {
+                    this.ignoreUnknown = false;
+                }
+                this.outputFormat = commandLine.getOptionValue("output-format", "other");
             }
 
             /*
@@ -694,6 +708,14 @@ public class MetasOptions implements Serializable {
 
     public int getTotalNReads() {
         return totalNReads;
+    }
+
+    public boolean ignoreUnknown(){
+        return this.ignoreUnknown;
+    }
+
+    public String getOutputFormat() {
+        return outputFormat;
     }
 
     /*

@@ -23,6 +23,9 @@ public class ProfilingResultRecord implements Serializable {
     private Double relAbun; // Relative abundance.
     private byte[] readNameStringBytes; //后续需要考虑采用更合适的方式来存储read name字符串
     private int outType = 2;
+    private String termTaxID; // leaf taxid
+    private String rank; // taxonomy rank full name
+    private String taxPath; // full taxid path
 
     public ProfilingResultRecord(){}
 
@@ -101,6 +104,30 @@ public class ProfilingResultRecord implements Serializable {
         }
     }
 
+    public void setTermTaxID(String termTaxID) {
+        this.termTaxID = termTaxID;
+    }
+
+    public String getTermTaxID() {
+        return termTaxID;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setTaxPath(String taxPath) {
+        this.taxPath = taxPath;
+    }
+
+    public String getTaxPath() {
+        return taxPath;
+    }
+
     @Override
     public String toString() {
         //return this.getClusterName() + '\t' + this.getRelAbun();
@@ -113,12 +140,19 @@ public class ProfilingResultRecord implements Serializable {
             return builder.append(this.getClusterName()).append('\t')
                     .append(String.format("%.2f", this.getRelAbun()))
                     .toString();
-        } else if ((outType & 4) > 0){
+        } else if ((outType & 4) > 0) {
             return builder.append(this.getClusterName())
                     .append('\t').append(this.getRawReadCount()).append('\t')
                     .append(this.getrecaliReadCount()).append('\t')
                     .append(this.getAbundance()).append('\t')
                     .append(String.format("%.2f", this.getRelAbun()))
+                    .toString();
+        } else if ((outType & 8) > 0) {
+            return builder.append(this.getTermTaxID()).append('\t')
+                    .append(this.getRank()).append('\t')
+                    .append(this.getTaxPath()).append('\t')
+                    .append(this.getClusterName()).append('\t')
+                    .append(this.getRelAbun())
                     .toString();
         } else {
             return builder.append(this.getClusterName()).append('\t')

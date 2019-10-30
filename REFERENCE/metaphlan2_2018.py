@@ -1255,7 +1255,6 @@ class TaxTree:
                     if k.startswith("k__") and not v.uncl])
 
         cl2ab, cl2glen, tot_ab = {}, {}, 0.0
-
         # SHIXU: 按照 kingdom rank 的丰度值加和来计算总丰度，各个子 rank 的丰度值在这个过程中也会计算完成
         for k,v in cl2ab_n.items():
             tot_ab += v.compute_abundance()
