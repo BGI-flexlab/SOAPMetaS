@@ -69,7 +69,6 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
             //this.gcBiasRecaliModel.outputCoefficients(options.getProfilingOutputHdfsDir() + "/builtin_model.json");
         } else {
             LOG.debug("[SOAPMetas::" + COMGProfilingMethod2.class.getName() + "] Skip GC recalibration.");
-
         }
 
         this.doIdentityFiltering = options.isDoIdentityFiltering();

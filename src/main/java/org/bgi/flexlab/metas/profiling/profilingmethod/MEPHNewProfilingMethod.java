@@ -2,6 +2,7 @@ package org.bgi.flexlab.metas.profiling.profilingmethod;
 
 import com.google.gson.stream.JsonReader;
 import htsjdk.samtools.SAMRecord;
+import htsjdk.samtools.util.SequenceUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.Partitioner;
@@ -15,6 +16,7 @@ import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
+import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelFactory;
 import scala.Tuple2;
 import scala.Tuple3;
 
@@ -45,12 +47,11 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
     //private Broadcast<HashMap<String, Integer>> markers2lenBroad = null;
     //private Broadcast<HashMap<String, String>> markers2cladeBroad = null;
     private Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad = null; // marker: cladename, len, extsList
-
     private Broadcast<ArrayList<Tuple3<ArrayList<String>, Integer, ArrayList<String>>>> taxonomyInformationBroad = null;
     private Broadcast<HashMap<String, Tuple2<String, String>>> cladeName2HighRankBroad = null; // "s__Species_name: k__xxx|p__xxx|c__xxx|o_xxx|f__xxx|g__xxx|"
-
     private Broadcast<HashMap<String, Integer>> sampleNamesBroadcast = null;
 
+    private HashMap<String, Double> geneGCMap;
     private HashSet<String> excludeMarkers;
 
     //private String metaphlanMpaDBFile;
@@ -66,6 +67,7 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
     private Pattern cigarPattern;
 
     private int minMapQuality = -100;
+    private String outFormat;
 
     private MetasOptions options;
 
@@ -103,6 +105,32 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
             } catch (IOException e) {
                 LOG.error("[SOAPMetas::" + MEPHNewProfilingMethod.class.getName() + "] Markers-to-exclude file IO error. " + e.toString());
             }
+        }
+
+        this.geneGCMap = new HashMap<>(1036030);
+        try (BufferedReader br = new BufferedReader(new FileReader(options.getReferenceMatrixFilePath()))) {
+            String currentLine;
+            while((currentLine = br.readLine()) != null) {
+                String[] ele = currentLine.split("\t");
+                this.geneGCMap.put(ele[1], Double.parseDouble(ele[4]));
+            }
+        } catch (FileNotFoundException e) {
+            LOG.error("[SOAPMetas::" + MEPHNewProfilingMethod.class.getName() + "] marker matrix file for metaphlan mode is not found. " + e.toString());
+        } catch (IOException e) {
+            LOG.error("[SOAPMetas::" + MEPHNewProfilingMethod.class.getName() + "] metaphlan mode marker matrix file IO error. " + e.toString());
+        }
+
+        this.minMapQuality = options.getMinMapQuallity();
+        this.outFormat = options.getOutputFormat();
+
+        this.doGCRecalibration = options.isDoGcBiasRecalibration();
+        if (this.doGCRecalibration) {
+            LOG.debug("[SOAPMetas::" + MEPHNewProfilingMethod.class.getName() + "] Do GC recalibration.");
+            this.gcBiasRecaliModel = new GCBiasModelFactory(options.getGcBiasRecaliModelType(),
+                    options.getGcBiasModelInput()).getGCBiasRecaliModel();
+            //this.gcBiasRecaliModel.outputCoefficients(options.getProfilingOutputHdfsDir() + "/builtin_model.json");
+        } else {
+            LOG.debug("[SOAPMetas::" + MEPHNewProfilingMethod.class.getName() + "] Skip GC recalibration.");
         }
     }
 
@@ -208,10 +236,10 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
         Double recaliReadCount = 1.0;
 
         if (this.doGCRecalibration) {
-            //recaliReadCount = this.gcBiasRecaliModel.recalibrateForSingle(
-            //        SequenceUtil.calculateGc(record.getReadBases()),
-            //        //this.referenceInfoMatrix.value().getSpeciesGenoGC(this.referenceInfoMatrix.value().getGeneSpeciesName(geneName))
-            //);
+            recaliReadCount = this.gcBiasRecaliModel.recalibrateForSingle(
+                    SequenceUtil.calculateGc(record.getReadBases()),
+                    this.geneGCMap.get(record.getReferenceName())
+            );
         }
 
         Tuple2<Integer, Double> readCount = new Tuple2<>(1, recaliReadCount);
@@ -314,48 +342,88 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
         // target high rank:
 
         try (JsonReader jsonReader = new JsonReader(new FileReader(mpaTaxonomyListFile))) {
-
             String tempItem;
             int genoLen = 0;
             int count;
 
-            jsonReader.beginObject();
-
-            while (jsonReader.hasNext()) {
-
-                ArrayList<String> taxonList = new ArrayList<>(9);
-                Collections.addAll(taxonList, jsonReader.nextName().split("\\|"));
-                ArrayList<String> taxIDList = new ArrayList<>(9);
-
+            if (this.outFormat.equals("CAMI")) {
                 jsonReader.beginObject();
                 while (jsonReader.hasNext()) {
-                    tempItem = jsonReader.nextName();
-                    switch (tempItem) {
-                        case "genoLen": {
-                            genoLen = jsonReader.nextInt();
-                            break;
-                        }
-                        case "taxid": {
-                            Collections.addAll(taxIDList, jsonReader.nextString().split("\\|"));
-                            break;
+
+                    ArrayList<String> taxonList = new ArrayList<>(9);
+                    Collections.addAll(taxonList, jsonReader.nextName().split("\\|"));
+                    ArrayList<String> taxIDList = new ArrayList<>(9);
+
+                    jsonReader.beginObject();
+                    while (jsonReader.hasNext()) {
+                        tempItem = jsonReader.nextName();
+                        switch (tempItem) {
+                            case "genoLen": {
+                                genoLen = jsonReader.nextInt();
+                                break;
+                            }
+                            case "taxid": {
+                                Collections.addAll(taxIDList, jsonReader.nextString().split("\\|"));
+                                break;
+                            }
                         }
                     }
-                }
-                jsonReader.endObject();
-                taxonomyInformation.add(new Tuple3<>(taxonList, genoLen, taxIDList));
+                    jsonReader.endObject();
+                    taxonomyInformation.add(new Tuple3<>(taxonList, genoLen, taxIDList));
 
-                count = taxonList.size();
-                StringBuilder highNameRank = new StringBuilder();
-                StringBuilder highIDRank = new StringBuilder();
-                cladeName2HighRank.put(taxonList.get(0), new Tuple2<>("", ""));
-                highNameRank.append(taxonList.get(0)).append('|');
-                highIDRank.append(taxIDList.get(0)).append('|');
-                for (int i = 1; i < count; i++) {
-                    cladeName2HighRank.put(taxonList.get(i), new Tuple2<>(highNameRank.toString().substring(3), highIDRank.toString()));
-                    highNameRank.append(taxonList.get(i)).append('|');
-                    highIDRank.append(taxIDList.get(i)).append('|');
+                    count = taxonList.size();
+                    StringBuilder highNameRank = new StringBuilder();
+                    StringBuilder highIDRank = new StringBuilder();
+                    cladeName2HighRank.put(taxonList.get(0), new Tuple2<>("", ""));
+                    highNameRank.append(taxonList.get(0)).append('|');
+                    highIDRank.append(taxIDList.get(0)).append('|');
+                    for (int i = 1; i < count; i++) {
+                        cladeName2HighRank.put(taxonList.get(i), new Tuple2<>(highNameRank.toString().substring(3), highIDRank.toString()));
+                        if (taxonList.get(i).contains("_unclassified")) {
+                            highNameRank.append('|');
+                        } else {
+                            highNameRank.append(taxonList.get(i)).append('|');
+                        }
+                        highIDRank.append(taxIDList.get(i)).append('|');
+                    }
                 }
+            } else {
+                jsonReader.beginObject();
+                while (jsonReader.hasNext()) {
 
+                    ArrayList<String> taxonList = new ArrayList<>(9);
+                    Collections.addAll(taxonList, jsonReader.nextName().split("\\|"));
+                    ArrayList<String> taxIDList = new ArrayList<>(9);
+
+                    jsonReader.beginObject();
+                    while (jsonReader.hasNext()) {
+                        tempItem = jsonReader.nextName();
+                        switch (tempItem) {
+                            case "genoLen": {
+                                genoLen = jsonReader.nextInt();
+                                break;
+                            }
+                            case "taxid": {
+                                Collections.addAll(taxIDList, jsonReader.nextString().split("\\|"));
+                                break;
+                            }
+                        }
+                    }
+                    jsonReader.endObject();
+                    taxonomyInformation.add(new Tuple3<>(taxonList, genoLen, taxIDList));
+
+                    count = taxonList.size();
+                    StringBuilder highNameRank = new StringBuilder();
+                    StringBuilder highIDRank = new StringBuilder();
+                    cladeName2HighRank.put(taxonList.get(0), new Tuple2<>("", ""));
+                    highNameRank.append(taxonList.get(0)).append('|');
+                    highIDRank.append(taxIDList.get(0)).append('|');
+                    for (int i = 1; i < count; i++) {
+                        cladeName2HighRank.put(taxonList.get(i), new Tuple2<>(highNameRank.toString(), highIDRank.toString()));
+                        highNameRank.append(taxonList.get(i)).append('|');
+                        highIDRank.append(taxIDList.get(i)).append('|');
+                    }
+                }
             }
 
             jsonReader.endObject();

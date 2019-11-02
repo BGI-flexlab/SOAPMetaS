@@ -78,6 +78,7 @@ public class MetasOptions implements Serializable {
     private double minIdentity = 0;
     private boolean doAlignLenFiltering = false;
     private int minAlignLength = 0;
+    private int minMapQuallity = 5;
 
     private String profilingTmpDir = null;
     private String profilingOutputHdfsDir;
@@ -276,6 +277,11 @@ public class MetasOptions implements Serializable {
                 "Switch for the procedure of disambiguating the quasi-markers. Refer to MetaPhlAn2 --avoid_disqm parameter for detail description.");
         this.options.addOption(null, "meph-abun-algorithm", false,
                 "Algorithm used to compute abundance. Refer to MetaPhlAn2 --stat parameter for details.");
+
+        Option minMapQ = new Option(null, "min-map-quality", true,
+                "Minimal mapping quality threshold of the remained mapped reads. Default: 5");
+        minMapQ.setArgName("Integer");
+        this.options.addOption(minMapQ);
 
 
         /*
@@ -557,6 +563,7 @@ public class MetasOptions implements Serializable {
             if (commandLine.hasOption("no-disqm")) {
                 this.doDisqm = false;
             }
+            this.minMapQuallity = Integer.parseInt(commandLine.getOptionValue("min-map-quality", "5"));
             switch (commandLine.getOptionValue("meph-abun-algorithm", "tavg_g")) {
                 case "avg_g": this.statType = 2; break;
                 case "avg_l": this.statType = 4; break;
@@ -577,9 +584,16 @@ public class MetasOptions implements Serializable {
             this.profilingPipeline = commandLine.getOptionValue("prof-pipe", "comg").toLowerCase();
             if (this.profilingPipeline.toLowerCase().equals("metaphlan") && this.sequencingMode.equals(SequencingMode.PAIREDEND)){
                 this.sequencingMode = SequencingMode.SINGLEEND;
-                LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] MetaPhlAn mode only supports Single-end (SE) sequence mode.");
+                LOG.warn("[SOAPMetas￿::" + MetasOptions.class.getName() + "] MetaPhlAn mode only supports Single-end (SE) sequence mode.");
             }
             this.totalNReads = Integer.parseInt(commandLine.getOptionValue("total-nreads", "0"));
+
+            this.outputFormat = commandLine.getOptionValue("output-format", "other").toUpperCase();
+            if (this.outputFormat.equals("CAMI")) {
+                LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] CAMI output format is only supported in metaphlan2019 profiling pipeline. Here we reset prof-pipe to \"metaphlan2019\"");
+                this.profilingPipeline = "metaphlan2019";
+            }
+
             if (this.profilingPipeline.toLowerCase().equals("metaphlan2019")) {
                 if (this.totalNReads == 0) {
                     LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] total-nreads must be provided in \"metaphlan2019\" prof-pipe. Here we reset its value to 1");
@@ -588,7 +602,6 @@ public class MetasOptions implements Serializable {
                 if (commandLine.hasOption("unknown-estimation")) {
                     this.ignoreUnknown = false;
                 }
-                this.outputFormat = commandLine.getOptionValue("output-format", "other");
             }
 
             /*
@@ -748,6 +761,10 @@ public class MetasOptions implements Serializable {
 
     public boolean isDoAlignLenFiltering(){
         return this.doAlignLenFiltering;
+    }
+
+    public int getMinMapQuallity() {
+        return minMapQuallity;
     }
 
     public boolean isDoDisqm(){

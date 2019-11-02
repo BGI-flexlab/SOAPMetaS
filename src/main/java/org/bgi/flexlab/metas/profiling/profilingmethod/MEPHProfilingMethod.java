@@ -2,6 +2,7 @@ package org.bgi.flexlab.metas.profiling.profilingmethod;
 
 import com.google.gson.stream.JsonReader;
 import htsjdk.samtools.SAMRecord;
+import htsjdk.samtools.util.SequenceUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.Partitioner;
@@ -15,6 +16,7 @@ import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelBase;
+import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasModelFactory;
 import scala.Tuple2;
 import scala.Tuple3;
 
@@ -45,12 +47,11 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
     //private Broadcast<HashMap<String, Integer>> markers2lenBroad = null;
     //private Broadcast<HashMap<String, String>> markers2cladeBroad = null;
     private Broadcast<HashMap<String, Tuple3<String, Integer, ArrayList<String>>>> markersInformationBroad = null; // marker: cladename, len, extsList
-
     private Broadcast<ArrayList<Tuple2<ArrayList<String>, Integer>>> taxonomyInformationBroad = null;
     private Broadcast<HashMap<String, String>> cladeName2HighRankBroad = null; // "s__Species_name: k__xxx|p__xxx|c__xxx|o_xxx|f__xxx|g__xxx|"
-
     private Broadcast<HashMap<String, Integer>> sampleNamesBroadcast = null;
 
+    private HashMap<String, Double> geneGCMap;
     private HashSet<String> excludeMarkers;
 
     //private String metaphlanMpaDBFile;
@@ -363,6 +364,31 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
                 LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Markers-to-exclude file IO error. " + e.toString());
             }
         }
+
+        this.minMapQuality = options.getMinMapQuallity();
+
+        this.doGCRecalibration = options.isDoGcBiasRecalibration();
+        if (this.doGCRecalibration) {
+            LOG.debug("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Do GC recalibration.");
+            this.gcBiasRecaliModel = new GCBiasModelFactory(options.getGcBiasRecaliModelType(),
+                    options.getGcBiasModelInput()).getGCBiasRecaliModel();
+            //this.gcBiasRecaliModel.outputCoefficients(options.getProfilingOutputHdfsDir() + "/builtin_model.json");
+        } else {
+            LOG.debug("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Skip GC recalibration.");
+        }
+
+        this.geneGCMap = new HashMap<>(1036030);
+        try (BufferedReader br = new BufferedReader(new FileReader(options.getReferenceMatrixFilePath()))) {
+            String currentLine;
+            while((currentLine = br.readLine()) != null) {
+                String[] ele = currentLine.split("\t");
+                this.geneGCMap.put(ele[1], Double.parseDouble(ele[4]));
+            }
+        } catch (FileNotFoundException e) {
+            LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] marker matrix file for metaphlan mode is not found. " + e.toString());
+        } catch (IOException e) {
+            LOG.error("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] metaphlan mode marker matrix file IO error. " + e.toString());
+        }
     }
 
     /**
@@ -468,10 +494,10 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
         Double recaliReadCount = 1.0;
 
         if (this.doGCRecalibration) {
-            //recaliReadCount = this.gcBiasRecaliModel.recalibrateForSingle(
-            //        SequenceUtil.calculateGc(record.getReadBases()),
-            //        //this.referenceInfoMatrix.value().getSpeciesGenoGC(this.referenceInfoMatrix.value().getGeneSpeciesName(geneName))
-            //);
+            recaliReadCount = this.gcBiasRecaliModel.recalibrateForSingle(
+                    SequenceUtil.calculateGc(record.getReadBases()),
+                    this.geneGCMap.get(record.getReferenceName())
+            );
         }
 
         Tuple2<Integer, Double> readCount = new Tuple2<>(1, recaliReadCount);
