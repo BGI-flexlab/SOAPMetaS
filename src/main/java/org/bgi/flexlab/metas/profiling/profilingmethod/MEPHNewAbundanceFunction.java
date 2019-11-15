@@ -400,17 +400,18 @@ public class MEPHNewAbundanceFunction implements PairFlatMapFunction<Iterator<Tu
     private double computeNodeAbundance(String clade, HashMap<String, MEPHNewAbundanceFunction.CladeNode> allClades)
             throws NullPointerException {
         MEPHNewAbundanceFunction.CladeNode node = allClades.get(clade);
-        if (node.abundance != null) {
-            return node.abundance;
-        }
-        //if (node == null) {
-        //    LOG.error("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Null node error in computor function.");
-        //    //throw new NullPointerException("Clade " + clade + " has no CladeNode record.");
-        //} else {
-        //    if (node.abundance != null) {
-        //        return node.abundance;
-        //    }
+        //if (node.abundance != null) {
+        //    return node.abundance;
         //}
+        if (node == null) {
+            LOG.error("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Null node for clade: " + clade);
+            return 0.0;
+            //throw new NullPointerException("Clade " + clade + " has no CladeNode record.");
+        } else {
+            if (node.abundance != null) {
+                return node.abundance;
+            }
+        }
 
         double sumChildAbun = 0.0;
         try {
@@ -612,6 +613,9 @@ public class MEPHNewAbundanceFunction implements PairFlatMapFunction<Iterator<Tu
     }
 
     private int computeNodeNreads(String clade, MEPHNewAbundanceFunction.CladeNode node) {
+        if (node == null) {
+            return 0;
+        }
         if (clade.startsWith("s")) {
             return node.nreads;
         }

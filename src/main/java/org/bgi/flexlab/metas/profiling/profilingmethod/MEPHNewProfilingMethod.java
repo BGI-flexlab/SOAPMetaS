@@ -368,6 +368,10 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
                             }
                         }
                     }
+                    int appendC = 8 - taxIDList.size();
+                    for (int i = 1; i<=appendC; i++) {
+                        taxIDList.add("");
+                    }
                     jsonReader.endObject();
                     taxonomyInformation.add(new Tuple3<>(taxonList, genoLen, taxIDList));
 
@@ -380,7 +384,7 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
                     for (int i = 1; i < count; i++) {
                         cladeName2HighRank.put(taxonList.get(i), new Tuple2<>(highNameRank.toString().substring(3), highIDRank.toString()));
                         if (taxonList.get(i).contains("_unclassified")) {
-                            highNameRank.append('|');
+                            highNameRank.append("").append('|');
                         } else {
                             highNameRank.append(taxonList.get(i)).append('|');
                         }
@@ -408,6 +412,10 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
                                 break;
                             }
                         }
+                    }
+                    int appendC = 8 - taxIDList.size();
+                    for (int i = 1; i<=appendC; i++) {
+                        taxIDList.add("");
                     }
                     jsonReader.endObject();
                     taxonomyInformation.add(new Tuple3<>(taxonList, genoLen, taxIDList));
