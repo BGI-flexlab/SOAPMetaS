@@ -84,7 +84,7 @@ public class ProfilingNewProcessMS2 {
         this.pipeline = this.metasOpt.getProfilingPipeline();
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
         this.seqMode = this.metasOpt.getSequencingMode();
-        if (this.pipeline.equals("metaphlan")) {
+        if (this.pipeline.equals("meph")) {
             this.skipRelAbun = true;
         }
 
@@ -268,9 +268,9 @@ public class ProfilingNewProcessMS2 {
     private ProfilingMethodBase getProfilingMethod(){
         if(this.pipeline.equals("comg")){
             return new COMGProfilingMethod2(this.metasOpt, this.jscontext);
-        } else if (this.pipeline.equals("metaphlan")) {
+        } else if (this.pipeline.equals("meph")) {
             return new MEPHProfilingMethod(this.metasOpt, this.jscontext);
-        } else if (this.pipeline.equals("metaphlan2019")) {
+        } else if (this.pipeline.equals("mephn")) {
             return new MEPHNewProfilingMethod(this.metasOpt, this.jscontext);
         } else {
             return new COMGProfilingMethod2(this.metasOpt, this.jscontext);

@@ -309,7 +309,7 @@ public class MetasOptions implements Serializable {
 
         Option profilingPipe = new Option(null, "prof-pipe", true,
                 "Pipeline of profiling. Please refer " +
-                        "to doi:10.1038/nbt.2942 for more information. Option: comg, metaphlan, metaphlan2019. Default: comg");
+                        "to doi:10.1038/nbt.2942 for more information. Option: comg, meph, mephn. Default: comg");
         profilingPipe.setArgName("MODE");
         this.options.addOption(profilingPipe);
 
@@ -582,21 +582,21 @@ public class MetasOptions implements Serializable {
             this.profilingAnalysisMode = ProfilingAnalysisMode.valueOf(commandLine.getOptionValue("ana-mode", "profile").toUpperCase());
             this.profilingAnalysisLevel = ProfilingAnalysisLevel.valueOf(commandLine.getOptionValue("ana-lev", "species").toUpperCase());
             this.profilingPipeline = commandLine.getOptionValue("prof-pipe", "comg").toLowerCase();
-            if (this.profilingPipeline.toLowerCase().equals("metaphlan") && this.sequencingMode.equals(SequencingMode.PAIREDEND)){
+            if (this.profilingPipeline.toLowerCase().equals("meph") && this.sequencingMode.equals(SequencingMode.PAIREDEND)){
                 this.sequencingMode = SequencingMode.SINGLEEND;
-                LOG.warn("[SOAPMetas￿::" + MetasOptions.class.getName() + "] MetaPhlAn mode only supports Single-end (SE) sequence mode.");
+                LOG.warn("[SOAPMetas￿::" + MetasOptions.class.getName() + "] \"meph\" mode only supports Single-end (SE) sequence mode.");
             }
             this.totalNReads = Integer.parseInt(commandLine.getOptionValue("total-nreads", "0"));
 
             this.outputFormat = commandLine.getOptionValue("output-format", "other").toUpperCase();
             if (this.outputFormat.equals("CAMI")) {
-                LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] CAMI output format is only supported in metaphlan2019 profiling pipeline. Here we reset prof-pipe to \"metaphlan2019\"");
-                this.profilingPipeline = "metaphlan2019";
+                LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] CAMI output format is only supported in \"mephn\" profiling pipeline. Here we reset prof-pipe to \"mephn\"");
+                this.profilingPipeline = "mephn";
             }
 
-            if (this.profilingPipeline.toLowerCase().equals("metaphlan2019")) {
+            if (this.profilingPipeline.toLowerCase().equals("mephn")) {
                 if (this.totalNReads == 0) {
-                    LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] total-nreads must be provided in \"metaphlan2019\" prof-pipe. Here we reset its value to 1");
+                    LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] total-nreads must be provided in \"mephn\" prof-pipe. Here we reset its value to 1");
                     this.totalNReads = 1;
                 }
                 if (commandLine.hasOption("unknown-estimation")) {
@@ -627,7 +627,7 @@ public class MetasOptions implements Serializable {
                 if (this.referenceMatrixFilePath == null) {
                     throw new MissingOptionException("Missing -r (--ref-matrix) option.");
                 }
-                if (this.profilingPipeline.equals("metaphlan") && (this.mpaTaxonomyListFile == null || this.mpaMarkersListFile == null)) {
+                if (this.profilingPipeline.equals("meph") && (this.mpaTaxonomyListFile == null || this.mpaMarkersListFile == null)) {
                     throw new MissingOptionException("Missing --mpa-marker-list or --mpa-taxon-list option.");
                 }
                 if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&

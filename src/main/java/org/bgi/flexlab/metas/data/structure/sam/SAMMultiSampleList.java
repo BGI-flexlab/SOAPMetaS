@@ -5,10 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * ClassName: SAMMultiSampleList
@@ -87,6 +84,52 @@ public class SAMMultiSampleList implements Serializable {
         }
 
         reader.close();
+    }
+
+    public SAMMultiSampleList(List<String> list, boolean isLocal, boolean recordSample, boolean recordPath) throws IOException {
+        sampleIDbySampleName = new HashMap<>();
+
+        if (recordSample){
+            samPathIDMap = new HashMap<>(100);
+        }
+        if (recordPath){
+            filePath = new StringBuilder(128);
+        }
+
+        String sampleTag;
+        for (String line : list) {
+            //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample line: " + line);
+            String[] items = StringUtils.split(line, '\t');
+
+            if (items.length != 3) {
+                continue;
+            }
+
+            sampleTag = items[1];
+            if (isLocal) {
+                if (items[2].startsWith("/")) {
+                    items[2] = "file://" + items[2];
+                }
+            }
+
+            if (!sampleIDbySampleName.containsKey(sampleTag)) {
+                sampleIDbySampleName.put(sampleTag, sampleCount);
+                sampleCount++;
+            }
+
+            if (recordSample) {
+                samPathIDMap.put(items[2], sampleIDbySampleName.get(sampleTag));
+            }
+
+            //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Current sample_line info: " +
+            //        "RGID: " + items[0] + " || sampleID: " + tagSamCount.get(items[0]) + " || path: " + items[1]);
+
+            if (recordPath) {
+                this.filePath.append(items[2]);
+                this.filePath.append(',');
+                //LOG.trace("[SOAPMetas::" + SAMMultiSampleList.class.getName() + "] Save SAM record file: " + items[1]);
+            }
+        }
     }
 
     public int getSampleID(String filePath){

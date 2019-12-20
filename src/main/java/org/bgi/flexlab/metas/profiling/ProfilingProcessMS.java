@@ -323,7 +323,7 @@ public class ProfilingProcessMS {
     private ProfilingMethodBase getProfilingMethod(){
         if(this.pipeline.equals("comg")){
             return new COMGProfilingMethod(this.metasOpt, this.jscontext);
-        } else if (this.pipeline.equals("metaphlan")){
+        } else if (this.pipeline.equals("meph")){
             return new MEPHProfilingMethod(this.metasOpt, this.jscontext);
         } else {
             return new COMGProfilingMethod(this.metasOpt, this.jscontext);

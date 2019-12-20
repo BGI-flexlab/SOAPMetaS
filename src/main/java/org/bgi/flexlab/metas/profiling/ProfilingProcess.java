@@ -126,7 +126,7 @@ public class ProfilingProcess {
      * @return ProfilingMethodBase New profiling pipeline instance of selected software.
      */
     public ProfilingMethodBase getProfilingMethod(){
-        if(this.pipeline.equals("metaphlan")){
+        if(this.pipeline.equals("meph")){
             return new COMGProfilingMethod(this.metasOpt, this.jscontext);
         } else if (this.pipeline.equals("comg")){
             return new MEPHProfilingMethod(this.metasOpt, this.jscontext);
