@@ -104,7 +104,7 @@ public class DataUtils {
         return dirName + '/' + jsc.appName() + '/' + subdir;
     }*/
 
-    public static void createHDFSFolder(Configuration hadoopConf, String target) throws IOException {
+    public static void createHDFSFolder(Configuration hadoopConf, String target, boolean autoDelete) throws IOException {
 
         // Path variable
         Path outputDir = new Path(target);
@@ -120,6 +120,9 @@ public class DataUtils {
             fs.delete(outputDir, true);
             fs.mkdirs(outputDir);
             fs.setPermission(outputDir, permission);
+        }
+        if (autoDelete) {
+            fs.deleteOnExit(outputDir);
         }
 
     }

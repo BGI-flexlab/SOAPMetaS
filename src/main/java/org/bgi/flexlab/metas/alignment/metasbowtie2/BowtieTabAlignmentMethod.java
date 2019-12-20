@@ -76,6 +76,18 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         smTag = temp[1];
         temp = null;
 
+        File alnTmpDir = new File(this.tmpDir);
+        if (! (alnTmpDir.exists() && alnTmpDir.isDirectory()) ) {
+            if (alnTmpDir.mkdir()) {
+                if (!(alnTmpDir.setWritable(true, false))){
+                    LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Fail to change permission of alignment temp directory: " + this.tmpDir);
+                }
+                alnTmpDir.deleteOnExit();
+            } else {
+                LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Fail to create alignment temp directory: " + this.tmpDir);
+            }
+        }
+
         //tab5FilePath = this.tmpDir + '/' + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".tab5";
         //outSamFileName = this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".sam";
         //logFile = this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + "-alignment.log";

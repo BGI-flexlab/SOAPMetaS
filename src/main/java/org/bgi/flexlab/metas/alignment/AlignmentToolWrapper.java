@@ -1,8 +1,5 @@
 package org.bgi.flexlab.metas.alignment;
 
-import org.apache.spark.api.java.JavaSparkContext;
-import org.bgi.flexlab.metas.MetasOptions;
-import org.bgi.flexlab.metas.util.DataUtils;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
 import java.io.Serializable;

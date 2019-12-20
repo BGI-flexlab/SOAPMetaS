@@ -83,14 +83,14 @@ public class ProfilingProcessMS {
             this.tmpDir = "/tmp/" + this.jscontext.appName() + "_TEMP/profiling";
         }
         try {
-            DataUtils.createHDFSFolder(conf, "file://" + this.tmpDir);
+            DataUtils.createHDFSFolder(conf, "file://" + this.tmpDir, false);
         } catch (IOException e){
             LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling temp directory. " + e.toString());
         }
 
         this.outputHdfsDir = this.metasOpt.getProfilingOutputHdfsDir();
         try {
-            DataUtils.createHDFSFolder(conf, this.outputHdfsDir);
+            DataUtils.createHDFSFolder(conf, this.outputHdfsDir, false);
         } catch (IOException e){
             LOG.error("[SOAPMetas::" + ProfilingProcessMS.class.getName() + "] Fail to create profiling output directory. " + e.toString());
         }
