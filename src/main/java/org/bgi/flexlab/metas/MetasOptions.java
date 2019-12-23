@@ -47,7 +47,8 @@ public class MetasOptions implements Serializable {
     private String extraAlignmentArguments;
 
     private String multiSampleList;
-    private int numPartitionEachSample = 10;// Partition number of each sample. The final partition number is partNumEachSample*NumberOfSample
+    //private int numPartitionEachSample = 10;// Partition number of each sample. The final partition number is partNumEachSample*NumberOfSample
+    private int numPartition = 32;
 
     //private String alignLog;
 
@@ -148,22 +149,19 @@ public class MetasOptions implements Serializable {
         this.options.addOption("e", "extra-arg", true,
                 "Other parameters for Bowtie2. Please refer to Bowtie2 manual. All parameters should be enclosed together with quotation marks \"\"");
 
-        Option partitionPerSam = new Option("n", "partition-per-sam", true,
-                "Partition number of each sample. Default: 10\n" +
-                        "The real partition number for Spark partitioner is (sampleNumber * partition-per-sam)." +
-                        "For example, if you have 10 samples and set the para to 5, the RDD will be split to 50 partitions.");
-        partitionPerSam.setArgName("INT");
-        //partitionPerSam.setType(Integer.TYPE);
-        this.options.addOption(partitionPerSam);
+        //Option partitionPerSam = new Option("n", "partition-per-sam", true,
+        //        "Partition number of each sample. Default: 10\n" +
+        //                "The real partition number for Spark partitioner is (sampleNumber * partition-per-sam)." +
+        //                "For example, if you have 10 samples and set the para to 5, the RDD will be split to 50 partitions.");
+        //partitionPerSam.setArgName("INT");
+        ////partitionPerSam.setType(Integer.TYPE);
+        //this.options.addOption(partitionPerSam);
 
-        //this.options.addOption(Option.builder("n").longOpt("partition-per-sam")
-        //        .desc("Partition number of each sample. Default: 10\n" +
-        //        "The real partition number for Spark partitioner is (sampleNumber * partition-per-sam)." +
-        //        "For example, if you have 10 samples and set the para to 5, the RDD will be split to 50 partitions.")
-        //        .argName("INT")
-        //        .required(false)
-        //        .type(Integer.TYPE)
-        //        .build());
+        Option partitionNumber = new Option("n", "partition-num", true,
+                "Partition number. Default: 32\n" +
+                        "The partition number for Spark partitioner.");
+        partitionNumber.setArgName("INT");
+        this.options.addOption(partitionNumber);
 
         OptionGroup inputSampleGroup = new OptionGroup();
         Option multiFqSampleListOpt = new Option("i", "multi-sample-list", true,
@@ -369,7 +367,7 @@ public class MetasOptions implements Serializable {
         //this.options.addOption(null, "prof-out-dir", true, "Output directory of profiling results. Default is output-dir/profiling.")
 
         Option local = new Option(null, "local", false,
-                "Input fastq/SAM files are considered to be in local file system. By default, fastq/SAM file paths are considered to be in HDFS by default.");
+                "Input fastq/SAM files are stored in local file system. By default, fastq/SAM file paths are treated as HDFS format.");
         this.options.addOption(local);
 
         /*
@@ -464,7 +462,8 @@ public class MetasOptions implements Serializable {
             }
 
             this.extraAlignmentArguments = commandLine.getOptionValue('e', "--very-sensitive --no-unal");
-            this.numPartitionEachSample = Integer.parseInt(commandLine.getOptionValue('n', "10"));
+            //this.numPartitionEachSample = Integer.parseInt(commandLine.getOptionValue('n', "10"));
+            this.numPartition = Integer.parseInt(commandLine.getOptionValue('n', "32"));
 
             if (commandLine.hasOption("merge-sam-sample")){
                 this.mergeSamBySample = true;
@@ -860,7 +859,7 @@ public class MetasOptions implements Serializable {
     }
 
     public int getPartitionNumber() {
-        return Math.abs(this.numPartitionEachSample);
+        return Math.abs(this.numPartition);
     }
 
     public boolean isSortFastqReads() {
@@ -891,9 +890,9 @@ public class MetasOptions implements Serializable {
         return multiSampleList;
     }
 
-    public int getNumPartitionEachSample() {
-        return Math.abs(numPartitionEachSample);
-    }
+    //public int getNumPartitionEachSample() {
+    //    return Math.abs(numPartitionEachSample);
+    //}
 
     public String getReadGroupID() {
         return readGroupID;

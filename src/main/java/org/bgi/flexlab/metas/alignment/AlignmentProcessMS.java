@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
+import org.apache.spark.HashPartitioner;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -44,7 +45,7 @@ public class AlignmentProcessMS {
     private MetasOptions options;// *Changes: original is options for BWA.
 
     private FastqMultiSampleList fastqMultiSampleList;
-    private int numPartitionEachSample = 1;
+    private int numPartition = 32;
     private SequencingMode seqMode;
 
     /**
@@ -83,7 +84,7 @@ public class AlignmentProcessMS {
 
         this.seqMode = this.options.getSequencingMode();
 
-        this.numPartitionEachSample = Math.max(this.options.getNumPartitionEachSample(), 1);
+        this.numPartition = Math.max(this.options.getPartitionNumber(), 1);
 
         //String samOutputHdfsDir = this.options.getSamOutputHdfsDir();
 
@@ -113,9 +114,8 @@ public class AlignmentProcessMS {
     private JavaPairRDD<String, String> handleMultiSampleReads(){
 
         // Add one more partition for files without sample information.
-        int numPartition = this.numPartitionEachSample * this.fastqMultiSampleList.getSampleCount() + 1;
-        SampleIDReadNamePartitioner samplePartitioner = new SampleIDReadNamePartitioner(numPartition,
-                this.numPartitionEachSample);
+        HashPartitioner samplePartitioner = new HashPartitioner(this.numPartition);
+        //SampleIDReadNamePartitioner samplePartitioner = new SampleIDReadNamePartitioner(numPartition, this.numPartitionEachSample);
 
         String filePath = this.fastqMultiSampleList.getAllFastqPath();
         LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Read multi-sample reads in. " +
@@ -271,9 +271,9 @@ public class AlignmentProcessMS {
     private JavaPairRDD<String, String> handleSingleEndReads(){
 
         // Add one more partition for files without sample information.
-        int numPartition = this.numPartitionEachSample * this.fastqMultiSampleList.getSampleCount() + 1;
-        SampleIDReadNamePartitioner sampleIDPartitioner = new SampleIDReadNamePartitioner(numPartition,
-                this.numPartitionEachSample);
+        HashPartitioner samplePartitioner = new HashPartitioner(this.numPartition);
+        //int numPartition = this.numPartitionEachSample * this.fastqMultiSampleList.getSampleCount() + 1;
+        //SampleIDReadNamePartitioner sampleIDPartitioner = new SampleIDReadNamePartitioner(numPartition, this.numPartitionEachSample);
 
         String filePath = this.fastqMultiSampleList.getAllFastqPath();
         LOG.debug("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Read multi-sample reads in. " +
@@ -296,7 +296,7 @@ public class AlignmentProcessMS {
                 .newAPIHadoopFile(filePath, MetasSEFastqInputFormat.class,
                         Text.class, Text.class, this.jscontext.hadoopConfiguration())
                 .mapToPair(rec -> new Tuple2<>(rec._1.toString(), rec._2.toString()))
-                .partitionBy(sampleIDPartitioner)
+                .partitionBy(samplePartitioner)
                 .mapToPair(rec -> {
                     String[] keys =  StringUtils.split(rec._1, '\t');
                     String[] values = StringUtils.split(rec._2, "||");

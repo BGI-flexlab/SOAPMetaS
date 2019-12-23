@@ -51,7 +51,8 @@ public class ProfilingNewProcessMS2 {
     private SequencingMode seqMode;
 
     private SAMMultiSampleList samMultiSampleList; //需要简化
-    private int numPartitionEachSample;
+    //private int numPartitionEachSample;
+    private int numPartition;
 
     private boolean doIdentityFiltering = false;
     private MetasSAMRecordIdentityFilter identityFilter;
@@ -79,7 +80,7 @@ public class ProfilingNewProcessMS2 {
 
     private void processConstruct(){
 
-        this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartitionEachSample(), 1);
+        this.numPartition = Math.max(this.metasOpt.getPartitionNumber(), 1);
 
         this.pipeline = this.metasOpt.getProfilingPipeline();
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
