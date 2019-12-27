@@ -6,7 +6,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.spark.HashPartitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.storage.StorageLevel;
@@ -55,8 +54,7 @@ public class ProfilingNewProcessMS {
     private SequencingMode seqMode;
 
     private SAMMultiSampleList samMultiSampleList;
-    //private int numPartitionEachSample;
-    private int numPartition;
+    private int numPartitionEachSample;
 
     private boolean doIdentityFiltering = false;
     private boolean doAlignLenFiltering = false;
@@ -74,7 +72,7 @@ public class ProfilingNewProcessMS {
 
     private void processConstruct(){
 
-        this.numPartition = Math.max(this.metasOpt.getPartitionNumber(), 1);
+        this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartitionEachSample(), 1);
 
         this.pipeline = this.metasOpt.getProfilingPipeline();
         this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
@@ -165,15 +163,13 @@ public class ProfilingNewProcessMS {
         String filePath = this.samMultiSampleList.getAllSAMFilePath();
 
         // Add one more partition for files without sample information.
-        //int numPartition = this.numPartitionEachSample * sampleCount + 1;
-        //SampleIDReadNamePartitioner sampleIDClusterNamePartitioner = new SampleIDReadNamePartitioner(numPartition, this.numPartitionEachSample);
-        HashPartitioner sampleIDClusterNamePartitioner = new HashPartitioner(this.numPartition);
+        int numPartition = this.numPartitionEachSample * sampleCount + 1;
+        SampleIDReadNamePartitioner sampleIDClusterNamePartitioner = new SampleIDReadNamePartitioner(numPartition,
+                this.numPartitionEachSample);
         SampleIDPartitioner sampleIDPartitioner = new SampleIDPartitioner(sampleCount + 1);
-        //LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] SampleCount: " + sampleCount +
-        //        " Partition each sample: " + this.numPartitionEachSample + " Total Partition Number: " + numPartition);
-
         LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] SampleCount: " + sampleCount +
-                " Total Partition Number: " + this.numPartition);
+                " Partition each sample: " + this.numPartitionEachSample + " Total Partition Number: " + numPartition);
+
         //LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] All input sam file paths: " + filePath);
 
 
