@@ -91,7 +91,7 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
 
         // System.err.println("split:" + split.getPath().toString());
         String sampleListPath = jobConf.get("metas.data.mapreduce.input.fqsamplelist");
-        LOG.trace("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Sample list file (in hadoop conf): " + sampleListPath);
+        LOG.info("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Sample list file (in hadoop conf): " + sampleListPath);
         if (sampleListPath != null && !sampleListPath.equals("")) {
             FastqMultiSampleList fastqMultiSampleList = new FastqMultiSampleList(sampleListPath, true, true, false);
             FastqSampleList slist = null;
@@ -99,7 +99,7 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
             ArrayList<FastqSampleList> sampleIter = fastqMultiSampleList.getSampleList();
 
             for (FastqSampleList sample: sampleIter){
-                //LOG.trace("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Sample check for split. Split file: " +
+                //LOG.info("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Sample check for split. Split file: " +
                 //        fqName + " . Current sample in loop: " + sample.toString());
                 if (sample.getFastq1().contains(fqName)){
                     slist = sample;
@@ -119,7 +119,7 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
                 readGroupID = slist.getRgID();
                 smTag = slist.getSMTag();
             } else {
-                LOG.fatal("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Please provide multisample " +
+                LOG.error("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Please provide multisample " +
                         "information for " + file.toString() + " . Or the processing may be uncontrollable.");
                 sampleID = fastqMultiSampleList.getSampleCount() + 1;
                 smTag = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
@@ -127,13 +127,14 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
                 //mate = 1;
             }
         } else {
-            LOG.fatal("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Please provide multisample " +
+            LOG.error("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Please provide multisample " +
                     "information list, or the processing may be uncontrollable.");
             sampleID = 1;
             smTag = file.getName().replaceFirst("((\\.fq)|(\\.fastq))$", "");
             readGroupID = "NORGID";
             //mate = 1;
         }
+        //LOG.info("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Finish obtaining sampleID and sampleTag: sampleID: " + sampleID + " | sample Tag: " + smTag + " | file: " + fileSplit.getPath().getName());
 
         // open the file and seek to the start of the split
         FSDataInputStream fileIn = fs.open(fileSplit.getPath());
@@ -167,6 +168,9 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
         }
         getFirstFastqLine();
         this.pos = start;
+
+        //LOG.info("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Finish creating lineReader for sampleID: " + sampleID + " | sample Tag: " + smTag);
+
     }
 
     /**

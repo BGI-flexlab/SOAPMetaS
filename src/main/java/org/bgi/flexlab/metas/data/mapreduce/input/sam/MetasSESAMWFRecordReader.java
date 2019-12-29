@@ -77,6 +77,8 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
         String samSampleListPath = conf.get("metas.data.mapreduce.input.samsamplelist");
         //LOG.trace("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] SAM sample list configure metas.data.mapreduce.input.samsamplelist is " + samSampleListPath);
 
+        // TODO: 这里的recordreader在各个node中调用，因此读取samSampleList文件de时候依然依赖共享存储，后续需要解决这个问题
+        // WARN: 这里的recordreader在各个node中调用，因此读取samSampleList文件de时候依然依赖共享存储，后续需要解决这个问题
         if (samSampleListPath != null && !samSampleListPath.equals("")) {
             SAMMultiSampleList samMultiSampleList = new SAMMultiSampleList(samSampleListPath,
                     true, true, false);

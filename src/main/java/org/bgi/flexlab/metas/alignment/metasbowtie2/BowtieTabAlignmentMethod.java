@@ -82,7 +82,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
                 if (!(alnTmpDir.setWritable(true, false))){
                     LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Fail to change permission of alignment temp directory: " + this.tmpDir);
                 }
-                alnTmpDir.deleteOnExit();
+                //alnTmpDir.deleteOnExit();
             } else {
                 LOG.error("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Fail to create alignment temp directory: " + this.tmpDir);
             }
@@ -93,16 +93,10 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         //logFile = this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + "-alignment.log";
 
         // Set writable and deleteOnExit so that files can be deleted by group accounts if the Application is interrupted.
-        File outSamFile = new File(this.tmpDir + "/" + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".sam");
-        outSamFile.setWritable(true, false);
-        outSamFile.deleteOnExit();
+        File outSamFile = new File(this.tmpDir + '/' + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".sam");
         File logFile = new File(this.tmpDir + '/' + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + "-alignment.log");
-        logFile.setWritable(true, false);
-        logFile.deleteOnExit();
-
         File tab5File = new File(this.tmpDir + '/' + this.appId + "-SOAPMetas-RDDPart" + index + "-RG_" + readGroupID + "-SM_" + smTag + ".tab5");
-        tab5File.setWritable(true, false);
-        tab5File.deleteOnExit();
+
         FileOutputStream fos1;
         BufferedWriter bw1;
 
