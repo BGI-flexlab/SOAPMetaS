@@ -38,6 +38,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
     private double quantile = 0.1;
     private int minNucLen = 2000;
     private String taxaLevel = "a__";
+    private String outFormat;
     private ArrayList<String> kingdomList;
 
     /**
@@ -64,6 +65,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
 
         this.doDisqm = options.isDoDisqm();
         this.statType = options.getStatType();
+        this.outFormat = options.getOutputFormat();
 
         // MetaPhlAn2 2018 database:
         // markers2clades/exts/lens: 1035649
@@ -616,7 +618,13 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         //} else {
         //
         //}
-        resultRecord = new ProfilingResultRecord();
+        if (outFormat.equals("CAMI")) {
+            resultRecord = new ProfilingResultRecord(8);
+        } else if (outFormat.equals("DETAILED")) {
+            resultRecord = new ProfilingResultRecord(4);
+        } else {
+            resultRecord = new ProfilingResultRecord(2);
+        }
 
         resultRecord.setClusterName(clusterName);
 

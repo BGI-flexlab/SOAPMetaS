@@ -101,6 +101,7 @@ public class SOAPMetas {
             //ProfilingProcess
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing profiling process.");
             ProfilingNewProcessMS2 profilingMS = new ProfilingNewProcessMS2(metasOptions, jsc);
+            //ProfilingNewProcessMS profilingMS = new ProfilingNewProcessMS(metasOptions, jsc);
             // Output list format:
             // outputHDFSDir/profiling/<appID>-Profiling-<readGroupID>.abundance[.evaluation]
             if (alignmentOutputList != null) {

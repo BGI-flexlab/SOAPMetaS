@@ -686,6 +686,8 @@ public class MEPHNewAbundanceFunction implements PairFlatMapFunction<Iterator<Tu
         //}
         if (outFormat.equals("CAMI")) {
             resultRecord = new ProfilingResultRecord(8);
+        } else if (outFormat.equals("DETAILED")) {
+            resultRecord = new ProfilingResultRecord(4);
         } else {
             resultRecord = new ProfilingResultRecord(2);
         }

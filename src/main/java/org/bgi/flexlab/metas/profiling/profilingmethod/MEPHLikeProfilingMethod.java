@@ -26,17 +26,17 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * ClassName: METAPHLANProfilingMethod
+ * ClassName: MEPHLikeProfilingMethod
  * Description:
  *
  * @author: heshixu@genomics.cn
  */
 
-public class METAPHLANProfilingMethod extends ProfilingMethodBase implements Serializable{
+public class MEPHLikeProfilingMethod extends ProfilingMethodBase implements Serializable{
 
     public static final long serialVersionUID = 1L;
 
-    private static final Logger LOG = LogManager.getLogger(METAPHLANProfilingMethod.class);
+    private static final Logger LOG = LogManager.getLogger(MEPHLikeProfilingMethod.class);
 
     //private MetasSAMRecordInsertSizeFilter insertSizeFilter;
 
@@ -50,7 +50,7 @@ public class METAPHLANProfilingMethod extends ProfilingMethodBase implements Ser
 
     private double quantile = 0.1;
 
-    public METAPHLANProfilingMethod(MetasOptions options, JavaSparkContext jsc) {
+    public MEPHLikeProfilingMethod(MetasOptions options, JavaSparkContext jsc) {
 
         super(options, jsc);
 
@@ -60,12 +60,12 @@ public class METAPHLANProfilingMethod extends ProfilingMethodBase implements Ser
         this.doGCRecalibration = options.isDoGcBiasRecalibration();
 
         if (this.doGCRecalibration) {
-            LOG.info("[SOAPMetas::" + METAPHLANProfilingMethod.class.getName() + "] Do GC recalibration.");
+            LOG.info("[SOAPMetas::" + MEPHLikeProfilingMethod.class.getName() + "] Do GC recalibration.");
             this.gcBiasRecaliModel = new GCBiasModelFactory(options.getGcBiasRecaliModelType(),
                     options.getGcBiasModelInput()).getGCBiasRecaliModel();
             //this.gcBiasRecaliModel.outputCoefficients(options.getProfilingOutputHdfsDir() + "/builtin_model.json");
         } else {
-            LOG.info("[SOAPMetas::" + METAPHLANProfilingMethod.class.getName() + "] Skip GC recalibration.");
+            LOG.info("[SOAPMetas::" + MEPHLikeProfilingMethod.class.getName() + "] Skip GC recalibration.");
 
         }
         //final ReferenceInfoMatrix refMatrix = new ReferenceInfoMatrix(this.metasOpt.getReferenceMatrixFilePath(), this.metasOpt.getSpeciesGenomeGCFilePath());

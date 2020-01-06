@@ -88,7 +88,7 @@ public class MetasOptions implements Serializable {
     private int statType = 8;
     private int totalNReads = 0;
     private boolean ignoreUnknown = true;
-    private String outputFormat = "other";
+    private String outputFormat = "DEFAULT";
     private String mpaMarkersListFile;
     private String mpaTaxonomyListFile;
     private String mpaExcludeMarkersFile;
@@ -322,7 +322,7 @@ public class MetasOptions implements Serializable {
         this.options.addOption(null, "unknown-estimation", false,
                 "Switch option. If set, the unmapped reads and reads mapped to unknown clade will be considered.");
         this.options.addOption(null, "output-format", true,
-                "Output profiling file format. Options: CAMI, (others). Default: (legacy MetaPhlAn2 format).");
+                "Output profiling file format. Options: CAMI, DETAILED, DEFAULT. Default: DEFAULT(legacy MetaPhlAn2 format).");
 
         /*
         IO files/directory arguments.
@@ -588,7 +588,7 @@ public class MetasOptions implements Serializable {
             }
             this.totalNReads = Integer.parseInt(commandLine.getOptionValue("total-nreads", "0"));
 
-            this.outputFormat = commandLine.getOptionValue("output-format", "other").toUpperCase();
+            this.outputFormat = commandLine.getOptionValue("output-format", "DEFAULT").toUpperCase();
             if (this.outputFormat.equals("CAMI")) {
                 LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] CAMI output format is only supported in \"mephn\" profiling pipeline. Here we reset prof-pipe to \"mephn\"");
                 this.profilingPipeline = "mephn";
