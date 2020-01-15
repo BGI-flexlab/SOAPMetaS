@@ -30,7 +30,7 @@ public abstract class ProfilingMethodBase implements Serializable {
     protected ProfilingAnalysisMode profilingAnalysisMode;
     protected ProfilingAnalysisLevel profilingAnalysisLevel;
     protected SequencingMode sequencingMode;
-
+    protected String outputFormat;
 
     protected HashMap<String, Integer> sampleIDbySampleName = null;
 
@@ -39,6 +39,7 @@ public abstract class ProfilingMethodBase implements Serializable {
         this.profilingAnalysisMode = options.getProfilingAnalysisMode();
         this.profilingAnalysisLevel = options.getProfilingAnalysisLevel();
         this.sequencingMode = options.getSequencingMode();
+        this.outputFormat = options.getOutputFormat();
     }
 
     /**

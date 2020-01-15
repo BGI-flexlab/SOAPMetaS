@@ -148,7 +148,14 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
         //} else {
         //
         //}
-        resultRecord = new ProfilingResultRecord();
+
+        if (this.outputFormat.equals("CAMI")) {
+            resultRecord = new ProfilingResultRecord(8);
+        } else if (this.outputFormat.equals("DETAILED")) {
+            resultRecord = new ProfilingResultRecord(4);
+        } else {
+            resultRecord = new ProfilingResultRecord(2);
+        }
 
         resultRecord.setClusterName(clusterName);
 

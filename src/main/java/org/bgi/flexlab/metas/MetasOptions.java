@@ -290,7 +290,7 @@ public class MetasOptions implements Serializable {
         Option sequenceMode = new Option(null, "seq-mode", true,
                 "Sequence data type. \"pe\" for pair-end, \"se\" for single-end.");
         sequenceMode.setArgName("MODE");
-        sequenceMode.setRequired(true);
+        sequenceMode.setRequired(false);
         this.options.addOption(sequenceMode);
 
         Option analysisMode = new Option(null, "ana-mode", true,
@@ -578,7 +578,7 @@ public class MetasOptions implements Serializable {
             /*
             Profiling analysis arguments parsing.
              */
-            this.sequencingMode = SequencingMode.getValue(commandLine.getOptionValue("seq-mode").toUpperCase());
+            this.sequencingMode = SequencingMode.getValue(commandLine.getOptionValue("seq-mode", "se").toUpperCase());
             this.profilingAnalysisMode = ProfilingAnalysisMode.valueOf(commandLine.getOptionValue("ana-mode", "profile").toUpperCase());
             this.profilingAnalysisLevel = ProfilingAnalysisLevel.valueOf(commandLine.getOptionValue("ana-lev", "species").toUpperCase());
             this.profilingPipeline = commandLine.getOptionValue("prof-pipe", "comg").toLowerCase();

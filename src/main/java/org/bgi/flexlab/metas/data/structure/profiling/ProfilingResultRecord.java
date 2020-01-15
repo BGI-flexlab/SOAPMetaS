@@ -136,18 +136,18 @@ public class ProfilingResultRecord implements Serializable {
         // 4: detailed relative abundance
         // 8: CAMI format
         StringBuilder builder = new StringBuilder(64);
-        if ((outType & 2) > 0) {
+        if (outType == 2) {
             return builder.append(this.getClusterName()).append('\t')
-                    .append(String.format("%.2f", this.getRelAbun()))
+                    .append(this.getRelAbun())
                     .toString();
-        } else if ((outType & 4) > 0) {
+        } else if (outType == 4) {
             return builder.append(this.getClusterName())
                     .append('\t').append(this.getRawReadCount()).append('\t')
                     .append(this.getrecaliReadCount()).append('\t')
                     .append(this.getAbundance()).append('\t')
-                    .append(String.format("%.2f", this.getRelAbun()))
+                    .append(this.getRelAbun())
                     .toString();
-        } else if ((outType & 8) > 0) {
+        } else if (outType == 8) {
             return builder.append(this.getTermTaxID()).append('\t')
                     .append(this.getRank()).append('\t')
                     .append(this.getTaxPath()).append('\t')
@@ -156,7 +156,7 @@ public class ProfilingResultRecord implements Serializable {
                     .toString();
         } else {
             return builder.append(this.getClusterName()).append('\t')
-                    .append(String.format("%.2f", this.getRelAbun()))
+                    .append(this.getRelAbun())
                     .toString();
         }
 

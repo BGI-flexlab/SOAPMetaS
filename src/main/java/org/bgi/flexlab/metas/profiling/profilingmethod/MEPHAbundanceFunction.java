@@ -66,6 +66,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         this.doDisqm = options.isDoDisqm();
         this.statType = options.getStatType();
         this.outFormat = options.getOutputFormat();
+        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Output format is " + this.outFormat);
 
         // MetaPhlAn2 2018 database:
         // markers2clades/exts/lens: 1035649
