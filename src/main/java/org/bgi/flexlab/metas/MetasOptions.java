@@ -322,7 +322,10 @@ public class MetasOptions implements Serializable {
         this.options.addOption(null, "unknown-estimation", false,
                 "Switch option. If set, the unmapped reads and reads mapped to unknown clade will be considered.");
         this.options.addOption(null, "output-format", true,
-                "Output profiling file format. Options: CAMI, DETAILED, DEFAULT. Default: DEFAULT(legacy MetaPhlAn2 format).");
+                "Output profiling file format. Options: CAMI, DETAILED, DEFAULT. Default: DEFAULT(legacy MetaPhlAn2 format).\n" +
+                        "\t\tDEFAULT: clusterName\trel_abun\n" +
+                        "\t\tDETAILED: clusterName\traw_read_count\trecali_read_count\tabundance\trel_abun\n" +
+                        "\t\tCAMI: taxID\ttaxRank\ttaxPath\ttaxName\trel_abun\n");
 
         /*
         IO files/directory arguments.

@@ -24,7 +24,7 @@ import org.bgi.flexlab.metas.profiling.profilingmethod.MEPHNewProfilingMethod;
 import org.bgi.flexlab.metas.profiling.profilingmethod.MEPHProfilingMethod;
 import org.bgi.flexlab.metas.profiling.profilingmethod.ProfilingMethodBase;
 import org.bgi.flexlab.metas.util.DataUtils;
-import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
+//import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
 import java.io.*;
@@ -47,7 +47,7 @@ public class ProfilingNewProcessMS2 {
     private JavaSparkContext jscontext;
 
     private String pipeline;
-    private ProfilingAnalysisMode analysisMode;
+    //private ProfilingAnalysisMode analysisMode;
     private SequencingMode seqMode;
 
     private SAMMultiSampleList samMultiSampleList; //需要简化
@@ -82,7 +82,7 @@ public class ProfilingNewProcessMS2 {
         this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartitionEachSample(), 1);
 
         this.pipeline = this.metasOpt.getProfilingPipeline();
-        this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
+        //this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
         this.seqMode = this.metasOpt.getSequencingMode();
         if (this.pipeline.equals("meph")) {
             this.skipRelAbun = true;

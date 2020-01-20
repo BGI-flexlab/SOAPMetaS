@@ -58,7 +58,7 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
     public COMGProfilingMethod2(MetasOptions options, JavaSparkContext jsc) {
         super(options, jsc);
 
-        this.profilingAnalysisMode = options.getProfilingAnalysisMode();
+        //this.profilingAnalysisMode = options.getProfilingAnalysisMode();
 
         this.doGCRecalibration = options.isDoGcBiasRecalibration();
 

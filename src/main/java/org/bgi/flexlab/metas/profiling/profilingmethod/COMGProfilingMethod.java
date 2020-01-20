@@ -59,7 +59,7 @@ public final class COMGProfilingMethod extends ProfilingMethodBase implements Se
 
         super(options, jsc);
 
-        this.profilingAnalysisMode = options.getProfilingAnalysisMode();
+        //this.profilingAnalysisMode = options.getProfilingAnalysisMode();
 
         this.doInsRecalibration = options.isDoInsRecalibration();
         this.doGCRecalibration = options.isDoGcBiasRecalibration();

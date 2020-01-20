@@ -10,7 +10,7 @@ import org.bgi.flexlab.metas.profiling.filter.MetasSAMRecordIdentityFilter;
 import org.bgi.flexlab.metas.profiling.profilingmethod.COMGProfilingMethod;
 import org.bgi.flexlab.metas.profiling.profilingmethod.MEPHProfilingMethod;
 import org.bgi.flexlab.metas.profiling.profilingmethod.ProfilingMethodBase;
-import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
+//import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 
@@ -28,7 +28,7 @@ public class ProfilingProcess {
     private JavaSparkContext jscontext;
 
     private SequencingMode seqMode;
-    private ProfilingAnalysisMode analysisMode;
+    //private ProfilingAnalysisMode analysisMode;
     private String pipeline;
 
     private ProfilingUtils pUtil;
@@ -46,7 +46,7 @@ public class ProfilingProcess {
     private void processInitialize(){
 
         this.seqMode = this.metasOpt.getSequencingMode();
-        this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
+        //this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
         this.pipeline = this.metasOpt.getProfilingPipeline();
 
         this.pUtil = new ProfilingUtils(this.metasOpt);

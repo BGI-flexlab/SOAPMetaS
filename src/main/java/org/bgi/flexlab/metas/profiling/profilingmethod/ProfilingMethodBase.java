@@ -9,7 +9,7 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.data.structure.profiling.ProfilingResultRecord;
 import org.bgi.flexlab.metas.data.structure.sam.MetasSAMPairRecord;
 import org.bgi.flexlab.metas.util.ProfilingAnalysisLevel;
-import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
+//import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 
 import java.io.Serializable;
@@ -27,7 +27,7 @@ public abstract class ProfilingMethodBase implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    protected ProfilingAnalysisMode profilingAnalysisMode;
+    //protected ProfilingAnalysisMode profilingAnalysisMode;
     protected ProfilingAnalysisLevel profilingAnalysisLevel;
     protected SequencingMode sequencingMode;
     protected String outputFormat;
@@ -36,7 +36,7 @@ public abstract class ProfilingMethodBase implements Serializable {
 
 
     public ProfilingMethodBase(final MetasOptions options, final JavaSparkContext jsc){
-        this.profilingAnalysisMode = options.getProfilingAnalysisMode();
+        //this.profilingAnalysisMode = options.getProfilingAnalysisMode();
         this.profilingAnalysisLevel = options.getProfilingAnalysisLevel();
         this.sequencingMode = options.getSequencingMode();
         this.outputFormat = options.getOutputFormat();

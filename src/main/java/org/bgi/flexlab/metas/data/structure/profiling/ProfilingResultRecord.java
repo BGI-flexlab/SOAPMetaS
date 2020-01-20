@@ -30,9 +30,9 @@ public class ProfilingResultRecord implements Serializable {
     public ProfilingResultRecord(){}
 
     public ProfilingResultRecord(int outType){
-        // 2: relative abundance only
-        // 4: detailed relative abundance
-        // 8: CAMI format
+        // 2: DEFAULT: relative abundance only
+        // 4: DETAILED: detailed relative abundance
+        // 8: CAMI
         this.outType = outType;
     }
 
@@ -132,9 +132,9 @@ public class ProfilingResultRecord implements Serializable {
     public String toString() {
         //return this.getClusterName() + '\t' + this.getRelAbun();
         // Return type:
-        // 2: relative abundance only
-        // 4: detailed relative abundance
-        // 8: CAMI format
+        // 2: DEFAULT: relative abundance only
+        // 4: DETAILED: detailed relative abundance
+        // 8: CAMI
         StringBuilder builder = new StringBuilder(64);
         if (outType == 2) {
             return builder.append(this.getClusterName()).append('\t')

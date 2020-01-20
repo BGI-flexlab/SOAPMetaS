@@ -26,7 +26,7 @@ import org.bgi.flexlab.metas.profiling.profilingmethod.COMGProfilingMethod;
 import org.bgi.flexlab.metas.profiling.profilingmethod.MEPHLikeProfilingMethod;
 import org.bgi.flexlab.metas.profiling.profilingmethod.ProfilingMethodBase;
 import org.bgi.flexlab.metas.util.DataUtils;
-import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
+//import org.bgi.flexlab.metas.util.ProfilingAnalysisMode;
 import org.bgi.flexlab.metas.util.SequencingMode;
 import scala.Tuple2;
 
@@ -50,7 +50,7 @@ public class ProfilingNewProcessMS {
     private JavaSparkContext jscontext;
 
     private String pipeline;
-    private ProfilingAnalysisMode analysisMode;
+    //private ProfilingAnalysisMode analysisMode;
     private SequencingMode seqMode;
 
     private SAMMultiSampleList samMultiSampleList;
@@ -75,7 +75,7 @@ public class ProfilingNewProcessMS {
         this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartitionEachSample(), 1);
 
         this.pipeline = this.metasOpt.getProfilingPipeline();
-        this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
+        //this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
         this.seqMode = this.metasOpt.getSequencingMode();
 
         this.doIdentityFiltering = this.metasOpt.isDoIdentityFiltering();
