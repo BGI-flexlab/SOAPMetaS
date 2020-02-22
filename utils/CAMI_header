@@ -1,0 +1,7 @@
+# Taxonomic Profiling Output
+@SampleID:
+@Version:0.9.3
+@Ranks:superkingdom|phylum|class|order|family|genus|species|strain
+@TaxonomyID:ncbi-taxonomy_2019.08.06
+@__program__:
+@@TAXID RANK    TAXPATH TAXPATHSN       PERCENTAGE

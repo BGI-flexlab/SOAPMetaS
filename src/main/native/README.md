@@ -1,5 +1,7 @@
 # JNI script compilation
 
+The file records all attempts to build bowtie2\_align library for SOAPMetaS JNI call.
+
 ## Test on hadoop server
 
 Here is the first "semi-successful" compiling command.
