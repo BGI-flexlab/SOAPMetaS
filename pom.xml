@@ -12,7 +12,7 @@
 
     <groupId>org.bgi.flexlab.metas</groupId>
     <artifactId>SOAPMetas</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
 
     <dependencies>
         <!-- Other Utilities -->
