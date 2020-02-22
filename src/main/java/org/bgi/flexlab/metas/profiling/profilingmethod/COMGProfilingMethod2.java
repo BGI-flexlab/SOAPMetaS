@@ -103,7 +103,6 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
         if(referenceInfoMatrix == null){
             referenceInfoMatrix = ctx.broadcast(new ReferenceInfoMatrix(referenceMatrixFilePath, speciesGenomeGCFilePath));
         }
-
         LOG.info("[SOAPMetas::" + COMGProfilingMethod2.class.getName() + "] Start COMG Profiling.");
 //        samRecord.getStringAttribute("RG")
 
