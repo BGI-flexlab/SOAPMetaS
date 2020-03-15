@@ -70,6 +70,8 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         element = elementIter.next();
         partRGSM = element._1;
 
+        //LOG.debug("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] key: " + element._1 + " || value: " + element._2);
+
         String[] temp;
         temp = StringUtils.split(partRGSM, '\t');
         readGroupID = temp[0];
@@ -112,6 +114,8 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
 
             while (elementIter.hasNext()) {
                 element = elementIter.next();
+                //LOG.debug("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] key: " + element._1 + " || value: " + element._2);
+
 
                 if (!element._1.equals(partRGSM)) {
                     LOG.warn("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] RG:" + readGroupID +
@@ -134,7 +138,10 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
             returnedValues = this.runMultiSampleAlignment(readGroupID, smTag, tab5File, outSamFile, logFile);
 
             // Delete the temporary file, as results have been copied to the specified output directory
-            if (tab5File.delete()) {
+            if (this.toolWrapper.isRetainTemp()) {
+                LOG.debug("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Retain temp tab5 " +
+                        "file: " + tab5File.getAbsolutePath());
+            } else if (tab5File.delete()) {
                 LOG.debug("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Delete temp tab5 " +
                         "file: " + tab5File.getAbsolutePath());
             } else {

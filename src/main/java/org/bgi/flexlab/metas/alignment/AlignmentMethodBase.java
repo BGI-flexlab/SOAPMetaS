@@ -48,7 +48,7 @@ public class AlignmentMethodBase implements Serializable {
         this.tmpDir = this.toolWrapper.getAlnTmpDir();
         this.outDir = this.toolWrapper.getOutputHdfsDir();
 
-        this.LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName);
+        LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName);
     }
 
     /**
@@ -83,25 +83,34 @@ public class AlignmentMethodBase implements Serializable {
     public ArrayList<String> copyResults(String outSamFileName, String alnLogFileName, String readGroupID, String smTag) {
         ArrayList<String> returnedValues = new ArrayList<>(2);
 
+        boolean deleteSrc = ! this.toolWrapper.isRetainTemp();
+
         LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
                 this.appName + " Copy output sam files to output directory.");
         String hdfsSamPath = this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName;
-
+        Configuration conf = new Configuration();
+        FileSystem fs;
         try {
             //if (outputDir.startsWith("hdfs")) {
-            Configuration conf = new Configuration();
-            FileSystem fs = FileSystem.get(conf);
+            fs = FileSystem.get(conf);
 
-            fs.copyFromLocalFile(true, true,
+            fs.copyFromLocalFile(deleteSrc, true,
                     new Path(this.toolWrapper.getOutputFile()),
                     new Path(hdfsSamPath)
             );
+        } catch (IOException e) {
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Original alignment result file: "
+                    + this.toolWrapper.getOutputFile() + ". " + e.toString());
+        }
 
-            fs.copyFromLocalFile(true, true,
+        try {
+            fs = FileSystem.get(conf);
+
+            fs.copyFromLocalFile(deleteSrc, true,
                     new Path(this.toolWrapper.getAlnLog()),
                     new Path(this.toolWrapper.getOutputHdfsDir() + "/" + alnLogFileName));
         } catch (IOException e) {
-            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Original alignment result file: "
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Original alignment log file: "
                     + this.toolWrapper.getOutputFile() + ". " + e.toString());
         }
 

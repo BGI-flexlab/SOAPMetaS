@@ -43,6 +43,7 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
 
         this.isShortIndex = options.isAlignmentShortIndex();
         this.extraArguments = options.getExtraAlignmentArguments();
+        this.setRetainTemp(options.isRetainTemp());
 
         Configuration conf = jsc.hadoopConfiguration();
 

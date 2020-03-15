@@ -29,6 +29,8 @@ public abstract class AlignmentToolWrapper implements Serializable {
     private String alnTmpDir;
     protected String alnLog;
 
+    private boolean isRetainTemp = false;
+
     private SequencingMode sequencingMode;
 
     /**
@@ -185,6 +187,14 @@ public abstract class AlignmentToolWrapper implements Serializable {
 
     public String getSMTag() {
         return smTag;
+    }
+
+    public void setRetainTemp(boolean retainTemp) {
+        isRetainTemp = retainTemp;
+    }
+
+    public boolean isRetainTemp() {
+        return isRetainTemp;
     }
 
     /**

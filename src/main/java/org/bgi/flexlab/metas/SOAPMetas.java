@@ -123,9 +123,16 @@ public class SOAPMetas {
                         StringUtils.join(profilingOutputList, ','));
             }
         } else if (alignmentOutputList != null) {
-            String multiSamListFile = metasOptions.getAlignmentTmpDir() + "/" + "tmp-multiSampleSAMList-" + jsc.appName();
+
+            File tmpDir = new File(metasOptions.getProfilingTmpDir());
+            if (! tmpDir.exists()){
+                tmpDir.mkdirs();
+            }
+
+            String multiSamListFile = tmpDir + "/" + "tmp-multiSampleSAMList-" + jsc.appName();
 
             File samList = new File(multiSamListFile);
+
             FileOutputStream fos1;
             BufferedWriter bw1;
 

@@ -101,6 +101,7 @@ public class MetasOptions implements Serializable {
     private String hdfsOutputDir;
     private String tmpDir;
     private boolean isLocal = false;
+    private boolean retainTemp = false;
 
     //private String optionsAbbr = "\t\t[other options] --seqmod <pe|se> [--anamod <name>] [--pipemod <name>] [--analev <name>]\n" +
     //        "\t\t[-e/--extra-arg <\"AlignmentTool arguments\">] [--min-identity <float>] [--insert <int>]\n" +
@@ -198,10 +199,10 @@ public class MetasOptions implements Serializable {
         /*
         Recalibration Process arguments group.
          */
-        this.options.addOption(null, "gc-cali", false,
-                "Switch for GC bias recalibration in profiling process. Recalibration will " +
-                        "be done if set, or the recalibrated read number in profiling result will be equal " +
-                        "to raw read number. Note that \"--spe-gc\" (species genome gc information) must be set.");
+        //this.options.addOption(null, "gc-cali", false,
+        //        "Switch for GC bias recalibration in profiling process. Recalibration will " +
+        //                "be done if set, or the recalibrated read number in profiling result will be equal " +
+        //                "to raw read number. Note that \"--spe-gc\" (species genome gc information) must be set.");
         // Species genome GC table
         Option speciesGC = new Option("g", "spe-gc", true,
                 "Genome GC rate of each species included in reference matrix file. File format(tab delimited): \n" +
@@ -217,29 +218,26 @@ public class MetasOptions implements Serializable {
         speciesGenome.setArgName("FILE");
         this.options.addOption(speciesGenome);
 
-        this.options.addOption(null, "gc-model-type", true,
-                "Statistical model used for GC bias recalibration. Now merely support builtin model.");
-        this.options.addOption(null, "gc-model-train", false,
-                "Switch for gc training process. The process will run for training if set," +
-                        "and this means no profiling process.");
-
-        Option gcTrainOut = new Option(null, "gc-train-out", true,
-                "Output json format file of the training result of GC bias recalibration model." +
-                        "We use com.google.gson.stream.JsonWriter for file writing.");
-        gcTrainOut.setArgName("FILE");
-        this.options.addOption(gcTrainOut);
-
-        Option gcModelFile = new Option(null, "gc-model-file", true,
-                "Input gc model coefficients file, users may train their own model for data " +
-                        "originated from the same sequencing platform, once and for all.");
-        gcModelFile.setArgName("FILE");
-        this.options.addOption(gcModelFile);
-
-        Option scanWindowSize = new Option(null, "gc-window-size", true,
-                "The size of scanning windows on sequence used for GC calculation. Default: 100");
-        scanWindowSize.setArgName("INT");
-        //scanWindowSize.setType(Integer.TYPE);
-        this.options.addOption(scanWindowSize);
+        //this.options.addOption(null, "gc-model-type", true,
+        //        "Statistical model used for GC bias recalibration. Now merely support builtin model.");
+        //this.options.addOption(null, "gc-model-train", false,
+        //        "Switch for gc training process. The process will run for training if set," +
+        //                "and this means no profiling process.");
+        //Option gcTrainOut = new Option(null, "gc-train-out", true,
+        //        "Output json format file of the training result of GC bias recalibration model." +
+        //                "We use com.google.gson.stream.JsonWriter for file writing.");
+        //gcTrainOut.setArgName("FILE");
+        //this.options.addOption(gcTrainOut);
+        //Option gcModelFile = new Option(null, "gc-model-file", true,
+        //        "Input gc model coefficients file, users may train their own model for data " +
+        //                "originated from the same sequencing platform, once and for all.");
+        //gcModelFile.setArgName("FILE");
+        //this.options.addOption(gcModelFile);
+        //Option scanWindowSize = new Option(null, "gc-window-size", true,
+        //        "The size of scanning windows on sequence used for GC calculation. Default: 100");
+        //scanWindowSize.setArgName("INT");
+        ////scanWindowSize.setType(Integer.TYPE);
+        //this.options.addOption(scanWindowSize);
 
         this.options.addOption(null, "ins-cali-train", false,
                 "Switch for insert-size recalibration in profiling process. If set, a Gaussian curve " +
@@ -319,8 +317,8 @@ public class MetasOptions implements Serializable {
         readsCount.setArgName("INTEGER");
         this.options.addOption(readsCount);
 
-        this.options.addOption(null, "unknown-estimation", false,
-                "Switch option. If set, the unmapped reads and reads mapped to unknown clade will be considered.");
+        //this.options.addOption(null, "unknown-estimation", false,
+        //        "Switch option. If set, the unmapped reads and reads mapped to unknown clade will be considered.");
         this.options.addOption(null, "output-format", true,
                 "Output profiling file format. Options: CAMI, DETAILED, DEFAULT. Default: DEFAULT(legacy MetaPhlAn2 format).\n" +
                         "\t\tDEFAULT: clusterName\trel_abun\n" +
@@ -378,10 +376,10 @@ public class MetasOptions implements Serializable {
         /*
         Processing stage control.
          */
-        this.options.addOption(null, "merge-sam-sample", false,
-                "*(Not supported in current version) Switch option. SAM file generated by alignment " +
-                        "tool will be merged by sample if set. Note that the process may slow down with " +
-                        "this arg. Note: Merging will slow down the whole process.");
+        ////this.options.addOption(null, "merge-sam-sample", false,
+        ////        "*(Not supported in current version) Switch option. SAM file generated by alignment " +
+        ////                "tool will be merged by sample if set. Note that the process may slow down with " +
+        ////                "this arg. Note: Merging will slow down the whole process.");
 
         this.options.addOption(null, "skip-alignment", false,
                 "Switch option. If set, the alignment process will be skipped, and users must " +
@@ -389,6 +387,7 @@ public class MetasOptions implements Serializable {
         this.options.addOption(null, "skip-profiling", false,
                 "Switch option. If set, the profiling process will be skipped, the tools will run " +
                         "as an Spark-version of Bowtie2 for multi-sample.");
+        this.options.addOption(null, "retain-temp", false, "Switch option. If set, interval temp files will be retained.");
 
         /*
         Supplementary arguments. Not useful in current version.
@@ -400,22 +399,22 @@ public class MetasOptions implements Serializable {
         //this.options.addOption(null, "read-length", true, "Standard read length (theoretical value from sequencing) of the data. Default: 100");
         //this.options.addOption("f", "hdfs", false, "The HDFS is used to perform the input FASTQ reads sort.");
         //this.options.addOption("k", "spark", false, "the Spark engine is used to perform the input FASTQ reads sort.");
-        this.options.addOption(null, "zz-control", true, "Parameters for controling nls " +
-                "estimates. Refer to manual of nls.control in R for more help. This option might be " +
-                "deprecated in future version. Users who want to control nls estimation in detail in RStudio " +
-                "may use \"--zz-opoint\" and \"--zz-point-file\" to output data matrix of Normalized Cov, " +
-                "Window GC (Read GC) and Genome GC. Note: use with \"--gc-model-train\". Default: " +
-                "\"maxiter=50,tol=1e-05,minFactor=1/1024\".");
-        this.options.addOption(null, "zz-start-value", true, "Start values " +
-                "used in NLS estimation. Refer to manual of nls in RStudio for more information. Default: " +
-                "(\"startvalue\" in SOAPMetas_builtinModel.json). Note: use with \"--gc-model-train\".");
-        this.options.addOption(null, "zz-point", false, "Switch option. " +
-                "If set, data matrix used in GC Bias model training process will be written into file. And " +
-                "the process will be skipped. Note: use with \"--gc-model-train\".");
-        Option pointPath = new Option(null, "zz-point-file", true, "Path of file to " +
-                "save data matrix used in training process. Note: use with \"--gc-model-train\".");
-        pointPath.setArgName("FILE");
-        this.options.addOption(pointPath);
+        //this.options.addOption(null, "zz-control", true, "Parameters for controling nls " +
+        //        "estimates. Refer to manual of nls.control in R for more help. This option might be " +
+        //        "deprecated in future version. Users who want to control nls estimation in detail in RStudio " +
+        //        "may use \"--zz-opoint\" and \"--zz-point-file\" to output data matrix of Normalized Cov, " +
+        //        "Window GC (Read GC) and Genome GC. Note: use with \"--gc-model-train\". Default: " +
+        //        "\"maxiter=50,tol=1e-05,minFactor=1/1024\".");
+        //this.options.addOption(null, "zz-start-value", true, "Start values " +
+        //        "used in NLS estimation. Refer to manual of nls in RStudio for more information. Default: " +
+        //        "(\"startvalue\" in SOAPMetas_builtinModel.json). Note: use with \"--gc-model-train\".");
+        //this.options.addOption(null, "zz-point", false, "Switch option. " +
+        //        "If set, data matrix used in GC Bias model training process will be written into file. And " +
+        //        "the process will be skipped. Note: use with \"--gc-model-train\".");
+        //Option pointPath = new Option(null, "zz-point-file", true, "Path of file to " +
+        //        "save data matrix used in training process. Note: use with \"--gc-model-train\".");
+        //pointPath.setArgName("FILE");
+        //this.options.addOption(pointPath);
 
         //Option alnLog = new Option(null, "aln-log-pre", true, "LOG file path prefix for alignment process.");
         //alnLog.setArgName("FILE");
@@ -633,10 +632,15 @@ public class MetasOptions implements Serializable {
                 if (this.profilingPipeline.equals("meph") && (this.mpaTaxonomyListFile == null || this.mpaMarkersListFile == null)) {
                     throw new MissingOptionException("Missing --mpa-marker-list or --mpa-taxon-list option.");
                 }
-                if (this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
+                if (this.profilingPipeline.equals("comg") &&
+                        this.profilingAnalysisLevel.equals(ProfilingAnalysisLevel.SPECIES) &&
                         this.speciesGenomeGCFilePath == null){
                     throw new MissingArgumentException("Missing -g (--spe-gc) option. Please provide species genome information file in \"species\" analysis level.");
                 }
+            }
+
+            if (commandLine.hasOption("retain-temp")){
+                this.retainTemp = true;
             }
 
         } catch (UnrecognizedOptionException e) {
@@ -921,5 +925,9 @@ public class MetasOptions implements Serializable {
 
     public boolean isLocalFS() {
         return this.isLocal;
+    }
+
+    public boolean isRetainTemp() {
+        return retainTemp;
     }
 }

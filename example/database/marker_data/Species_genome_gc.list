@@ -1,0 +1,520 @@
+s__Abiotrophia__defectiva	2043439	0.4694439129330506	GCF_000160075.2,Abiotrophia defectiva,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/075/GCF_000160075.2_ASM16007v2
+s__Acholeplasma__laidlawii	1496992	0.31927759132981337	GCF_000018785.1,Acholeplasma laidlawii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/018/785/GCF_000018785.1_ASM1878v1
+s__Achromobacter__piechaudii	6154438	0.6386654638490143	GCF_000164035.1,Achromobacter piechaudii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/164/035/GCF_000164035.1_ASM16403v1
+s__Achromobacter__xylosoxidans	6813182	0.673750385649466	GCF_001457475.1,Achromobacter xylosoxidans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/457/475/GCF_001457475.1_NCTC10807
+s__Acidaminococcus__fermentans	2329769	0.5584270371869485	GCF_000025305.1,Acidaminococcus fermentans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/025/305/GCF_000025305.1_ASM2530v1
+s__Acidaminococcus__intestini	2487765	0.5002060082041511	GCF_000230275.1,Acidaminococcus intestini,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/230/275/GCF_000230275.1_ASM23027v1
+s__Acidovorax__ebreus	3796573	0.6683398422735451	GCF_000022305.1,Acidovorax ebreus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/022/305/GCF_000022305.1_ASM2230v1
+s__Acinetobacter__baumannii	4335793	0.3904102432934414	GCF_000746645.1,Acinetobacter baumannii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/746/645/GCF_000746645.1_ASM74664v1
+s__Acinetobacter__haemolyticus	3715198	0.35972672250577226	GCF_000164055.1,Acinetobacter haemolyticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/164/055/GCF_000164055.1_ASM16405v1
+s__Acinetobacter__johnsonii	3509795	0.4143082430740257	GCF_001484935.1,Acinetobacter johnsonii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/484/935/GCF_001484935.1_ASM148493v1
+s__Acinetobacter__junii	3378307	0.38636689915984546	GCF_001941805.1,Acinetobacter junii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/941/805/GCF_001941805.1_ASM194180v1
+s__Acinetobacter__lwoffii	3481004	0.40943245109744203	GCF_000162095.1,Acinetobacter lwoffii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/162/095/GCF_000162095.1_ASM16209v1
+s__Acinetobacter__nosocomialis	4015811	0.3855413016200215	GCF_000300635.1,Acinetobacter nosocomialis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/300/635/GCF_000300635.1_Acin_baum_Ab22222_V1
+s__Acinetobacter__radioresistens	3195486	0.41376554301912133	GCF_000368905.1,Acinetobacter radioresistens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/368/905/GCF_000368905.1_Acin_radi_CIP_103788_V1
+s__Actinobacillus__minor	2127148	0.39317527506313615	GCF_000174155.1,Actinobacillus minor,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/174/155/GCF_000174155.1_ASM17415v1
+s__Actinobacillus__pleuropneumoniae	2274482	0.41299513471638816	GCF_000015885.1,Actinobacillus pleuropneumoniae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/015/885/GCF_000015885.1_ASM1588v1
+s__Actinobacillus__ureae	2354471	0.3896769168106127	GCF_000188255.1,Actinobacillus ureae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/188/255/GCF_000188255.1_ASM18825v1
+s__Actinomyces__viscosus	3134496	0.6841839964064398	GCF_000175315.3,Actinomyces viscosus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/175/315/GCF_000175315.3_Acti_vis_C505_V3
+s__Aerococcus__urinae	1974262	0.4259505577273938	GCF_001543175.1,Aerococcus urinae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/543/175/GCF_001543175.1_ASM154317v1
+s__Aerococcus__viridans	2199877	0.393756560025856	GCF_001543285.1,Aerococcus viridans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/543/285/GCF_001543285.1_ASM154328v1
+s__Aeromonas__caviae	4439218	0.6143352275107913	GCF_000208825.1,Aeromonas caviae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/208/825/GCF_000208825.1_ASM20882v1
+s__Aeromonas__hydrophila	4744448	0.6154840352344466	GCF_000014805.1,Aeromonas hydrophila,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/805/GCF_000014805.1_ASM1480v1
+s__Aeromonas__salmonicida	4702402	0.5851118215754416	GCF_000196395.1,Aeromonas salmonicida,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/196/395/GCF_000196395.1_ASM19639v1
+s__Aeromonas__veronii	4551783	0.5871903383794878	GCF_000204115.1,Aeromonas veronii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/204/115/GCF_000204115.1_ASM20411v1
+s__Aggregatibacter__actinomycetemcomitans	2367908	0.44227225044216245	GCF_001594265.1,Aggregatibacter actinomycetemcomitans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/594/265/GCF_001594265.1_ASM159426v1
+s__Aggregatibacter__aphrophilus	2313035	0.42230964944326393	GCF_000022985.1,Aggregatibacter aphrophilus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/022/985/GCF_000022985.1_ASM2298v1
+s__Aggregatibacter__segnis	2012010	0.4205610310087922	GCF_000185305.1,Aggregatibacter segnis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/185/305/GCF_000185305.1_ASM18530v1
+s__Akkermansia__muciniphila	2664102	0.5576235444438689	GCF_000020225.1,Akkermansia muciniphila,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/020/225/GCF_000020225.1_ASM2022v1
+s__Alicycliphilus__denitrificans	4995263	0.6798318727162114	GCF_000204645.1,Alicycliphilus denitrificans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/204/645/GCF_000204645.1_ASM20464v1
+s__Alistipes__putredinis	2550678	0.53251253196209	GCF_000154465.1,Alistipes putredinis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/465/GCF_000154465.1_ASM15446v1
+s__Alistipes__shahii	3763317	0.5581937423820529	GCF_000210575.1,Alistipes shahii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/210/575/GCF_000210575.1_ASM21057v1
+s__Anaerococcus__hydrogenalis	1889366	0.2963809023767761	GCF_000173355.1,Anaerococcus hydrogenalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/173/355/GCF_000173355.1_ASM17335v1
+s__Anaerococcus__lactolyticus	2206675	0.34478389432064077	GCF_000156575.1,Anaerococcus lactolyticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/575/GCF_000156575.1_ASM15657v1
+s__Anaerococcus__prevotii	1883067	0.3606876441464908	GCF_000024105.1,Anaerococcus prevotii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/024/105/GCF_000024105.1_ASM2410v1
+s__Anaerococcus__tetradius	2145347	0.33474444926624924	GCF_000159095.1,Anaerococcus tetradius,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/159/095/GCF_000159095.1_ASM15909v1
+s__Anaerococcus__vaginalis	2049433	0.2885417576471151	GCF_000307225.1,Anaerococcus vaginalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/307/225/GCF_000307225.1_ASM30722v1
+s__Anaerofustis__stercorihominis	2284703	0.3334197048806781	GCF_000154825.1,Anaerofustis stercorihominis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/825/GCF_000154825.1_ASM15482v1
+s__Anaerostipes__caccae	3606936	0.44310600465325695	GCF_000154305.1,Anaerostipes caccae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/305/GCF_000154305.1_ASM15430v1
+s__Anaerotruncus__colihominis	3719688	0.5416663978269145	GCF_000154565.1,Anaerotruncus colihominis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/565/GCF_000154565.1_ASM15456v1
+s__Arcanobacterium__haemolyticum	1986154	0.5313324143042282	GCF_000092365.1,Arcanobacterium haemolyticum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/092/365/GCF_000092365.1_ASM9236v1
+s__Atopobium__parvulum	1543805	0.45686599019953944	GCF_000024225.1,Atopobium parvulum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/024/225/GCF_000024225.1_ASM2422v1
+s__Atopobium__rimae	1626291	0.49262278399130294	GCF_000174015.1,Atopobium rimae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/174/015/GCF_000174015.1_ASM17401v1
+s__Atopobium__vaginae	1430526	0.42656826929395203	GCF_000159235.2,Atopobium vaginae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/159/235/GCF_000159235.2_ASM15923v2
+s__Bacillus__anthracis/cereus/thuringiensis	5227293	0.35376838451565656	GCF_000007845.1,Bacillus anthracis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/845/GCF_000007845.1_ASM784v1
+s__Bacteroides__caccae	4570803	0.4190519696429708	GCF_002222615.2,Bacteroides caccae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/002/222/615/GCF_002222615.2_ASM222261v2
+s__Bacteroides__clarus	3747170	0.4536682349613175	GCF_000195615.1,Bacteroides clarus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/195/615/GCF_000195615.1_ASM19561v1
+s__Bacteroides__coprocola	4300117	0.4182521080240375	GCF_000154845.1,Bacteroides coprocola,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/845/GCF_000154845.1_ASM15484v1
+s__Bacteroides__coprophilus	4041504	0.4361846480914036	GCF_000157915.1,Bacteroides coprophilus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/157/915/GCF_000157915.1_ASM15791v1
+s__Bacteroides__coprosuis	2991798	0.34989795434050025	GCF_000212915.1,Bacteroides coprosuis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/212/915/GCF_000212915.1_ASM21291v1
+s__Bacteroides__dorei	5566217	0.41393948529135677	GCF_000156075.1,Bacteroides dorei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/075/GCF_000156075.1_ASM15607v1
+s__Bacteroides__dorei/vulgatus	5566217	0.41393948529135677	GCF_000156075.1,Bacteroides dorei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/075/GCF_000156075.1_ASM15607v1
+s__Bacteroides__eggerthii	4197635	0.4416279643180029	GCF_000155815.1,Bacteroides eggerthii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/815/GCF_000155815.1_ASM15581v1
+s__Bacteroides__finegoldii	4892401	0.42841009966272187	GCF_000156195.1,Bacteroides finegoldii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/195/GCF_000156195.1_ASM15619v1
+s__Bacteroides__fluxus	4330716	0.45567776783330977	GCF_000195635.1,Bacteroides fluxus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/195/635/GCF_000195635.1_ASM19563v1
+s__Bacteroides__fragilis	5277274	0.43266049858317	GCF_000009925.1,Bacteroides fragilis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/009/925/GCF_000009925.1_ASM992v1
+s__Bacteroides__helcogenes	3998906	0.44717455224003766	GCF_000186225.1,Bacteroides helcogenes,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/186/225/GCF_000186225.1_ASM18622v1
+s__Bacteroides__intestinalis	6052596	0.4280892033765346	GCF_000172175.1,Bacteroides intestinalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/172/175/GCF_000172175.1_ASM17217v1
+s__Bacteroides__ovatus	6472489	0.418787270244878	GCF_001314995.1,Bacteroides ovatus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/314/995/GCF_001314995.1_ASM131499v1
+s__[Bacteroides]__pectinophilus	3028326	0.4189142780532875	GCF_000155855.1,[Bacteroides] pectinophilus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/855/GCF_000155855.1_ASM15585v1
+s__Bacteroides__plebeius	4421924	0.44306776869073283	GCF_000187895.1,Bacteroides plebeius,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/187/895/GCF_000187895.1_ASM18789v1
+s__Bacteroides__salanitronis	4242803	0.46648736696000265	GCF_000190575.1,Bacteroides salanitronis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/190/575/GCF_000190575.1_ASM19057v1
+s__Bacteroides__stercoris	4009829	0.45818562337695695	GCF_000154525.1,Bacteroides stercoris,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/525/GCF_000154525.1_ASM15452v1
+s__Bacteroides__thetaiotaomicron	6260361	0.4283717823940185	GCF_000011065.1,Bacteroides thetaiotaomicron,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/011/065/GCF_000011065.1_ASM1106v1
+s__Bacteroides__uniformis	4719097	0.4643038699988578	GCF_000154205.1,Bacteroides uniformis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/205/GCF_000154205.1_ASM15420v1
+s__Bacteroides__xylanisolvens	6059812	0.41984751342120846	GCF_000178215.1,Bacteroides xylanisolvens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/178/215/GCF_000178215.1_ASM17821v1
+s__Bacteroidetes__oral__taxon__274	2113539	0.4289743411406177	GCF_000163695.1,Bacteroidetes oral taxon 274,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/163/695/GCF_000163695.1_ASM16369v1
+s__Bifidobacterium__adolescentis	2089645	0.5918431121075589	GCF_000010425.1,Bifidobacterium adolescentis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/010/425/GCF_000010425.1_ASM1042v1
+s__Bifidobacterium__angulatum	2021974	0.5943063560659039	GCF_001025155.1,Bifidobacterium angulatum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/025/155/GCF_001025155.1_ASM102515v1
+s__Bifidobacterium__animalis	1938483	0.6048203672665687	GCA_000022965.1,Bifidobacterium animalis,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/022/965/GCA_000022965.1_ASM2296v1
+s__Bifidobacterium__bifidum	2214656	0.6266643668362039	GCF_000165905.1,Bifidobacterium bifidum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/165/905/GCF_000165905.1_ASM16590v1
+s__Bifidobacterium__breve	2269415	0.5889028670384218	GCF_001025175.1,Bifidobacterium breve,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/025/175/GCF_001025175.1_ASM102517v1
+s__Bifidobacterium__catenulatum-Bifidobacterium__pseudocatenulatum__complex	2058429	0.560987044002975	GCF_000173455.1,Bifidobacterium catenulatum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/173/455/GCF_000173455.1_ASM17345v1
+s__Bifidobacterium__dentium	2635669	0.5853792718281393	GCF_001042595.1,Bifidobacterium dentium,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/042/595/GCF_001042595.1_ASM104259v1
+s__Bifidobacterium__longum	2256640	0.6011982416335792	GCF_000007525.1,Bifidobacterium longum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/525/GCF_000007525.1_ASM752v1
+s__Bilophila__wadsworthia	4630442	0.5922225135311057	GCF_000701705.1,Bilophila wadsworthia,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/701/705/GCF_000701705.1_ASM70170v1
+s__Blautia__hansenii	3058721	0.3891861990681726	GCF_000156675.1,Blautia hansenii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/675/GCF_000156675.1_ASM15667v1
+s__Blautia__hydrogenotrophica	3626943	0.4430298463471855	GCF_000157975.1,Blautia hydrogenotrophica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/157/975/GCF_000157975.1_ASM15797v1
+s__Brachyspira__murdochii	3241804	0.2775143099336049	GCF_000092845.1,Brachyspira murdochii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/092/845/GCF_000092845.1_ASM9284v1
+s__Brachyspira__pilosicoli	2555556	0.2791732992742088	GCF_000325665.1,Brachyspira pilosicoli,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/325/665/GCF_000325665.1_ASM32566v1
+s__Brevibacterium__mcbrellneri	2561804	0.5801833395529088	GCF_000178455.1,Brevibacterium mcbrellneri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/178/455/GCF_000178455.1_ASM17845v1
+s__Brucella__melitensis	3294931	0.5722229084615126	GCF_000007125.1,Brucella melitensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/125/GCF_000007125.1_ASM712v1
+s__Bulleidia__extructa	1419583	0.36276568541606935	GCF_000177375.1,Bulleidia extructa,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/177/375/GCF_000177375.1_ASM17737v1
+s__Burkholderia__cenocepacia	7963121	0.6694741923424246	GCF_000009485.1,Burkholderia cenocepacia,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/009/485/GCF_000009485.1_ASM948v1
+s__Burkholderia__multivorans	6841388	0.6681731835703515	GCF_000010545.1,Burkholderia multivorans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/010/545/GCF_000010545.1_ASM1054v1
+s__Burkholderia__pseudomallei	7247547	0.680587238689173	GCF_000011545.1,Burkholderia pseudomallei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/011/545/GCF_000011545.1_ASM1154v1
+s__butyrate-producing__bacterium	3601020	0.4635469950180782	GCA_000209895.1,butyrate-producing bacterium,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/209/895/GCA_000209895.1_ASM20989v1
+s__butyrate-producing__bacterium__SSC/2	3601020	0.4635469950180782	GCA_000209895.1,butyrate-producing bacterium,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/209/895/GCA_000209895.1_ASM20989v1
+s__Butyrivibrio__crossotus	2496039	0.37546168148814985	GCF_000156015.1,Butyrivibrio crossotus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/015/GCF_000156015.1_ASM15601v1
+s__Butyrivibrio__fibrisolvens	4837257	0.39659211821906504	GCF_900129945.1,Butyrivibrio fibrisolvens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/900/129/945/GCF_900129945.1_IMG-taxon_2585428068_annotated_assembly
+s__Campylobacter__concisus	1840041	0.37615031404191535	GCF_001298465.1,Campylobacter concisus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/298/465/GCF_001298465.1_ASM129846v1
+s__Campylobacter__hominis	1711273	0.31733160051026343	GCF_000017585.1,Campylobacter hominis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/017/585/GCF_000017585.1_ASM1758v1
+s__Campylobacter__jejuni	1641481	0.30548571686178516	GCF_000009085.1,Campylobacter jejuni,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/009/085/GCF_000009085.1_ASM908v1
+s__Campylobacter__rectus	2513107	0.4484930406862899	GCF_000174175.1,Campylobacter rectus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/174/175/GCF_000174175.1_ASM17417v1
+s__Campylobacter__upsaliensis	1619052	0.34957555408967717	GCF_000620965.1,Campylobacter upsaliensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/620/965/GCF_000620965.1_ASM62096v1
+s__Candidatus__Nitrospira__defluvii	3295117	0.5923122001434243	GCF_001458695.1,Candidatus Nitrospira,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/458/695/GCF_001458695.1_NiCh1
+s__Capnocytophaga__canimorsus	2571406	0.36109428071646404	GCF_000220625.1,Capnocytophaga canimorsus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/220/625/GCF_000220625.1_ASM22062v1
+s__Cardiobacterium__hominis	2642494	0.5789606334016274	GCF_000160655.1,Cardiobacterium hominis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/655/GCF_000160655.1_ASM16065v1
+s__Catonella__morbi	3479204	0.37120416049188265	GCF_000160035.2,Catonella morbi,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/035/GCF_000160035.2_ASM16003v2
+s__Centipeda__periodontii	2761262	0.5505953437232686	GCF_000213975.1,Centipeda periodontii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/213/975/GCF_000213975.1_ASM21397v1
+s__Chlamydia__trachomatis	1042519	0.41307256750236687	GCF_000008725.1,Chlamydia trachomatis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/008/725/GCF_000008725.1_ASM872v1
+s__Citrobacter__koseri	4720462	0.5382780329552489	GCF_000018045.1,Citrobacter koseri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/018/045/GCF_000018045.1_ASM1804v1
+s__Citrobacter__rodentium	5346659	0.5472224804312376	GCF_000027085.1,Citrobacter rodentium,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/027/085/GCF_000027085.1_ASM2708v1
+s__Citrobacter__youngae	5154159	0.5264952051343391	GCF_000155975.1,Citrobacter youngae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/975/GCF_000155975.1_ASM15597v1
+s__Clostridiales__genomosp.__BVAB3	1501241	0.3102073551148683	GCA_005465875.1,Clostridiales genomosp.,/database/ftp.ncbi.nih.gov/genomes/all/GCA/005/465/875/GCA_005465875.1_ASM546587v1
+s__[Clostridium]__bartlettii	2961274	0.2849260149516728	GCA_000433835.1,Clostridium bartlettii,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/433/835/GCA_000433835.1_MGS1329
+s__Clostridium__beijerinckii	6485394	0.30002217290113753	GCF_000833105.2,Clostridium beijerinckii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/833/105/GCF_000833105.2_ASM83310v2
+s__Clostridium__bolteae	6377378	0.49483831756562024	GCF_000371705.1,Clostridium bolteae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/371/705/GCF_000371705.1_Clos_bolt_90A9_V1
+s__Clostridium__botulinum	3760560	0.2818471185142638	GCF_000017045.1,Clostridium botulinum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/017/045/GCF_000017045.1_ASM1704v1
+s__Clostridium__butyricum	4627894	0.28741972050353787	GCF_001456065.2,Clostridium butyricum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/456/065/GCF_001456065.2_ASM145606v2
+s__Clostridium__cellulovorans	5262222	0.3120940165580243	GCF_000145275.1,Clostridium cellulovorans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/145/275/GCF_000145275.1_ASM14527v1
+s__[Clostridium]__hiranonis	2479772	0.30309802675407255	GCF_000156055.1,[Clostridium] hiranonis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/055/GCF_000156055.1_ASM15605v1
+s__Clostridium__hylemonae	3889859	0.48799480906634407	GCF_000156515.1,Clostridium hylemonae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/515/GCF_000156515.1_ASM15651v1
+s__Clostridium__kluyveri	3964618	0.3202036110414673	GCF_000016505.1,Clostridium kluyveri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/016/505/GCF_000016505.1_ASM1650v1
+s__Clostridium__leptum	3270209	0.5018373443409886	GCF_000154345.1,Clostridium leptum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/345/GCF_000154345.1_ASM15434v1
+s__Clostridium__methylpentosum	3478423	0.5074216103101894	GCF_000158655.1,Clostridium methylpentosum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/655/GCF_000158655.1_ASM15865v1
+s__Clostridium__perfringens	3256683	0.2837915142493144	GCF_000013285.1,Clostridium perfringens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/013/285/GCF_000013285.1_ASM1328v1
+s__Clostridium__saccharolyticum	4662871	0.4500474064154895	GCF_000144625.1,Clostridium saccharolyticum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/144/625/GCF_000144625.1_ASM14462v1
+s__Clostridium__scindens	3622605	0.4631854701243994	GCF_000154505.1,Clostridium scindens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/505/GCF_000154505.1_ASM15450v1
+s__Clostridium__spiroforme	2507885	0.2857168490580708	GCF_000154805.1,Clostridium spiroforme,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/805/GCF_000154805.1_ASM15480v1
+s__Clostridium__sporogenes/botulinum	4102325	0.2801672222459215	GCF_000155085.1,Clostridium sporogenes,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/085/GCF_000155085.1_ASM15508v1
+s__Clostridium__symbiosum	5352498	0.473647070956402	GCF_000189595.1,Clostridium symbiosum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/189/595/GCF_000189595.1_Clos_symb_WAL_14163_V1
+s__Collinsella__aerofaciens	2439869	0.6054734905849454	GCF_000169035.1,Collinsella aerofaciens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/169/035/GCF_000169035.1_ASM16903v1
+s__Collinsella__intestinalis	1809497	0.6228686756595894	GCF_000156175.1,Collinsella intestinalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/175/GCF_000156175.1_ASM15617v1
+s__Collinsella__stercoris	2475429	0.6126441113843297	GCF_000156215.1,Collinsella stercoris,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/215/GCF_000156215.1_ASM15621v1
+s__Comamonas__testosteroni	6062703	0.6187228699806011	GCF_000739375.1,Comamonas testosteroni,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/739/375/GCF_000739375.1_ASM73937v1
+s__Congregibacter__litoralis	4351117	0.5766335403070062	GCF_000153125.2,Congregibacter litoralis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/153/125/GCF_000153125.2_ASM15312v2
+s__Coprococcus__catus	3522329	0.4326415845879246	GCF_003433855.1,Coprococcus catus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/003/433/855/GCF_003433855.1_ASM343385v1
+s__Coprococcus__comes	3242215	0.42446136360481956	GCF_000155875.1,Coprococcus comes,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/875/GCF_000155875.1_ASM15587v1
+s__Coprococcus__eutactus	3102987	0.4307781502146158	GCF_000154425.1,Coprococcus eutactus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/425/GCF_000154425.1_ASM15442v1
+s__Coriobacterium__glomerans	2115681	0.603934619633111	GCF_000195315.1,Coriobacterium glomerans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/195/315/GCF_000195315.1_ASM19531v1
+s__Corynebacterium__glucuronolyticum	2821068	0.5912654356435222	GCF_900176155.1,Corynebacterium glucuronolyticum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/900/176/155/GCF_900176155.1_IMG-taxon_2529292557_annotated_assembly
+s__Corynebacterium__striatum	2828991	0.5720170194956435	GCF_000159135.1,Corynebacterium striatum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/159/135/GCF_000159135.1_ASM15913v1
+s__Cronobacter__sakazakii/turicensis	4511265	0.5671344955350661	GCF_000982825.1,Cronobacter sakazakii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/982/825/GCF_000982825.1_ASM98282v1
+s__Dehalococcoides__mccartyi	1469720	0.48850257191846064	GCF_000011905.1,Dehalococcoides mccartyi,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/011/905/GCF_000011905.1_ASM1190v1
+s__Dehalogenimonas__lykanthroporepellens	1686510	0.5504438159275664	GCF_000143165.1,Dehalogenimonas lykanthroporepellens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/143/165/GCF_000143165.1_ASM14316v1
+s__Delftia__acidovorans	6767514	0.6647625701254553	GCF_000018665.1,Delftia acidovorans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/018/665/GCF_000018665.1_ASM1866v1
+s__Desulfarculus__baarsii	3655731	0.657034940481124	GCF_000143965.1,Desulfarculus baarsii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/143/965/GCF_000143965.1_ASM14396v1
+s__Desulfitobacterium__hafniense	5279134	0.47537342298945245	GCF_000021925.1,Desulfitobacterium hafniense,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/021/925/GCF_000021925.1_ASM2192v1
+s__Desulfosporosinus__orientis	5863081	0.4285489148111718	GCF_000235605.1,Desulfosporosinus orientis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/235/605/GCF_000235605.1_ASM23560v1
+s__Desulfotalea__psychrophila	3523383	0.4681120389126019	GCF_000025945.1,Desulfotalea psychrophila,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/025/945/GCF_000025945.1_ASM2594v1
+s__Desulfovibrio__alaskensis	3730232	0.5783613458894782	GCF_000012665.1,Desulfovibrio alaskensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/012/665/GCF_000012665.1_ASM1266v1
+s__Desulfovibrio__desulfuricans	2873437	0.5807216236165957	GCF_000022125.1,Desulfovibrio desulfuricans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/022/125/GCF_000022125.1_ASM2212v1
+s__Desulfovibrio__piger	2807531	0.6417987904674962	GCF_900116045.1,Desulfovibrio piger,/database/ftp.ncbi.nih.gov/genomes/all/GCF/900/116/045/GCF_900116045.1_DESPIGER
+s__Desulfuromonas__acetoxidans	3828328	0.5182675047697063	GCF_000167355.1,Desulfuromonas acetoxidans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/167/355/GCF_000167355.1_ASM16735v1
+s__Dialister__invisus	1895960	0.4549463068841115	GCF_000160055.1,Dialister invisus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/055/GCF_000160055.1_ASM16005v1
+s__Dialister__micraerophilus	1281836	0.3460021406794629	GCF_000194985.1,Dialister micraerophilus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/194/985/GCF_000194985.1_ASM19498v1
+s__Dichelobacter__nodosus	1389350	0.4439572461942635	GCF_000015345.1,Dichelobacter nodosus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/015/345/GCF_000015345.1_ASM1534v1
+s__Dickeya__dadantii	4922802	0.5629633286083819	GCF_000147055.1,Dickeya dadantii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/147/055/GCF_000147055.1_ASM14705v1
+s__Dickeya__zeae	4818394	0.5363907559240693	GCF_000025065.1,Dickeya zeae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/025/065/GCF_000025065.1_ASM2506v1
+s__Dorea__formicigenerans	3186031	0.4097486810391989	GCF_000169235.1,Dorea formicigenerans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/169/235/GCF_000169235.1_ASM16923v1
+s__Dorea__longicatena	2915433	0.4142208035650279	GCF_000154065.1,Dorea longicatena,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/065/GCF_000154065.1_ASM15406v1
+s__Dysgonomonas__gadei	5176087	0.3953001562763532	GCF_000213555.1,Dysgonomonas gadei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/213/555/GCF_000213555.1_Dysg_gade_ATCC_V1
+s__Dysgonomonas__mossii	3954365	0.37439386601894364	GCF_000213575.1,Dysgonomonas mossii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/213/575/GCF_000213575.1_Dysg_moss_DSM_V1
+s__Edwardsiella__ictaluri/tarda	3812301	0.5743688654174999	GCF_000022885.2,Edwardsiella ictaluri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/022/885/GCF_000022885.2_ASM2288v2
+s__Eggerthella__lenta	3632260	0.6420459989097697	GCF_000024265.1,Eggerthella lenta,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/024/265/GCF_000024265.1_ASM2426v1
+s__Eikenella__corrodens	2171245	0.5489219318870049	GCF_000158615.1,Eikenella corrodens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/615/GCF_000158615.1_ASM15861v1
+s__Enhydrobacter__aerosaccus	6769764	0.6465167766557298	GCF_900167455.1,Enhydrobacter aerosaccus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/900/167/455/GCF_900167455.1_IMG-taxon_2582581318_annotated_assembly
+s__Enterobacter__asburiae	5204871	0.5531729796953662	GCF_000492675.1,Enterobacter asburiae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/492/675/GCF_000492675.1_Ente_cloa_BWH_31_V1
+s__Enterobacter__cancerogenus	4638653	0.5581180571170122	GCF_000155995.1,Enterobacter cancerogenus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/995/GCF_000155995.1_ASM15599v1
+s__Enterobacter__cloacae	5314581	0.5478668967506564	GCF_000025565.1,Enterobacter cloacae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/025/565/GCF_000025565.1_ASM2556v1
+s__Enterobacter__hormaechei/cloacae	4782480	0.555530185175892	GCF_001729725.1,Enterobacter hormaechei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/729/725/GCF_001729725.1_ASM172972v1
+s__Enterococcus__casseliflavus	3427276	0.4284843123226726	GCF_000157355.2,Enterococcus casseliflavus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/157/355/GCF_000157355.2_ASM15735v2
+s__Enterococcus__faecalis	3218031	0.37527388642309534	GCF_000007785.1,Enterococcus faecalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/785/GCF_000007785.1_ASM778v1
+s__Enterococcus__faecium	2698137	0.38150953787743175	GCF_000174395.2,Enterococcus faecium,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/174/395/GCF_000174395.2_ASM17439v2
+s__Enterococcus__gallinarum	3162323	0.4024199931506048	GCF_000157255.1,Enterococcus gallinarum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/157/255/GCF_000157255.1_ASM15725v1
+s__Enterococcus__italicus	2415788	0.37428449847420386	GCF_000185365.1,Enterococcus italicus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/185/365/GCF_000185365.1_ASM18536v1
+s__Eremococcus__coleocola	1869643	0.38775958832782514	GCF_000428865.1,Eremococcus coleocola,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/428/865/GCF_000428865.1_ASM42886v1
+s__Erwinia__amylovora	3805573	0.5360194115314566	GCF_000091565.1,Erwinia amylovora,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/091/565/GCF_000091565.1_ASM9156v1
+s__Erwinia__billingiae	5100167	0.5519723177692024	GCF_000196615.1,Erwinia billingiae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/196/615/GCF_000196615.1_ASM19661v1
+s__Erwinia__pyrifoliae	4026286	0.534078056054637	GCF_000026985.1,Erwinia pyrifoliae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/026/985/GCF_000026985.1_ASM2698v1
+s__Erwinia__tasmaniensis	3883467	0.537318329214591	GCF_000026185.1,Erwinia tasmaniensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/026/185/GCF_000026185.1_ASM2618v1
+s__Erysipelothrix__rhusiopathiae	1787941	0.3655623983118011	GCF_000270085.1,Erysipelothrix rhusiopathiae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/270/085/GCF_000270085.1_ASM27008v1
+s__Escherichia__albertii	4746590	0.4937814304584976	GCF_000155105.1,Escherichia albertii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/105/GCF_000155105.1_ASM15510v1
+s__Escherichia__coli	4641652	0.5079070985933456	GCF_000005845.2,Escherichia coli,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/005/845/GCF_000005845.2_ASM584v2
+s__Ethanoligenens__harbinense	3008576	0.555585100725393	GCF_000178115.2,Ethanoligenens harbinense,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/178/115/GCF_000178115.2_ASM17811v2
+s__Eubacterium__cellulosolvens	3384656	0.48166135642735924	GCF_000183525.2,Eubacterium cellulosolvens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/183/525/GCF_000183525.2_ASM18352v3
+s__Eubacterium__dolichum	2025104	0.37241741658699995	GCA_000437615.1,Eubacterium dolichum,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/437/615/GCA_000437615.1_MGS375
+s__Eubacterium__eligens	2144190	0.3771265606126323	GCF_000146185.1,Eubacterium eligens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/146/185/GCF_000146185.1_ASM14618v1
+s__Eubacterium__hallii	2722180	0.38264589409958194	GCA_000435875.1,Eubacterium hallii,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/435/875/GCA_000435875.1_MGS12
+s__Eubacterium__limosum	4422837	0.4719043455591965	GCF_000807675.2,Eubacterium limosum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/807/675/GCF_000807675.2_ASM80767v2
+s__Eubacterium__rectale	3449685	0.4148117871631758	GCF_000020605.1,Eubacterium rectale,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/020/605/GCF_000020605.1_ASM2060v1
+s__Eubacterium__saphenum	1084901	0.4054655678260044	GCF_000161975.1,Eubacterium saphenum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/161/975/GCF_000161975.1_ASM16197v1
+s__Eubacterium__siraeum	2664035	0.4483113022163748	GCF_000382085.1,Eubacterium siraeum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/382/085/GCF_000382085.1_ASM38208v1
+s__Eubacterium__ventriosum	2870795	0.3490165616144657	GCF_000153885.1,Eubacterium ventriosum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/153/885/GCF_000153885.1_ASM15388v1
+s__[Eubacterium]__yurii	2511030	0.3182618288112846	GCA_000146855.1,[Eubacterium] yurii,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/146/855/GCA_000146855.1_ASM14685v1
+s__Faecalibacterium__prausnitzii	3090349	0.5621989619942602	GCF_000162015.1,Faecalibacterium prausnitzii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/162/015/GCF_000162015.1_ASM16201v1
+s__Filifactor__alocis	1931012	0.3544550732983534	GCF_000163895.2,Filifactor alocis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/163/895/GCF_000163895.2_ASM16389v2
+s__Finegoldia__magna	1797577	0.323127743623778	GCF_000010185.1,Finegoldia magna,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/010/185/GCF_000010185.1_ASM1018v1
+s__Fusobacterium__gonidiaformans	1930430	0.30903270255849735	GCF_000158235.1,Fusobacterium gonidiaformans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/235/GCF_000158235.1_ASM15823v1
+s__Fusobacterium__mortiferum	2671036	0.29030870418818766	GCF_000158195.2,Fusobacterium mortiferum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/195/GCF_000158195.2_Fuso_mor_ATCC9817_V2
+s__Fusobacterium__nucleatum	2174500	0.2715157507472982	GCF_000007325.1,Fusobacterium nucleatum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/325/GCF_000007325.1_ASM732v1
+s__Fusobacterium__periodonticum	2546312	0.27237628381753687	GCF_000158215.3,Fusobacterium periodonticum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/215/GCF_000158215.3_Fuso_sp_2_1_31_V3
+s__Fusobacterium__ulcerans	3487504	0.3034448132532608	GCF_000158315.2,Fusobacterium ulcerans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/315/GCF_000158315.2_Fuso_ulc_ATCC49185_V2
+s__Fusobacterium__varium	3299801	0.2915084879360907	GCF_000159915.2,Fusobacterium varium,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/159/915/GCF_000159915.2_Fuso_varium_ATCC_27725_V2
+s__Gardnerella__vaginalis	1617545	0.42016327211916826	GCF_000025205.1,Gardnerella vaginalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/025/205/GCF_000025205.1_ASM2520v1
+s__Gemella__haemolysans	1916192	0.308756116297323	GCF_000173915.1,Gemella haemolysans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/173/915/GCF_000173915.1_ASM17391v1
+s__Gemella__morbillorum	1752918	0.3067239882299115	GCF_000185645.1,Gemella morbillorum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/185/645/GCF_000185645.1_ASM18564v1
+s__Gemella__sanguinis	1795494	0.295108755584814	GCF_000701685.1,Gemella sanguinis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/701/685/GCF_000701685.1_ASM70168v1
+s__Granulibacter__bethesdensis	2708434	0.5907232740395373	GCF_000014285.2,Granulibacter bethesdensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/285/GCF_000014285.2_ASM1428v2
+s__Granulicatella__adiacens	1947166	0.37183475882384964	GCF_000160675.1,Granulicatella adiacens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/675/GCF_000160675.1_ASM16067v1
+s__Granulicatella__elegans	1743361	0.3332895481773425	GCF_000162475.2,Granulicatella elegans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/162/475/GCF_000162475.2_Gran_ele_ATCC_700633_V2
+s__Haemophilus__haemolyticus	1884911	0.38483992082384794	GCF_000222025.1,Haemophilus haemolyticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/222/025/GCF_000222025.1_ASM22202v2
+s__Haemophilus__influenzae	1830138	0.38147888301319355	GCF_000027305.1,Haemophilus influenzae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/027/305/GCF_000027305.1_ASM2730v1
+s__Haemophilus__parainfluenzae	2124757	0.3891536773381615	GCF_000191405.1,Haemophilus parainfluenzae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/191/405/GCF_000191405.1_ASM19140v1
+s__Haemophilus__pittmaniae	2182608	0.42540804395475507	GCF_000223275.1,Haemophilus pittmaniae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/223/275/GCF_000223275.1_ASM22327v1
+s__Helicobacter__bilis	2620399	0.34775810859338596	GCF_001999985.1,Helicobacter bilis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/999/985/GCF_001999985.1_ASM199998v1
+s__Helicobacter__cinaedi	2240130	0.38343488993942315	GCF_000349975.1,Helicobacter cinaedi,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/349/975/GCF_000349975.1_ASM34997v1
+s__Helicobacter__pullorum	1951667	0.33579601438155177	GCF_000155495.1,Helicobacter pullorum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/495/GCF_000155495.1_ASM15549v1
+s__Helicobacter__pylori	1667867	0.38873183533219374	GCF_000008525.1,Helicobacter pylori,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/008/525/GCF_000008525.1_ASM852v1
+s__Helicobacter__winghamensis	1690216	0.3474443503078896	GCF_000158455.1,Helicobacter winghamensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/455/GCF_000158455.1_ASM15845v1
+s__Histophilus__somni	2263857	0.3737806760762716	GCF_000019405.1,Histophilus somni,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/019/405/GCF_000019405.1_ASM1940v1
+s__Holdemania__filiformis	3932923	0.4853664818762025	GCF_000157995.1,Holdemania filiformis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/157/995/GCF_000157995.1_ASM15799v1
+s__Jonquetella__anthropi	1675934	0.5950013544686127	GCF_000237805.1,Jonquetella anthropi,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/237/805/GCF_000237805.1_ASM23780v1
+s__Kingella__denitrificans	2220455	0.5325552645741526	GCF_000190695.1,Kingella denitrificans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/190/695/GCF_000190695.1_ASM19069v1
+s__Klebsiella__oxytoca	6257473	0.5574517061439977	GCF_001022195.1,Klebsiella oxytoca,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/022/195/GCF_001022195.1_ASM102219v1
+s__Klebsiella__pneumoniae	5333942	0.5748478329910599	GCF_000240185.1,Klebsiella pneumoniae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/240/185/GCF_000240185.1_ASM24018v2
+s__Klebsiella__pneumoniae/Klebsiella__variicola__group	5333942	0.5748478329910599	GCF_000240185.1,Klebsiella pneumoniae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/240/185/GCF_000240185.1_ASM24018v2
+s__Klebsiella__variicola/pneumoniae	5641239	0.57286103283339	GCF_000019565.1,Klebsiella variicola,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/019/565/GCF_000019565.1_ASM1956v1
+s__Lachnospiraceae__oral__taxon__107	3288100	0.35604878197135126	GCF_000209465.1,Lachnospiraceae oral taxon 107,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/209/465/GCF_000209465.1_Lach_bact_F0167_V1
+s__Lactobacillus__acidophilus	1993560	0.3471458095066113	GCF_000011985.1,Lactobacillus acidophilus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/011/985/GCF_000011985.1_ASM1198v1
+s__Lactobacillus__amylolyticus	1422440	0.38456103596636765	GCF_002075105.1,Lactobacillus amylolyticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/002/075/105/GCF_002075105.1_ASM207510v1
+s__Lactobacillus__amylovorus	2078001	0.3814786422143204	GCF_000191545.1,Lactobacillus amylovorus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/191/545/GCF_000191545.1_ASM19154v1
+s__Lactobacillus__animalis	1880186	0.4106125670545361	GCF_001434535.1,Lactobacillus animalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/434/535/GCF_001434535.1_ASM143453v1
+s__Lactobacillus__antri	2302896	0.4976829175090842	GCF_000160835.1,Lactobacillus antri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/835/GCF_000160835.1_ASM16083v1
+s__Lactobacillus__brevis	2291220	0.4621887029617409	GCF_000014465.1,Lactobacillus brevis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/465/GCF_000014465.1_ASM1446v1
+s__Lactobacillus__buchneri	2500564	0.4436915031968788	GCF_000298115.2,Lactobacillus buchneri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/298/115/GCF_000298115.2_ASM29811v2
+s__Lactobacillus__casei	3079196	0.4633569931891312	GCF_000026485.1,Lactobacillus casei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/026/485/GCF_000026485.1_ASM2648v1
+s__Lactobacillus__casei__group	3079196	0.4633569931891312	GCF_000026485.1,Lactobacillus casei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/026/485/GCF_000026485.1_ASM2648v1
+s__Lactobacillus__coleohominis	1725829	0.40819571348030426	GCF_000161935.1,Lactobacillus coleohominis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/161/935/GCF_000161935.1_ASM16193v1
+s__Lactobacillus__coryniformis	2705076	0.42832401012023325	GCF_001433765.1,Lactobacillus coryniformis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/433/765/GCF_001433765.1_ASM143376v1
+s__Lactobacillus__crispatus	2043161	0.3687761267956857	GCF_000091765.1,Lactobacillus crispatus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/091/765/GCF_000091765.1_ASM9176v1
+s__Lactobacillus__delbrueckii	1864998	0.49719034551243485	GCF_000056065.1,Lactobacillus delbrueckii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/056/065/GCF_000056065.1_ASM5606v1
+s__Lactobacillus__farciminis	2498309	0.35974172930570236	GCF_000184535.1,Lactobacillus farciminis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/184/535/GCF_000184535.1_ASM18453v1
+s__Lactobacillus__fermentum	2098685	0.5146903894581607	GCF_000010145.1,Lactobacillus fermentum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/010/145/GCF_000010145.1_ASM1014v1
+s__Lactobacillus__gasseri	1894360	0.35259612745201546	GCF_000014425.1,Lactobacillus gasseri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/425/GCF_000014425.1_ASM1442v1
+s__Lactobacillus__helveticus	2160583	0.36809694420441147	GCF_001308285.1,Lactobacillus helveticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/308/285/GCF_001308285.1_ASM130828v1
+s__Lactobacillus__hilgardii/buchneri/brevis	2721039	0.38167846914358816	GCF_000159315.1,Lactobacillus hilgardii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/159/315/GCF_000159315.1_ASM15931v1
+s__Lactobacillus__iners	1277649	0.3230096841933896	GCF_000160875.1,Lactobacillus iners,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/875/GCF_000160875.1_ASM16087v1
+s__Lactobacillus__jensenii	1672949	0.3443798944259508	GCF_001936235.1,Lactobacillus jensenii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/936/235/GCF_001936235.1_ASM193623v1
+s__Lactobacillus__johnsonii	1992676	0.3461124638425916	GCF_000008065.1,Lactobacillus johnsonii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/008/065/GCF_000008065.1_ASM806v1
+s__Lactobacillus__kefiranofaciens	2113023	0.37695898246256665	GCF_000214785.1,Lactobacillus kefiranofaciens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/214/785/GCF_000214785.1_ASM21478v1
+s__Lactobacillus__oris	2115990	0.49772068866109953	GCF_000180015.1,Lactobacillus oris,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/180/015/GCF_000180015.1_ASM18001v1
+s__Lactobacillus__plantarum	3308273	0.44466886499391073	GCF_000203855.3,Lactobacillus plantarum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/203/855/GCF_000203855.3_ASM20385v3
+s__Lactobacillus__reuteri	1999618	0.3887262467131222	GCF_000016825.1,Lactobacillus reuteri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/016/825/GCF_000016825.1_ASM1682v1
+s__Lactobacillus__rhamnosus	3010111	0.46690005783839866	GCF_000026505.1,Lactobacillus rhamnosus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/026/505/GCF_000026505.1_ASM2650v1
+s__Lactobacillus__ruminis	2066652	0.434694375250405	GCF_000224985.1,Lactobacillus ruminis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/224/985/GCF_000224985.1_ASM22498v1
+s__Lactobacillus__sakei	1945884	0.41269572081377925	GCF_002224565.1,Lactobacillus sakei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/002/224/565/GCF_002224565.1_ASM222456v1
+s__Lactobacillus__salivarius	1827111	0.32941238928559896	GCF_000008925.1,Lactobacillus salivarius,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/008/925/GCF_000008925.1_ASM892v1
+s__Lactobacillus__sanfranciscensis	1298316	0.3470195237523068	GCF_000225325.1,Lactobacillus sanfranciscensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/225/325/GCF_000225325.1_ASM22532v1
+s__Lactobacillus__ultunensis	2248406	0.34694401278060993	GCF_000159415.1,Lactobacillus ultunensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/159/415/GCF_000159415.1_ASM15941v1
+s__Lactobacillus__vaginalis	1877332	0.39080141392145873	GCF_000159435.1,Lactobacillus vaginalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/159/435/GCF_000159435.1_ASM15943v1
+s__Lactococcus__garvieae	1950135	0.3882685044881508	GCF_000269925.1,Lactococcus garvieae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/269/925/GCF_000269925.1_ASM26992v1
+s__Lactococcus__lactis	2365589	0.3532938308387467	GCF_000006865.1,Lactococcus lactis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/006/865/GCF_000006865.1_ASM686v1
+s__Lautropia__mirabilis	3151925	0.6527033479540281	GCF_000186425.1,Lautropia mirabilis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/186/425/GCF_000186425.1_ASM18642v1
+s__Lawsonia__intracellularis	1457619	0.332844865496402	GCF_000055945.1,Lawsonia intracellularis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/055/945/GCF_000055945.1_ASM5594v1
+s__Leuconostoc__fallax	1638971	0.37531414527773826	GCF_000165675.1,Leuconostoc fallax,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/165/675/GCF_000165675.1_ASM16567v1
+s__Leuconostoc__gelidum	1954080	0.36663237943175303	GCA_000196855.1,Leuconostoc gelidum,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/196/855/GCA_000196855.1_ASM19685v1
+s__Leuconostoc__lactis	1737502	0.4332449689266545	GCF_001698145.1,Leuconostoc lactis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/698/145/GCF_001698145.1_ASM169814v1
+s__Leuconostoc__mesenteroides	2038396	0.3771033695121066	GCF_000014445.1,Leuconostoc mesenteroides,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/445/GCF_000014445.1_ASM1444v1
+s__Listeria__innocua	2914007	0.35849776613439843	GCF_000183905.1,Listeria innocua,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/183/905/GCF_000183905.1_ASM18390v1
+s__Listeria__monocytogenes	2944528	0.3798102785913396	GCF_000196035.1,Listeria monocytogenes,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/196/035/GCF_000196035.1_ASM19603v1
+s__Listeria__seeligeri	2797636	0.37382633051619296	GCF_000027145.1,Listeria seeligeri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/027/145/GCF_000027145.1_ASM2714v1
+s__Mannheimia__haemolytica	2731870	0.41047341198519693	GCF_000376645.1,Mannheimia haemolytica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/376/645/GCF_000376645.1_ASM37664v1
+s__Marinobacter__hydrocarbonoclasticus	3989480	0.5742525341648536	GCF_000284615.1,Marinobacter hydrocarbonoclasticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/284/615/GCF_000284615.1_ASM28461v1
+s__Marvinbryantia__formatexigens	4548960	0.49554689423516585	GCF_000173815.1,Marvinbryantia formatexigens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/173/815/GCF_000173815.1_ASM17381v1
+s__Megasphaera__elsdenii	2504349	0.5275147353663567	GCF_001304715.1,Megasphaera elsdenii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/304/715/GCF_001304715.1_ASM130471v1
+s__Megasphaera__genomosp.__type_1	1726197	0.4605134871628209	GCF_000177555.1,Megasphaera genomosp. type_1,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/177/555/GCF_000177555.1_ASM17755v1
+s__Megasphaera__micronuciformis	1765528	0.454347368039476	GCF_000165735.1,Megasphaera micronuciformis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/165/735/GCF_000165735.1_ASM16573v1
+s__Methanobrevibacter__smithii	1853160	0.3103423341751387	GCF_000016525.1,Methanobrevibacter smithii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/016/525/GCF_000016525.1_ASM1652v1
+s__Methanosphaera__stadtmanae	1767403	0.27633708893783704	GCF_000012545.1,Methanosphaera stadtmanae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/012/545/GCF_000012545.1_ASM1254v1
+s__Methylobacillus__flagellatus	2971517	0.5571908220615934	GCF_000013705.1,Methylobacillus flagellatus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/013/705/GCF_000013705.1_ASM1370v1
+s__Methylocella__silvestris	4305430	0.63083362172884	GCF_000021745.1,Methylocella silvestris,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/021/745/GCF_000021745.1_ASM2174v1
+s__Methylococcus__capsulatus	3304561	0.6358457295840506	GCF_000008325.1,Methylococcus capsulatus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/008/325/GCF_000008325.1_ASM832v1
+s__Methylophaga__aminisulfidivorans	3261960	0.43372604201155135	GCF_000214595.1,Methylophaga aminisulfidivorans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/214/595/GCF_000214595.1_ASM21459v1
+s__Methyloversatilis__universalis	4234613	0.6696970892027205	GCF_000214035.1,Methyloversatilis universalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/214/035/GCF_000214035.1_ASM21403v1
+s__Micrococcus__luteus	2501097	0.7299524968443847	GCF_000023205.1,Micrococcus luteus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/023/205/GCF_000023205.1_ASM2320v1
+s__Microlunatus__phosphovorus	5683123	0.672675393441247	GCF_000270245.1,Microlunatus phosphovorus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/270/245/GCF_000270245.1_ASM27024v1
+s__Mitsuokella__multacida	2577056	0.5801119572100878	GCF_000155955.1,Mitsuokella multacida,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/955/GCF_000155955.1_ASM15595v1
+s__Mobiluncus__curtisii	2146480	0.5541328127911744	GCF_000196535.1,Mobiluncus curtisii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/196/535/GCF_000196535.1_ASM19653v1
+s__Mobiluncus__mulieris	2435166	0.5430709857151422	GCF_000160615.1,Mobiluncus mulieris,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/615/GCF_000160615.1_ASM16061v1
+s__Neisseria__cinerea	1872773	0.5081203114312306	GCF_000173895.1,Neisseria cinerea,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/173/895/GCF_000173895.1_ASM17389v1
+s__Neisseria__elongata	2256647	0.5425957183378703	GCF_000818035.1,Neisseria elongata,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/818/035/GCF_000818035.1_ASM81803v1
+s__Neisseria__flavescens	2205588	0.4920198151241302	GCF_000173935.1,Neisseria flavescens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/173/935/GCF_000173935.1_ASM17393v1
+s__Neisseria__gonorrhoeae	2153922	0.5268965171440748	GCF_000006845.1,Neisseria gonorrhoeae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/006/845/GCF_000006845.1_ASM684v1
+s__Neisseria__lactamica	2220606	0.5227500961449262	GCF_000196295.1,Neisseria lactamica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/196/295/GCF_000196295.1_ASM19629v1
+s__Neisseria__meningitidis	2272360	0.5152783889876604	GCF_000008805.1,Neisseria meningitidis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/008/805/GCF_000008805.1_ASM880v1
+s__Neisseria__mucosa	2169437	0.4941696854990488	GCF_000186165.1,Neisseria mucosa,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/186/165/GCF_000186165.1_Neis_muco_C102_V1
+s__Neisseria__polysaccharea	2030958	0.520012723059758	GCF_000176735.1,Neisseria polysaccharea,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/176/735/GCF_000176735.1_ASM17673v1
+s__Neisseria__subflava	2292986	0.4901050420717789	GCF_000173955.1,Neisseria subflava,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/173/955/GCF_000173955.1_ASM17395v1
+s__Nitrococcus__mobilis	3623681	0.5986881847491542	GCF_000153205.1,Nitrococcus mobilis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/153/205/GCF_000153205.1_ASM15320v1
+s__Nitrosococcus__oceani	3481691	0.5031761865139669	GCF_000012805.1,Nitrosococcus oceani,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/012/805/GCF_000012805.1_ASM1280v1
+s__Nitrosococcus__watsonii	3328570	0.5011752794743689	GCF_000143085.1,Nitrosococcus watsonii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/143/085/GCF_000143085.1_ASM14308v1
+s__Nitrosomonas__europaea	2812094	0.5071818367380322	GCF_000009145.1,Nitrosomonas europaea,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/009/145/GCF_000009145.1_ASM914v1
+s__Novosphingobium__nitrogenifigens	4182647	0.6342540979432403	GCF_000192575.1,Novosphingobium nitrogenifigens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/192/575/GCF_000192575.1_NovNit_2.0
+s__Odoribacter__splanchnicus	4392288	0.4335854115212846	GCF_000190535.1,Odoribacter splanchnicus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/190/535/GCF_000190535.1_ASM19053v1
+s__Oenococcus__oeni	1780517	0.3788888283571569	GCF_000014385.1,Oenococcus oeni,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/385/GCF_000014385.1_ASM1438v1
+s__Olsenella__uli	2051896	0.6469752852971106	GCF_000143845.1,Olsenella uli,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/143/845/GCF_000143845.1_ASM14384v1
+s__Oribacterium__sinus	2706954	0.4178597050411644	GCF_000160635.1,Oribacterium sinus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/635/GCF_000160635.1_ASM16063v1
+s__Oscillibacter__valericigenes	4410036	0.5332115202687688	GCF_000283575.1,Oscillibacter valericigenes,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/283/575/GCF_000283575.1_ASM28357v1
+s__Oxalobacter__formigenes	2488386	0.5261908723164332	GCF_000158475.2,Oxalobacter formigenes,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/475/GCF_000158475.2_Oxal_for_HOxBLS_2_V2
+s__Pantoea__ananatis	4703373	0.5369076617993087	GCF_000025405.2,Pantoea ananatis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/025/405/GCF_000025405.2_ASM2540v1
+s__Parabacteroides__distasonis	4811379	0.45059576474852636	GCF_000012845.1,Parabacteroides distasonis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/012/845/GCF_000012845.1_ASM1284v1
+s__Parabacteroides__merdae	4434377	0.45277904878182434	GCF_000154105.1,Parabacteroides merdae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/105/GCF_000154105.1_ASM15410v1
+s__Paracoccus__denitrificans	4582379	0.6675078600002313	GCF_000203895.1,Paracoccus denitrificans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/203/895/GCF_000203895.1_ASM20389v1
+s__Paraprevotella__xylaniphila	3789812	0.48514754821611206	GCF_000205165.1,Paraprevotella xylaniphila,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/205/165/GCF_000205165.1_ASM20516v1
+s__Parascardovia__denticolens	1890857	0.5831297660267276	GCF_001042675.1,Parascardovia denticolens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/042/675/GCF_001042675.1_ASM104267v1
+s__Parasutterella__excrementihominis	2831696	0.4814125527599008	GCF_000205025.1,Parasutterella excrementihominis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/205/025/GCF_000205025.1_ASM20502v1
+s__Parvimonas__micra	1627009	0.28613425002566056	GCF_000800295.1,Parvimonas micra,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/800/295/GCF_000800295.1_ASM80029v1
+s__Parvimonas__sp.__oral__taxon__110	1556464	0.2818561817041705	GCF_000214475.1,Parvimonas sp. oral taxon 110,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/214/475/GCF_000214475.1_ASM21447v1
+s__Parvimonas__sp.__oral__taxon__393	1483165	0.2816773588912899	GCF_000223315.1,Parvimonas sp. oral taxon 393,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/223/315/GCF_000223315.1_ASM22331v1
+s__Pasteurella__multocida	2271840	0.4035473448834425	GCF_000754275.1,Pasteurella multocida,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/754/275/GCF_000754275.1_ASM75427v1
+s__Pectobacterium__atrosepticum	5064019	0.509673245696748	GCF_000011605.1,Pectobacterium atrosepticum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/011/605/GCF_000011605.1_ASM1160v1
+s__Pectobacterium__wasabiae	5149301	0.5056940738170094	GCF_000291725.1,Pectobacterium wasabiae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/291/725/GCF_000291725.1_PecWas1.0
+s__Pediococcus__acidilactici	2131361	0.4210215913681446	GCF_001767275.1,Pediococcus acidilactici,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/767/275/GCF_001767275.1_ASM176727v1
+s__Pediococcus__claussenii	1829111	0.3682001803061706	GCF_000237995.1,Pediococcus claussenii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/237/995/GCF_000237995.1_ASM23799v2
+s__Peptoniphilus__duerdenii	2124844	0.33538509179968035	GCF_000146345.1,Peptoniphilus duerdenii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/146/345/GCF_000146345.1_ASM14634v1
+s__Peptoniphilus__harei	1836030	0.34438053844436095	GCF_000183565.1,Peptoniphilus harei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/183/565/GCF_000183565.1_ASM18356v1
+s__Peptoniphilus__lacrimalis	1849203	0.3021723412735108	GCF_000378725.1,Peptoniphilus lacrimalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/378/725/GCF_000378725.1_ASM37872v1
+s__Peptostreptococcus__anaerobius	2106935	0.35704281337582794	GCF_000381525.1,Peptostreptococcus anaerobius,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/381/525/GCF_000381525.1_ASM38152v1
+s__Peptostreptococcus__stomatis	1988044	0.36663021542782753	GCF_000147675.1,Peptostreptococcus stomatis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/147/675/GCF_000147675.1_ASM14767v1
+s__Phascolarctobacterium__succinatutens	2121954	0.4763755481975575	GCF_000188175.1,Phascolarctobacterium succinatutens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/188/175/GCF_000188175.1_ASM18817v1
+s__Photobacterium__damselae	4240063	0.4102964979529785	GCF_002142615.1,Photobacterium damselae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/002/142/615/GCF_002142615.1_ASM214261v1
+s__Photorhabdus__asymbiotica	5064808	0.4215263441378232	GCF_000196475.1,Photorhabdus asymbiotica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/196/475/GCF_000196475.1_ASM19647v1
+s__Plautia__stali__symbiont	4035456	0.5695688417864053	GCF_000180175.2,Plautia stali symbiont,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/180/175/GCF_000180175.2_ASM18017v2
+s__Porphyromonas__asaccharolytica	2186370	0.5246824645416832	GCF_000212375.1,Porphyromonas asaccharolytica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/212/375/GCF_000212375.1_ASM21237v1
+s__Porphyromonas__endodontalis	2064508	0.4752241211949772	GCF_000174815.1,Porphyromonas endodontalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/174/815/GCF_000174815.1_ASM17481v1
+s__Porphyromonas__gingivalis	2354886	0.48359283634112227	GCF_000010505.1,Porphyromonas gingivalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/010/505/GCF_000010505.1_ASM1050v1
+s__Porphyromonas__uenonis	2242885	0.5245578796951248	GCF_000174775.1,Porphyromonas uenonis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/174/775/GCF_000174775.1_ASM17477v1
+s__Prevotella__amnii	2391937	0.364055993113531	GCF_000378745.1,Prevotella amnii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/378/745/GCF_000378745.1_ASM37874v1
+s__Prevotella__bergensis	3273670	0.4658859933957913	GCF_000160535.1,Prevotella bergensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/535/GCF_000160535.1_ASM16053v1
+s__Prevotella__bivia	2521238	0.39842648730504615	GCF_000262545.1,Prevotella bivia,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/262/545/GCF_000262545.1_ASM26254v1
+s__Prevotella__bryantii	3592947	0.3905120225820197	GCF_000179055.1,Prevotella bryantii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/179/055/GCF_000179055.1_ASM17905v1
+s__Prevotella__buccae	3284105	0.5006539072289101	GCF_000184945.1,Prevotella buccae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/184/945/GCF_000184945.1_ASM18494v1
+s__Prevotella__buccalis	3033961	0.4531409599530119	GCF_000177075.1,Prevotella buccalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/177/075/GCF_000177075.1_ASM17707v1
+s__Prevotella__copri	3512473	0.44795048958383454	GCF_000157935.1,Prevotella copri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/157/935/GCF_000157935.1_ASM15793v1
+s__Prevotella__dentalis	3286469	0.5528745288636527	GCF_000220215.1,Prevotella dentalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/220/215/GCF_000220215.1_ASM22021v1
+s__Prevotella__denticola	2937589	0.5036065290277163	GCF_000193395.1,Prevotella denticola,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/193/395/GCF_000193395.1_ASM19339v1
+s__Prevotella__disiens	2797134	0.39866806524106463	GCF_000613345.1,Prevotella disiens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/613/345/GCF_000613345.1_ASM61334v1
+s__Prevotella__marshii	2559358	0.4667963606498192	GCF_000146675.1,Prevotella marshii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/146/675/GCF_000146675.1_ASM14667v1
+s__Prevotella__melaninogenica	3168282	0.40983315247822005	GCF_000144405.1,Prevotella melaninogenica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/144/405/GCF_000144405.1_ASM14440v1
+s__Prevotella__multiformis	3057407	0.5121921942351804	GCF_000191065.1,Prevotella multiformis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/191/065/GCF_000191065.1_ASM19106v1
+s__Prevotella__multisaccharivorax	3388644	0.4828996495353304	GCF_000218235.1,Prevotella multisaccharivorax,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/218/235/GCF_000218235.1_ASM21823v1
+s__Prevotella__nigrescens	2669193	0.41695261451682214	GCF_000220235.1,Prevotella nigrescens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/220/235/GCF_000220235.1_ASM22023v1
+s__Prevotella__oralis	2839537	0.4445041568396538	GCF_000185145.2,Prevotella oralis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/185/145/GCF_000185145.2_ASM18514v2
+s__Prevotella__oris	3077999	0.43842541859175393	GCF_000613505.1,Prevotella oris,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/613/505/GCF_000613505.1_ASM61350v1
+s__Prevotella__oulorum	2827758	0.46796401955188527	GCF_000613785.1,Prevotella oulorum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/613/785/GCF_000613785.1_ASM61378v1
+s__Prevotella__pallens	3127600	0.3650127893592531	GCF_000220255.1,Prevotella pallens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/220/255/GCF_000220255.1_ASM22025v1
+s__Prevotella__ruminicola	3619559	0.47685532961335897	GCF_000025925.1,Prevotella ruminicola,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/025/925/GCF_000025925.1_ASM2592v1
+s__Prevotella__salivae	3274581	0.39664402865587994	GCF_000185845.1,Prevotella salivae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/185/845/GCF_000185845.1_ASM18584v1
+s__Prevotella__timonensis	3217068	0.41299966304722185	GCF_000455445.1,Prevotella timonensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/455/445/GCF_000455445.1_4401737
+s__Prevotella__veroralis	2845746	0.4175073952489084	GCF_000377625.1,Prevotella veroralis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/377/625/GCF_000377625.1_ASM37762v1
+s__Proteus__mirabilis	4063606	0.38899686633005265	GCF_000069965.1,Proteus mirabilis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/069/965/GCF_000069965.1_ASM6996v1
+s__Proteus__penneri	3771888	0.3781119693903955	GCF_003144535.1,Proteus penneri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/003/144/535/GCF_003144535.1_ASM314453v1
+s__Providencia__alcalifaciens	4204778	0.4148892046143697	GCF_000314875.2,Providencia alcalifaciens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/314/875/GCF_000314875.2_ASM31487v2
+s__Providencia__rettgeri	4764068	0.4002142706611241	GCF_000158055.1,Providencia rettgeri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/055/GCF_000158055.1_ASM15805v1
+s__Providencia__rustigianii	3978644	0.4108615900291657	GCF_000156395.1,Providencia rustigianii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/395/GCF_000156395.1_ASM15639v1
+s__Providencia__stuartii	4402109	0.41265538858760653	GCF_000259175.1,Providencia stuartii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/259/175/GCF_000259175.1_ASM25917v1
+s__Pseudoflavonifractor__capillosus	4241076	0.5911478596469386	GCF_000169255.2,Pseudoflavonifractor capillosus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/169/255/GCF_000169255.2_ASM16925v2
+s__Pseudomonas__aeruginosa	6264404	0.6655573299550923	GCF_000006765.1,Pseudomonas aeruginosa,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/006/765/GCF_000006765.1_ASM676v1
+s__Pseudomonas__putida	6181873	0.6152402354432063	GCF_000007565.2,Pseudomonas putida,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/565/GCF_000007565.2_ASM756v2
+s__Pseudomonas__stutzeri	4547930	0.6392842457997374	GCF_000219605.1,Pseudomonas stutzeri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/219/605/GCF_000219605.1_ASM21960v1
+s__Pseudoramibacter__alactolyticus	2362882	0.5085497286787914	GCF_000185505.1,Pseudoramibacter alactolyticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/185/505/GCF_000185505.1_ASM18550v1
+s__Pyramidobacter__piscolens	2562014	0.5984073467201975	GCF_000177335.1,Pyramidobacter piscolens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/177/335/GCF_000177335.1_ASM17733v1
+s__Rahnella__aquatilis	4962173	0.5218893013202079	GCF_000255535.1,Rahnella aquatilis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/255/535/GCF_000255535.1_ASM25553v1
+s__Ralstonia__pickettii	5244795	0.636983714330112	GCF_000020205.1,Ralstonia pickettii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/020/205/GCF_000020205.1_ASM2020v1
+s__Rhodococcus__erythropolis	6281198	0.6245332498673024	GCF_000454045.1,Rhodococcus erythropolis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/454/045/GCF_000454045.1_ASM45404v1
+s__Rhodospirillum__rubrum	4352825	0.6544795621234486	GCF_000013085.1,Rhodospirillum rubrum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/013/085/GCF_000013085.1_ASM1308v1
+s__Roseburia__hominis	3592125	0.48496836830566864	GCF_000225345.1,Roseburia hominis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/225/345/GCF_000225345.1_ASM22534v1
+s__Roseburia__intestinalis	4411375	0.42337774503414466	GCF_000156535.1,Roseburia intestinalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/156/535/GCF_000156535.1_ASM15653v1
+s__Roseburia__inulinivorans	4048462	0.4192819396600487	GCF_000174195.1,Roseburia inulinivorans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/174/195/GCF_000174195.1_ASM17419v1
+s__Ruminococcus__albus	3685408	0.44205227752259724	GCF_000179635.2,Ruminococcus albus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/179/635/GCF_000179635.2_ASM17963v2
+s__Ruminococcus__bromii	2539482	0.39143337105756215	GCF_900101355.1,Ruminococcus bromii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/900/101/355/GCF_900101355.1_IMG-taxon_2593339225_annotated_assembly
+s__Ruminococcus__champanellensis	2573208	0.5220720594681814	GCF_000210095.1,Ruminococcus champanellensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/210/095/GCF_000210095.1_ASM21009v1
+s__Ruminococcus__flavefaciens	4573608	0.45018200073115144	GCF_000174895.1,Ruminococcus flavefaciens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/174/895/GCF_000174895.1_ASM17489v1
+s__[Ruminococcus]__gnavus	3724077	0.42518186385512435	GCF_000526735.1,[Ruminococcus] gnavus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/526/735/GCF_000526735.1_ASM52673v1
+s__Ruminococcus__lactaris	2731235	0.42673589054035993	GCF_000155205.1,Ruminococcus lactaris,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/205/GCF_000155205.1_ASM15520v1
+s__[Ruminococcus]__obeum	2607950	0.41890527042312925	GCA_000436995.1,Ruminococcus obeum,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/436/995/GCA_000436995.1_MGS39
+s__[Ruminococcus]__torques	2741706	0.41936225109475633	GCF_000153925.1,[Ruminococcus] torques,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/153/925/GCF_000153925.1_ASM15392v1
+s__Salmonella__bongori	4460105	0.5132968842661776	GCF_000252995.1,Salmonella bongori,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/252/995/GCF_000252995.1_ASM25299v1
+s__Salmonella__enterica	4857450	0.5222170068657424	GCF_000006945.2,Salmonella enterica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/006/945/GCF_000006945.2_ASM694v2
+s__Scardovia__inopinata	1797862	0.4863343237690101	GCF_001042695.1,Scardovia inopinata,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/042/695/GCF_001042695.1_ASM104269v1
+s__Selenomonas__artemidis	2350599	0.5679382148975644	GCF_000426665.1,Selenomonas artemidis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/426/665/GCF_000426665.1_ASM42666v1
+s__Selenomonas__noxia	2054993	0.5544568764954431	GCF_000160555.1,Selenomonas noxia,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/555/GCF_000160555.1_ASM16055v1
+s__Serratia__odorifera	5267389	0.5457442007795513	GCF_000163595.1,Serratia odorifera,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/163/595/GCF_000163595.1_ASM16359v1
+s__Serratia__proteamaculans	5448853	0.5507359071716561	GCF_000018085.1,Serratia proteamaculans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/018/085/GCF_000018085.1_ASM1808v1
+s__Shewanella__frigidimarina	4845257	0.4158406870884248	GCF_000014705.1,Shewanella frigidimarina,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/705/GCF_000014705.1_ASM1470v1
+s__Shewanella__putrefaciens	4659220	0.44451624950098945	GCF_000016585.1,Shewanella putrefaciens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/016/585/GCF_000016585.1_ASM1658v1
+s__Shuttleworthia__satelles	2169477	0.5127701284687508	GCF_000160115.1,Shuttleworthia satelles,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/115/GCF_000160115.1_ASM16011v1
+s__Simonsiella__muelleri	2372614	0.4097830494130103	GCF_000163775.2,Simonsiella muelleri,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/163/775/GCF_000163775.2_Simo_muel_ATCC_29453_V2
+s__Slackia__exigua	2096289	0.6210112250744053	GCF_000162875.1,Slackia exigua,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/162/875/GCF_000162875.1_ASM16287v1
+s__Slackia__heliotrinireducens	3165038	0.6021159935520521	GCF_000023885.1,Slackia heliotrinireducens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/023/885/GCF_000023885.1_ASM2388v1
+s__Sodalis__glossinidius	4171146	0.5469899639091991	GCF_000010085.1,Sodalis glossinidius,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/010/085/GCF_000010085.1_ASM1008v1
+s__Solobacterium__moorei	2335946	0.3701391213666754	GCF_000425005.1,Solobacterium moorei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/425/005/GCF_000425005.1_ASM42500v1
+s__Sphaerochaeta__pleomorpha	3590853	0.46197296297007984	GCF_000236685.1,Sphaerochaeta pleomorpha,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/236/685/GCF_000236685.1_ASM23668v1
+s__Staphylococcus__aureus	2821361	0.32868250464935184	GCF_000013425.1,Staphylococcus aureus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/013/425/GCF_000013425.1_ASM1342v1
+s__Staphylococcus__epidermidis	2499279	0.32095176248830165	GCF_000007645.1,Staphylococcus epidermidis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/645/GCF_000007645.1_ASM764v1
+s__Stenotrophomonas__maltophilia	4851126	0.6632404518043852	GCF_000072485.1,Stenotrophomonas maltophilia,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/072/485/GCF_000072485.1_ASM7248v1
+s__Streptobacillus__moniliformis	1662578	0.26314554865997264	GCF_000024565.1,Streptobacillus moniliformis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/024/565/GCF_000024565.1_ASM2456v1
+s__Streptococcus__agalactiae	2160267	0.35646612201176986	GCF_000007265.1,Streptococcus agalactiae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/265/GCF_000007265.1_ASM726v1
+s__Streptococcus__anginosus	2233640	0.38234406618792643	GCF_000463505.1,Streptococcus anginosus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/463/505/GCF_000463505.1_ASM46350v1
+s__Streptococcus__australis	2129953	0.4141368377612088	GCF_000186465.1,Streptococcus australis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/186/465/GCF_000186465.1_ASM18646v1
+s__Streptococcus__constellatus	1840061	0.3791564518784975	GCF_000257785.1,Streptococcus constellatus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/257/785/GCF_000257785.1_ASM25778v1
+s__Streptococcus__criceti	2418558	0.4218687333526837	GCF_000187975.2,Streptococcus criceti,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/187/975/GCF_000187975.2_ASM18797v3
+s__Streptococcus__cristatus	2142100	0.4206699033658559	GCF_000385925.1,Streptococcus cristatus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/385/925/GCF_000385925.1_ASM38592v1
+s__Streptococcus__downei	2239421	0.43389474332874434	GCF_000180055.1,Streptococcus downei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/180/055/GCF_000180055.1_ASM18005v1
+s__Streptococcus__dysgalactiae	2179445	0.3952230957881479	GCF_000317855.1,Streptococcus dysgalactiae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/317/855/GCF_000317855.1_ASM31785v1
+s__Streptococcus__equi	2149868	0.415324103619385	GCF_000026605.1,Streptococcus equi,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/026/605/GCF_000026605.1_ASM2660v1
+s__Streptococcus__equinus	1930741	0.37453495833982914	GCF_000964315.1,Streptococcus equinus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/964/315/GCF_000964315.1_ASM96431v1
+s__Streptococcus__gallolyticus	2492900	0.37695896345621566	GCF_002000985.1,Streptococcus gallolyticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/002/000/985/GCF_002000985.1_ASM200098v1
+s__Streptococcus__gordonii	2196662	0.40506778011364514	GCF_000017005.1,Streptococcus gordonii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/017/005/GCF_000017005.1_ASM1700v1
+s__Streptococcus__infantarius	1925187	0.3757266177259664	GCF_000154985.1,Streptococcus infantarius,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/985/GCF_000154985.1_ASM15498v1
+s__Streptococcus__infantis	1792252	0.3924297476024577	GCF_000148975.1,Streptococcus infantis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/148/975/GCF_000148975.1_ASM14897v1
+s__Streptococcus__macacae	1916985	0.37811146148770075	GCF_000187995.2,Streptococcus macacae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/187/995/GCF_000187995.2_ASM18799v3
+s__Streptococcus__mitis	2146611	0.39979157844621127	GCF_000027165.1,Streptococcus mitis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/027/165/GCF_000027165.1_ASM2716v1
+s__Streptococcus__mutans	2032925	0.3682865821414956	GCF_000007465.2,Streptococcus mutans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/465/GCF_000007465.2_ASM746v2
+s__Streptococcus__oralis	1884712	0.41346582395612697	GCF_000148565.1,Streptococcus oralis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/148/565/GCF_000148565.1_ASM14856v1
+s__Streptococcus__parasanguinis	2153652	0.4172447544914406	GCF_000164675.2,Streptococcus parasanguinis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/164/675/GCF_000164675.2_ASM16467v2
+s__Streptococcus__parauberis	2143887	0.3554781571976508	GCF_000213825.1,Streptococcus parauberis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/213/825/GCF_000213825.1_ASM21382v1
+s__Streptococcus__peroris	1639920	0.3898635299282892	GCF_000187585.1,Streptococcus peroris,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/187/585/GCF_000187585.1_ASM18758v1
+s__Streptococcus__pneumoniae	2038615	0.397159836457595	GCF_000007045.1,Streptococcus pneumoniae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/007/045/GCF_000007045.1_ASM704v1
+s__Streptococcus__porcinus	2025881	0.36767608758856024	GCF_000187955.1,Streptococcus porcinus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/187/955/GCF_000187955.1_ASM18795v2
+s__Streptococcus__pseudopneumoniae	2190731	0.39793886150330643	GCF_000221985.1,Streptococcus pseudopneumoniae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/221/985/GCF_000221985.1_ASM22198v1
+s__Streptococcus__pseudoporcinus	2126865	0.37129860146271626	GCF_000188035.1,Streptococcus pseudoporcinus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/188/035/GCF_000188035.1_ASM18803v3
+s__Streptococcus__pyogenes	1852433	0.38511784231872354	GCF_000006785.2,Streptococcus pyogenes,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/006/785/GCF_000006785.2_ASM678v2
+s__Streptococcus__salivarius	2188923	0.40147414961604405	GCF_000785515.1,Streptococcus salivarius,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/785/515/GCF_000785515.1_ASM78551v1
+s__Streptococcus__sanguinis	2388435	0.43400218134468804	GCF_000014205.1,Streptococcus sanguinis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/205/GCF_000014205.1_ASM1420v1
+s__Streptococcus__suis	2146229	0.41064769882431	GCF_000026745.1,Streptococcus suis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/026/745/GCF_000026745.1_ASM2674v1
+s__Streptococcus__thermophilus	1929905	0.3892077589311391	GCF_000253395.1,Streptococcus thermophilus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/253/395/GCF_000253395.1_ASM25339v1
+s__Streptococcus__uberis	1852352	0.3663180648170542	GCF_000009545.1,Streptococcus uberis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/009/545/GCF_000009545.1_ASM954v1
+s__Streptococcus__urinalis	2130431	0.3419467703952862	GCF_000188055.2,Streptococcus urinalis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/188/055/GCF_000188055.2_ASM18805v3
+s__Streptococcus__vestibularis	2022289	0.39643295295578423	GCF_000180075.1,Streptococcus vestibularis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/180/075/GCF_000180075.1_ASM18007v1
+s__Subdoligranulum__variabile	3245471	0.5777494237354147	GCF_000157955.1,Subdoligranulum variabile,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/157/955/GCF_000157955.1_ASM15795v1
+s__Succinatimonas__hippei	2306546	0.4024849276797428	GCF_000188195.1,Succinatimonas hippei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/188/195/GCF_000188195.1_ASM18819v1
+s__Sutterella__wadsworthensis	2725870	0.6023552113637114	GCF_000297775.1,Sutterella wadsworthensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/297/775/GCF_000297775.1_Sutt_wads_2_1_59BFAA_V1
+s__Syntrophobacter__fumaroxidans	4990251	0.5994872802991272	GCF_000014965.1,Syntrophobacter fumaroxidans,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/965/GCF_000014965.1_ASM1496v1
+s__Syntrophomonas__wolfei	2936195	0.4486592341448712	GCF_000014725.1,Syntrophomonas wolfei,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/014/725/GCF_000014725.1_ASM1472v1
+s__Syntrophus__aciditrophicus	3179300	0.5146003837322681	GCF_000013405.1,Syntrophus aciditrophicus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/013/405/GCF_000013405.1_ASM1340v1
+s__Tannerella__forsythia	3405521	0.46975954633666916	GCF_000238215.1,Tannerella forsythia,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/238/215/GCF_000238215.1_ASM23821v1
+s__Tetragenococcus__halophilus	2562720	0.36041081351064497	GCF_000283615.1,Tetragenococcus halophilus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/283/615/GCF_000283615.1_ASM28361v1
+s__Thermoanaerobacter__pseudethanolicus	2362816	0.345127593515534	GCF_000019085.1,Thermoanaerobacter pseudethanolicus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/019/085/GCF_000019085.1_ASM1908v1
+s__Treponema__denticola	2843201	0.3787375567186421	GCF_000008185.1,Treponema denticola,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/008/185/GCF_000008185.1_ASM818v1
+s__Treponema__succinifaciens	2731853	0.39163234624996296	GCF_000195275.1,Treponema succinifaciens,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/195/275/GCF_000195275.1_ASM19527v1
+s__Treponema__vincentii	2693493	0.45248827451936946	GCF_000412995.1,Treponema vincentii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/412/995/GCF_000412995.1_Trep_vinc_F0403_V1
+s__Turicibacter__sanguinis	2953411	0.34119497760386214	GCF_000178255.1,Turicibacter sanguinis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/178/255/GCF_000178255.1_ASM17825v1
+s__unclassified__Actinomyces__sp.__oral__taxon__180	2372658	0.6563546031497165	GCF_000185285.1,Actinomyces sp. oral taxon 180,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/185/285/GCF_000185285.1_ASM18528v1
+s__unclassified__Alistipes__sp.__HGB5	3464615	0.5752258187417649	GCF_000183485.2,Alistipes sp. HGB5,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/183/485/GCF_000183485.2_ASM18348v1
+s__unclassified__Alteromonas__sp.__SN2	4635666	0.43671783083595755	GCF_000597705.1,Alteromonas sp.,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/597/705/GCF_000597705.1_ASM59770v1
+s__unclassified__butyrate-producing__bacterium__SS3/4	3601020	0.4635469950180782	GCA_000209895.1,butyrate-producing bacterium SS3/4,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/209/895/GCA_000209895.1_ASM20989v1
+s__unclassified__Candidatus__Arthromitus__sp.__SFB-mouse	1569870	0.27944606878276546	GCF_000225365.1,Candidatus Arthromitus sp.,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/225/365/GCF_000225365.1_ASM22536v2
+s__unclassified__Candidatus__Arthromitus__sp.__SFB-rat-Yit	1515556	0.2797890675105374	GCF_000283555.1,Candidatus Arthromitus sp. SFB-rat-Yit,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/283/555/GCF_000283555.1_ASM28355v1
+s__unclassified__Capnocytophaga__sp.__oral__taxon__329	2536778	0.3876421192552127	GCF_000213295.2,Capnocytophaga sp. oral taxon 329,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/213/295/GCF_000213295.2_ASM21329v2
+s__unclassified__Carnobacterium__sp.__AT7	2442118	0.3527515869421543	GCF_000171855.1,Carnobacterium sp. AT7,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/171/855/GCF_000171855.1_ASM17185v1
+s__unclassified__Citrobacter__sp.__30_2	5090626	0.5181437410644585	GCF_000277565.1,Citrobacter sp.,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/277/565/GCF_000277565.1_ASM27756v1
+s__unclassified__Clostridiales__bacterium__1_7_47FAA	6548966	0.49868162393880194	GCF_000155435.1,Clostridiales bacterium 1_7_47FAA,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/435/GCF_000155435.1_ASM15543v1
+s__unclassified__Clostridium__sp.__7_2_43FAA	3813122	0.27760061178215645	GCF_000158375.2,Clostridium sp. 7_2_43FAA,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/375/GCF_000158375.2_Clostridium_sp_7_2_43FAA_V2
+s__unclassified__Clostridium__sp.__BNL1100	4613747	0.3725566226323203	GCF_000244875.1,Clostridium sp. BNL1100,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/244/875/GCF_000244875.1_ASM24487v1
+s__unclassified__Clostridium__sp.__D5	5427315	0.45031088116315343	GCF_000190355.1,Clostridium sp. D5,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/190/355/GCF_000190355.1_ASM19035v1
+s__unclassified__Clostridium__sp.__HGF2	4099852	0.4392248793371078	GCF_000183585.1,Clostridium sp. HGF2,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/183/585/GCF_000183585.1_ASM18358v1
+s__unclassified__Clostridium__sp.__L2-50	2954616	0.41358674020583386	GCF_000154245.1,Clostridium sp. L2-50,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/154/245/GCF_000154245.1_ASM15424v1
+s__unclassified__Clostridium__sp.__SY8519	2835737	0.5074049532802231	GCF_000270305.1,Clostridium sp. SY8519,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/270/305/GCF_000270305.1_ASM27030v1
+s__unclassified__Coprobacillus__sp.__29_1	3527730	0.3128258114991794	GCF_000158555.2,Coprobacillus sp.,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/158/555/GCF_000158555.2_Erys_bact_D7_V2
+s__unclassified__Desulfovibrio__sp.__3_1_syn3	3663932	0.6076993241140938	GCF_000145315.2,Desulfovibrio sp. 3_1_syn3,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/145/315/GCF_000145315.2_Desulfovibrio_sp3_1_syn3_V2
+s__unclassified__Eggerthella__sp.__YY7918	3123671	0.5620047693883254	GCF_000270285.1,Eggerthella sp. YY7918,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/270/285/GCF_000270285.1_ASM27028v1
+s__unclassified__Enterobacteriaceae__bacterium__9_2_54FAA	4497073	0.48006203145912907	GCF_000185685.2,Enterobacteriaceae bacterium 9_2_54FAA,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/185/685/GCF_000185685.2_Ente_bact_9_2_54FAA_V2
+s__unclassified__Enterobacter__sp.__638	4518712	0.5298175674838317	GCF_000016325.1,Enterobacter sp. 638,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/016/325/GCF_000016325.1_ASM1632v1
+s__unclassified__Erysipelotrichaceae__bacterium__3_1_53	4486197	0.42286328487135094	GCA_000165065.1,Erysipelotrichaceae bacterium 3_1_53,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/165/065/GCA_000165065.1_ASM16506v1
+s__unclassified__Erysipelotrichaceae__bacterium__5_2_54FAA	3137498	0.3814593666673254	GCF_000163515.2,Erysipelotrichaceae bacterium 5_2_54FAA,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/163/515/GCF_000163515.2_Ery_bact_5_2_54FAA_V2
+s__unclassified__Fusobacterium__sp.__D12	2093299	0.2735027342008953	GCF_000235465.1,Fusobacterium sp.,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/235/465/GCF_000235465.1_ASM23546v1
+s__unclassified__gamma__proteobacterium__HdN1	4587455	0.5325857147372562	GCF_000198515.1,gamma proteobacterium HdN1,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/198/515/GCF_000198515.1_ASM19851v1
+s__unclassified__Geobacter__sp.__M18	5277406	0.6117795371438165	GCF_000175115.2,Geobacter sp. M18,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/175/115/GCF_000175115.2_ASM17511v2
+s__unclassified__Lachnospiraceae__bacterium__1_4_56FAA	3233902	0.4537605035650431	GCF_000218385.1,Lachnospiraceae bacterium 1_4_56FAA,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/218/385/GCF_000218385.1_Lach_bact_1_4_56FAA_V1
+s__unclassified__Lachnospiraceae__bacterium__2_1_46FAA	2219029	0.3875352688045086	GCF_000209385.2,Lachnospiraceae bacterium 2_1_46FAA,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/209/385/GCF_000209385.2_Lach_bact_2_1_46_FAA_V2
+s__unclassified__Lachnospiraceae__bacterium__3_1_57FAA_CT1	7712837	0.466704663925868	GCF_000218405.2,Lachnospiraceae bacterium 3_1_57FAA_CT1,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/218/405/GCF_000218405.2_Lach_bact_3-1-57FAA_CT1_V1
+s__unclassified__Lachnospiraceae__bacterium__4_1_37FAA	3790302	0.4352080652148562	GCF_900168235.1,Lachnospiraceae bacterium,/database/ftp.ncbi.nih.gov/genomes/all/GCF/900/168/235/GCF_900168235.1_IMG-taxon_2606217738_annotated_assembly
+s__unclassified__Lachnospiraceae__bacterium__9_1_43BFAA	2844875	0.4131460960499143	GCF_000209445.1,Lachnospiraceae bacterium 9_1_43BFAA,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/209/445/GCF_000209445.1_Lach_bact_9_1_43BFAA_V1
+s__unclassified__Megasphaera__sp.__UPII__135-E	1650551	0.3888295484356436	GCF_000221545.1,Megasphaera sp. UPII 135-E,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/221/545/GCF_000221545.1_ASM22154v1
+s__unclassified__Methylocystis__sp.__ATCC__49242	4726034	0.6282227339033108	GCF_000188155.2,Methylocystis sp. ATCC 49242,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/188/155/GCF_000188155.2_ASM18815v3
+s__unclassified__Neisseria__sp.__oral__taxon__014	2515760	0.5255914713645181	GCF_000090875.1,Neisseria sp. oral taxon 014,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/090/875/GCF_000090875.1_ASM9087v1
+s__unclassified__Oribacterium__sp.__oral__taxon__078	2676554	0.5460192471364299	GCF_000160135.1,Oribacterium sp. oral taxon 078,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/135/GCF_000160135.1_ASM16013v1
+s__unclassified__Oribacterium__sp.__oral__taxon__108	2518361	0.43252138990398914	GCF_000214455.1,Oribacterium sp. oral taxon 108,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/214/455/GCF_000214455.1_ASM21445v1
+s__unclassified__Pantoea__sp.__aB	4805313	0.5430859550668188	GCF_000179655.1,Pantoea sp. aB,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/179/655/GCF_000179655.1_ASM17965v1
+s__unclassified__Peptoniphilus__sp.__oral__taxon__375	1950550	0.41389402988900564	GCF_000221565.1,Peptoniphilus sp. oral taxon 375,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/221/565/GCF_000221565.1_ASM22156v1
+s__unclassified__Peptoniphilus__sp.__oral__taxon__386	1569385	0.3057528904634618	GCF_000090945.1,Peptoniphilus sp. oral taxon 386,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/090/945/GCF_000090945.1_ASM9094v1
+s__unclassified__Prevotella__sp.__oral__taxon__299	709850	0.37951257307881947	GCF_000163055.2,Prevotella sp. oral taxon 299,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/163/055/GCF_000163055.2_ASM16305v2
+s__unclassified__Prevotella__sp.__oral__taxon__317	4099098	0.45854624602778465	GCF_000162415.1,Prevotella sp. oral taxon 317,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/162/415/GCF_000162415.1_ASM16241v1
+s__unclassified__Prevotella__sp.__oral__taxon__472	3635499	0.4593042110587845	GCF_000163495.1,Prevotella sp. oral taxon 472,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/163/495/GCF_000163495.1_ASM16349v1
+s__unclassified__Rahnella__sp.__Y9602	4864217	0.5234752068010123	GCF_000187705.1,Rahnella sp. Y9602,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/187/705/GCF_000187705.1_ASM18770v1
+s__unclassified__Roseobacter__sp.__AzwK-3b	4178704	0.6184762069770915	GCF_000170875.1,Roseobacter sp. AzwK-3b,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/170/875/GCF_000170875.1_ASM17087v1
+s__unclassified__Ruminococcaceae__bacterium__D16	3197355	0.5679660219149891	GCF_000177015.3,Ruminococcaceae bacterium D16,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/177/015/GCF_000177015.3_Rumi_bact_D16_V2
+s__unclassified__Ruminococcus__sp.__5_1_39BFAA	3930699	0.41351423754400934	GCF_000159975.2,Ruminococcus sp. 5_1_39BFAA,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/159/975/GCF_000159975.2_Ruminococus_sp_5_1_39B_FAA_V2
+s__unclassified__Ruminococcus__sp.__SR1/5	3545606	0.43761574185061736	GCA_000209835.1,Ruminococcus sp. SR1/5,/database/ftp.ncbi.nih.gov/genomes/all/GCA/000/209/835/GCA_000209835.1_ASM20983v1
+s__unclassified__Selenomonas__sp.__oral__taxon__149	2471116	0.5584480858041468	GCF_000146365.1,Selenomonas sp. oral taxon 149,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/146/365/GCF_000146365.1_ASM14636v1
+s__unclassified__Sphingobacterium__sp.__21	6226409	0.4110174901777252	GCF_000192845.1,Sphingobacterium sp. 21,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/192/845/GCF_000192845.1_ASM19284v1
+s__unclassified__Streptococcus__oralis	1884712	0.41346582395612697	GCF_000148565.1,Streptococcus oralis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/148/565/GCF_000148565.1_ASM14856v1
+s__unclassified__Streptococcus__sp.__C150	2142483	0.39504724191510504	GCF_000187445.1,Streptococcus sp. C150,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/187/445/GCF_000187445.1_ASM18744v1
+s__unclassified__Streptococcus__sp.__M143	1880978	0.4105125099815096	GCF_000162495.1,Streptococcus sp. M143,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/162/495/GCF_000162495.1_ASM16249v1
+s__unclassified__Streptococcus__sp.__M334	2207013	0.39060304583615957	GCF_000187745.1,Streptococcus sp. M334,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/187/745/GCF_000187745.1_ASM18774v1
+s__unclassified__Streptococcus__sp.__oral__taxon__056	1943250	0.394722243663965	GCF_000220065.1,Streptococcus sp. oral taxon 056,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/220/065/GCF_000220065.1_ASM22006v1
+s__unclassified__Streptococcus__sp.__oral__taxon__071	1976523	0.406488566032371	GCF_000146755.1,Streptococcus sp. oral taxon 071,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/146/755/GCF_000146755.1_ASM14675v1
+s__unclassified__Thauera__sp.__MZ1T	4496212	0.684042033605177	GCF_000021765.1,Thauera sp. MZ1T,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/021/765/GCF_000021765.1_ASM2176v1
+s__unclassified__Veillonella__sp.__oral__taxon__158	2176752	0.38949223430138113	GCF_000183505.1,Veillonella sp. oral taxon 158,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/183/505/GCF_000183505.1_ASM18350v1
+s__unclassified__Veillonella__sp.__oral__taxon__780	1731014	0.394473990389448	GCF_000221605.1,Veillonella sp. oral taxon 780,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/221/605/GCF_000221605.1_ASM22160v1
+s__unclassified__Verrucomicrobiae__bacterium__DG1235	5775745	0.5419731999941133	GCF_000155695.1,Verrucomicrobiae bacterium DG1235,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/155/695/GCF_000155695.1_ASM15569v1
+s__Ureaplasma__urealyticum	874478	0.25774233314045636	GCF_000021265.1,Ureaplasma urealyticum,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/021/265/GCF_000021265.1_ASM2126v1
+s__Veillonella__atypica	2053871	0.3897133753775188	GCF_000179735.1,Veillonella atypica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/179/735/GCF_000179735.1_ASM17973v1
+s__Veillonella__dispar	2118767	0.38820738665459675	GCF_000160015.1,Veillonella dispar,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/015/GCF_000160015.1_ASM16001v1
+s__Veillonella__parvula	2132142	0.38629275160847637	GCF_000024945.1,Veillonella parvula,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/024/945/GCF_000024945.1_ASM2494v1
+s__Vibrio__alginolyticus	5146637	0.4467925365631965	GCF_000354175.2,Vibrio alginolyticus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/354/175/GCF_000354175.2_ASM35417v2
+s__Vibrio__cholerae	4033464	0.47487122731230524	GCF_000006745.1,Vibrio cholerae,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/006/745/GCF_000006745.1_ASM674v1
+s__Vibrio__furnissii	4958664	0.506035698325194	GCF_000176175.1,Vibrio furnissii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/176/175/GCF_000176175.1_ASM17617v1
+s__Vibrio__harveyi	5930024	0.455660887713102	GCF_000182685.1,Vibrio harveyi,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/182/685/GCF_000182685.1_ASM18268v1
+s__Vibrio__metschnikovii	3815101	0.44133038679709924	GCF_000176155.1,Vibrio metschnikovii,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/176/155/GCF_000176155.1_ASM17615v1
+s__Victivallis__vadensis	5199916	0.5960138586854096	GCF_003096415.1,Victivallis vadensis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/003/096/415/GCF_003096415.1_ASM309641v1
+s__Weissella__cibaria	2466961	0.4508522834369899	GCF_001308145.2,Weissella cibaria,/database/ftp.ncbi.nih.gov/genomes/all/GCF/001/308/145/GCF_001308145.2_ASM130814v2
+s__Weissella__paramesenteroides	1980223	0.37538398453103516	GCF_000160575.1,Weissella paramesenteroides,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/160/575/GCF_000160575.1_ASM16057v1
+s__Xanthobacter__autotrophicus	5308934	0.6746469253526226	GCF_000017645.1,Xanthobacter autotrophicus,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/017/645/GCF_000017645.1_ASM1764v1
+s__Xanthomonas__euvesicatoria__species__complex	5042674	0.6476151343513382	GCF_000488955.1,Xanthomonas euvesicatoria,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/488/955/GCF_000488955.1_Xaf-CFBP3836-G1
+s__Yersinia__enterocolitica	4615899	0.47271051641294576	GCF_000009345.1,Yersinia enterocolitica,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/009/345/GCF_000009345.1_ASM934v1
+s__Yersinia__pseudotuberculosis	4723306	0.4753759337209997	GCF_000016945.1,Yersinia pseudotuberculosis,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/016/945/GCF_000016945.1_ASM1694v1
+s__Zunongwangia__profunda	5128187	0.3621845303223147	GCF_000023465.1,Zunongwangia profunda,/database/ftp.ncbi.nih.gov/genomes/all/GCF/000/023/465/GCF_000023465.1_ASM2346v1

@@ -55,6 +55,7 @@ public class MetaSamSource extends SamSource implements Serializable {
                                     return stream(lines)
                                             .filter(line -> !line.startsWith("@"))
                                             .map(samLineParser::parseLine)
+                                            .filter(samRecord -> !samRecord.getReadUnmappedFlag())
                                             .peek(samRecord -> {samRecord.setBaseQualities(new byte[0]); samRecord.setBaseQualityString("*"); samRecord.setHeaderStrict(null);})
                                             .iterator();
                                 });
