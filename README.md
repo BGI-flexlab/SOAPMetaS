@@ -9,18 +9,16 @@ Basic manual.
 ### Prerequisites
 
 + Necessary
-
-  Java >=1.8
-  Spark >=2.4.0
-  Hadoop >=3.0.0
+  + Java >=1.8
+  + Spark >=2.4.0
+  + Hadoop >=3.0.0
 
 <br>
 
 + Optional
-
-  Maven >=3.2.5 (for building from source)
-  YARN latest (for distributed system)
-  HDFS latest (for distributed file storage)
+  + Maven >=3.2.5 (for building from source)
+  + YARN latest (for distributed system)
+  + HDFS latest (for distributed file storage)
 
 ### Database
 
