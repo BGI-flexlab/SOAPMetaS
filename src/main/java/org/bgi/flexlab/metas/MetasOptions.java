@@ -140,19 +140,21 @@ public class MetasOptions implements Serializable {
                         "support multiple-sample mode. We implemented JNI to achieve the integration.");
 
         Option alignmentIndex = new Option("x", "index", true,
-                "Alignment tool index path. Refer to Bowtie2 manual.");
+                "The alignment index file prefix, utilized by bowtie2. Refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information.");
         alignmentIndex.setArgName("PATH-PREFIX");
         this.options.addOption(alignmentIndex);
 
         this.options.addOption(null, "large-index", false,
                 "Bowtie2 large index mode.");
         this.options.addOption("e", "extra-arg", true,
-                "Other parameters for Bowtie2. Please refer to Bowtie2 manual. All parameters should be enclosed together with quotation marks \"\"");
+                "Other parameters for Bowtie2. Please refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information. " +
+                        "All parameters should be enclosed together with quotation marks \"\". Default: \"--very-sensitive --no-unal\"");
 
         Option partitionPerSam = new Option("n", "partition-per-sam", true,
-                "Partition number of each sample. Default: 10\n" +
-                        "The real partition number for Spark partitioner is (sampleNumber * partition-per-sam)." +
-                        "For example, if you have 10 samples and set the para to 5, the RDD will be split to 50 partitions.");
+                "Partition number of each sample. " +
+                        "The real partition number for Spark partitioner is (sampleNumber * partition-per-sam). " +
+                        "For example, if you have 10 samples and set the para to 5, the RDD will be split to 50 partitions. " +
+                        " Increase the number properly may improve the performance. Default: 10");
         partitionPerSam.setArgName("INT");
         //partitionPerSam.setType(Integer.TYPE);
         this.options.addOption(partitionPerSam);
@@ -168,20 +170,17 @@ public class MetasOptions implements Serializable {
 
         OptionGroup inputSampleGroup = new OptionGroup();
         Option multiFqSampleListOpt = new Option("i", "multi-sample-list", true,
-                "Input file of multi sample fastq path list, one line per sample. The option is " +
-                        "exclusive to \"-s\". File format(tab delimited):\n" +
-                        "\t\tReadGroupID Sample(SMTag) read1_path read2_path (header line not included)\n" +
-                        "\t\tERR0000001 HG00001 /path/to/read_1.fq [/path/to/read_2.fq]\n" +
+                "Multiple-sample clean FASTQ files list, one line per sample. The option is exclusive to \"-s\". Note that ReadGroupID info is not considered in current version. File format (tab delimited):\n" +
+                        "\t\tReadGroupID1 Sample(SMTag)1 /path/to/read1_1.fq [/path/to/read1_2.fq]\n" +
+                        "\t\tReadGroupID1 Sample(SMTag)1 /path/to/read2_1.fq [/path/to/read2_2.fq]\n" +
                         "\t\t...");
         multiFqSampleListOpt.setArgName("FILE");
         //multiFqSampleListOpt.setRequired(true);
         Option multiSamSampleListOpt = new Option("s", "multi-sam-list", true,
-                "Input file of multi sample SAM path list, one sample could be splited into " +
-                        "multi lines (with same ReadGroupID). the option is exclusive to \"-i\". File format (tab delimited):\n" +
-                        "\t\tReadGroupID sample(SMTag) sam_path (header line not included)\n" +
-                        "\t\tERR0000001 HG00001 /path/to/rg1_part1.sam\n" +
-                        "\t\tERR0000001 HG00001 /path/to/rg1_part2.sam\n" +
-                        "\t\tERR0000002 HG00001 /path/to/rg2_part1.sam\n" +
+                "Multiple-sample SAM file list, Note that ReadGroupID info is not considered in current version. the option is exclusive to \"-i\". File format (tab delimited):\n" +
+                        "\t\tReadGroupID1 sample(SMTag)1 /path/to/sample1_part1.sam\n" +
+                        "\t\tReadGroupID1 sample(SMTag)1 /path/to/sample1_part2.sam\n" +
+                        "\t\tReadGroupID2 sample(SMTag)2 /path/to/sample2_part1.sam\n" +
                         "\t\t...");
         multiSamSampleListOpt.setArgName("FILE");
         inputSampleGroup.addOption(multiFqSampleListOpt).addOption(multiSamSampleListOpt).setRequired(true);
@@ -205,8 +204,8 @@ public class MetasOptions implements Serializable {
         //                "to raw read number. Note that \"--spe-gc\" (species genome gc information) must be set.");
         // Species genome GC table
         Option speciesGC = new Option("g", "spe-gc", true,
-                "Genome GC rate of each species included in reference matrix file. File format(tab delimited): \n" +
-                        "\t\ts__Genusname_speciesname\t<int>\t<float> (header line not included)\n" +
+                "Genome information (genome length, genome GC) of each species in reference data. The file is used with \"--ana-lev species\" and \"--prof-pipe comg\". File format (tab delimited):\n" +
+                        "\t\ts__Genusname_speciesname\t<Genome_Length>\t<Genome_GC_rate>\n" +
                         "\t\ts__Escherichia_coli\t4641652\t0.508\n");
         speciesGC.setArgName("FILE");
         this.options.addOption(speciesGC);
@@ -256,18 +255,18 @@ public class MetasOptions implements Serializable {
         this.options.addOption(insertSize);
 
         this.options.addOption(null, "iden-filt", false,
-                "Switch for identity filtering of SAMRecords in profiling process. The filtering will be implemented if set.");
+                "Whether to filter alignment results by identity in profiling process.");
 
         Option minIdentity = new Option(null, "min-identity", true,
-                "Identity threshold for filtering of SAMRecords in profiling process. Default: 0.8");
+                "The minimal alignment identity of reserved sequence. Default: 0.8");
         minIdentity.setArgName("Double");
         //minIdentity.setType(Double.TYPE);
         this.options.addOption(minIdentity);
 
         this.options.addOption(null, "len-filt", false,
-                "Switch for alignment length filtering of SAMRecords in profiling process. The filtering will be implemented if set.");
+                "Whether to filter alignment results by alignment length in profiling process.");
         Option minAlignLen = new Option(null, "min-align-len", true,
-                "Alignment length threshold for filtering of SAMRecords in profiling process. Default: 30");
+                "The minimal alignment length of reserved sequence. Default: 30");
         minAlignLen.setArgName("Double");
         this.options.addOption(minAlignLen);
 
@@ -299,15 +298,13 @@ public class MetasOptions implements Serializable {
         this.options.addOption(analysisMode);
 
         Option analysisLevel = new Option(null, "ana-lev", true,
-                "Output level of profiling. Options: species, markers. \"species\" level means the " +
-                        "result is profiling of species. \"markers\" means profiling of marker gene (genes of reference)." +
-                        " Default: species");
+                "The cluster level of output profiling result, including \"marker\" level for gene profiling and \"species\" level for species profiling." +
+                        "The parameter work with \"--prof-pipe comg\". Default: species." + " Default: species");
         analysisLevel.setArgName("MODE");
         this.options.addOption(analysisLevel);
 
         Option profilingPipe = new Option(null, "prof-pipe", true,
-                "Pipeline of profiling. Please refer " +
-                        "to doi:10.1038/nbt.2942 for more information. Option: comg, meph, mephn. Default: comg");
+                "Pipeline of profiling. Option: comg (doi:10.1038/nbt.2942), meph (MetaPhlAn2). Default: comg");
         profilingPipe.setArgName("MODE");
         this.options.addOption(profilingPipe);
 
@@ -331,39 +328,40 @@ public class MetasOptions implements Serializable {
         TODO: Reference information include genus, is it possible to add genus level profiling?
          */
         Option referenceMatrix = new Option("r", "ref-matrix", true,
-                "Reference information matrix file of marker gene. We suggest filtering out gene " +
-                        "with no species info. File format(tab delimited):\n" +
-                        "\t\tgeneID geneName geneLength geneGC species[ genus phylum] (header line not included)\n" +
-                        "\t\t1 T2D-6A_GL0083352 88230 s__unclassed[ geneGC[ g__unclassed p__unclassed]]\n" +
+                "Reference information matrix file of marker gene. Including sequence length, species information of marker gene. File format (tab delimited):\n" +
+                        "\t\tgeneID geneName geneLength geneGC species [genus phylum] (header line not included)\n" +
+                        "\t\t1 T2D-6A_GL0083352 88230 s__unclassed [geneGC [g__unclassed p__unclassed]]\n" +
                         "..." +
-                        "\t\t59 585054.EFER_0542 21669 s__Escherichia_coli[ geneGC[ g__Escherichia p__Proteobacteria]]\n" +
+                        "\t\t59 585054.EFER_0542 21669 s__Escherichia_coli [geneGC [g__Escherichia p__Proteobacteria]]\n" +
                         "...");
         referenceMatrix.setArgName("FILE");
         this.options.addOption(referenceMatrix);
 
         Option mpaMarkerList = new Option(null, "mpa-marker-list", true,
-                "Marker information list extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in json format. User may generate the file with python3 json.dump(mpa_pkl[\"markers\"])");
+                "Marker information list for \"--prof-pipe meph\", extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in json format. User may generate the file using python3 json.dump(mpa_pkl[\"markers\"])");
         mpaMarkerList.setArgName("FILE");
         this.options.addOption(mpaMarkerList);
         Option mpaTaxonomyList = new Option(null, "mpa-taxon-list", true,
-                "Taxonomy information list extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in tab-seperated format. User may generate the file with python3 json.dump(mpa_pkl[\"taxonomy\"])");
+                "Taxonomy information list for \"--prof-pipe meph\", extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in json format. User may generate the file using python3 json.dump(mpa_pkl[\"taxonomy\"])");
         mpaTaxonomyList.setArgName("FILE");
         this.options.addOption(mpaTaxonomyList);
         Option excludeMarkers = new Option(null, "mpa-exclude-list", true,
-                "Markers to exclude, one marker gene per line. Please reference to MetaPhlAn2 markers_to_exclude/ingnore_markers.");
+                "Markers to exclude for \"--prof-pipe meph\", one marker gene per line. Please reference to variable markers_to_exclude/ingnore_markers in MetaPhlAn2 source code for more information.");
         excludeMarkers.setArgName("FILE");
         this.options.addOption(excludeMarkers);
 
 
         Option outputDir = new Option("o", "output-hdfs-dir", true,
-                "Output directory, in HDFS, of SAM result and Profiling result. Note that the \"alignment\" and " +
-                        "\"profiling\" subdirectory will be created. Add \"file://\" prefix to save outputs in local file system.");
+                "Path to store alignment and profiling results, support both local path (file://) and HDFS (Hadoop Distributed File System) path. " +
+                        "Note that the \"alignment\" and \"profiling\" subdirectory will be created.");
         outputDir.setArgName("PATH");
         outputDir.setRequired(true);
         this.options.addOption(outputDir);
 
+        //Option tmpDirOpt = new Option(null, "tmp-local-dir", true, "Local temp directory for intermediate files. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. The temp directory is used to save alignment results, GC-model-related outputs and sample list file.");
         Option tmpDirOpt = new Option(null, "tmp-local-dir", true,
-                "Local temp directory for intermediate files. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. The temp directory is used to save alignment results, GC-model-related outputs and sample list file.");
+                "Local temp directory for intermediate files. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. " +
+                        "The temp directory is used to save alignment results and sample list file.");
         tmpDirOpt.setArgName("PATH");
         this.options.addOption(tmpDirOpt);
         //this.options.addOption(null, "align-out-dir", true, "Output directory of profiling results. Default is output-dir/alignment.")
@@ -382,11 +380,9 @@ public class MetasOptions implements Serializable {
         ////                "this arg. Note: Merging will slow down the whole process.");
 
         this.options.addOption(null, "skip-alignment", false,
-                "Switch option. If set, the alignment process will be skipped, and users must " +
-                        "provide formatted SAM sample list (argument \"-s\").");
+                "Switch option. If set, the alignment process will be skipped, and users must provide formatted SAM sample list (argument \"-s\").");
         this.options.addOption(null, "skip-profiling", false,
-                "Switch option. If set, the profiling process will be skipped, the tools will run " +
-                        "as an Spark-version of Bowtie2 for multi-sample.");
+                "Switch option. If set, the profiling process will be skipped, and users must provide formatted FASTQ sample list (argument \"-i\").");
         this.options.addOption(null, "retain-temp", false, "Switch option. If set, interval temp files will be retained.");
 
         /*

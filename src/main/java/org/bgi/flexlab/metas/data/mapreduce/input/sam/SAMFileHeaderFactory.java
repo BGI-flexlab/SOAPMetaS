@@ -45,7 +45,6 @@ public class SAMFileHeaderFactory {
                 int len = Integer.parseInt(lineSplit[2]);
                 samSequenceRecordList.add(new SAMSequenceRecord(lineSplit[1], len));
             }
-
         } catch (NumberFormatException e){
             LOG.error("[SOAPMetas::" + SAMFileHeaderFactory.class.getName() + "] Wrong number format of gene length or gene GC content.");
         } catch (IOException e) {

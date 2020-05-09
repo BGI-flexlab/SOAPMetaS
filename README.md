@@ -2,27 +2,109 @@
 
 An Apache Spark<sup>TM</sup> based tool for profiling large metagenome datasets accurately on distributed cluster.
 
-## Getting Started
-
-Basic manual.
-
-### Prerequisites
+## Prerequisites
 
 + Necessary
-  + Java >=1.8
-  + Spark >=2.4.0
-  + Hadoop >=3.0.0
+  + Java (1.8 tested)
+  + Spark (2.4.4 tested)
+  + Hadoop (2.7 tested)
 
-<br>
+<br/>
 
 + Optional
-  + Maven >=3.2.5 (for building from source)
+  + Maven 3.2.5 (for building from source)
   + YARN latest (for distributed system)
   + HDFS latest (for distributed file storage)
 
-### Database
+## Important Parameters
 
-#### "comg" mode
+```Text
+--ana-lev
+The cluster level of output profiling result, including "marker" level for gene profiling and "species" level for species profiling. The parameter work with "--prof-pipe comg". Default: species.
+
+-e, --extra-arg
+Other parameters for Bowtie2. Please refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information. All parameters should be enclosed together with quotation marks "". Default: "--very-sensitive --no-unal".
+
+-g, --spe-gc
+Genome information (genome length, genome GC) of each species in reference data. The file is used with "--ana-lev species" and "--prof-pipe comg". File format (tab delimited):
+s__Genusname_speciesname	<Genome_Length>	<Genome_GC_rate>
+s__Escherichia_coli	4641652	0.508
+...
+
+-i, --multi-sample-list
+Multiple-sample clean FASTQ files list, one line per sample. The option is exclusive to "-s". Note that ReadGroupID info is not considered in current version. File format (tab delimited):
+ReadGroupID1 Sample(SMTag)1 /path/to/read1_1.fq [/path/to/read1_2.fq]
+ReadGroupID2 Sample(SMTag)2 /path/to/read2_1.fq [/path/to/read2_2.fq]
+...
+
+--iden-filt
+Whether to filter alignment results by identity in profiling process.
+
+--large-index
+Bowtie2 large index mode.
+
+--len-filt
+Whether to filter alignment results by alignment length in profiling process.
+
+--local
+If set, input/output file paths are treated as local file system. By default, input/output file paths are treated as HDFS.
+
+--min-identity
+The minimal alignment identity of reserved sequence. Default: 0.8
+
+--min-align-len
+The minimal alignment length of reserved sequence. Default: 30
+
+--mpa-marker-list
+Marker information list for "--prof-pipe meph", extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in json format. User may generate the file using python3 json.dump(mpa_pkl["markers"]).
+
+--mpa-exclude-list
+Markers to exclude for "--prof-pipe meph", one marker gene per line. Please reference to variable markers_to_exclude/ingnore_markers in MetaPhlAn2 source code for more information.
+
+--mpa-taxon-list
+Taxonomy information list for "--prof-pipe meph", extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in json format. User may generate the file using python3 json.dump(mpa_pkl["taxonomy"]).
+
+-n, --partition-per-sam
+Partition number of each sample. The real partition number for Spark partitioner is (sampleNumber * partition-per-sam). For example, if you have 10 samples and set this para as 5, the RDD will be split to 50 partitions. Increase the number properly may improve the performance. Default: 10
+
+-o, --output-hdfs-dir
+Path to store alignment and profiling results, support both local path (file://) and HDFS (Hadoop Distributed File System) path. Note that the "alignment" and "profiling" subdirectory will be created.
+
+--prof-pipe
+Pipeline of profiling. Option: comg (doi:10.1038/nbt.2942), meph (MetaPhlAn2). Default: comg.
+
+-r, --ref-matrix
+Reference information matrix file of marker gene. Including sequence length, species information of marker gene. File format (tab delimited):
+geneID geneName geneLength geneGC species [genus phylum] (header line not included)
+1 T2D-6A_GL0083352 88230 s__unclassed [geneGC [g__unclassed p__unclassed]]
+...
+59 585054.EFER_0542 21669 s__Escherichia_coli [geneGC [g__Escherichia p__Proteobacteria]]
+...
+
+-s, --multi-sam-list
+Multiple-sample SAM file list, Note that ReadGroupID info is not considered in current version. the option is exclusive to "-i". File format (tab delimited):
+ReadGroupID1 sample(SMTag)1 /path/to/rg1_part1.sam
+ReadGroupID1 sample(SMTag)1 /path/to/rg1_part2.sam
+ReadGroupID2 sample(SMTag)2 /path/to/rg2_part1.sam
+...
+
+--skip-alignment
+Switch option. If set, the alignment process will be skipped, and users must provide formatted SAM sample list (argument "-s").
+
+--skip-profiling
+Switch option. If set, the profiling process will be skipped, and users must provide formatted FASTQ sample list (argument "-i").
+
+--tmp-local-dir
+Local temp directory for intermediate files. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. The temp directory is used to save alignment results and sample list file.
+
+-x, --index
+The alignment index file prefix, utilized by bowtie2. Refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information.
+
+```
+
+## Database
+
+### "comg" mode
 
 Including three (types of) files:
 
@@ -32,7 +114,7 @@ Including three (types of) files:
 
 File demos are listed in `example/database/marker_data` folder, refer to related [README](https://github.com/BGI-flexlab/SOAPMetaS/tree/dev_maple/example/database/marker_data/README.md) for more information.
 
-#### "meph" mode
+### "meph" mode
 
 Including five (types of) files:
 
@@ -44,107 +126,62 @@ Including five (types of) files:
 
 File demos are listed in `example/database/metaphlanDB` folder, refer to related [README](https://github.com/BGI-flexlab/SOAPMetaS/tree/dev_maple/example/database/metaphlanDB/README.md) for more information.
 
-### Usage
+## Usage
 
-#### Basic Parameters
+```bash
+# --prof-pipe comg
+spark-submit --master <URL> --deploy-mode client --driver-memory 512m --executor-memory 512m --executor-cores 1 --conf spark.task.cpus=1 --class org.bgi.flexlab.metas.SOAPMetas SOAPMetaS.jar --prof-pipe comg -i sample.list -x /path/to/Bowtie2ReferenceIndex_prefix --large-index -o /path/to/results -n 3 -e "--very-sensitive --phred33 --no-unal --xeq --threads 1" --tmp-local-dir /path/to/local/temp --ana-lev species --ref-matrix marker_gene_info.matrix --spe-gc reference_genome_info.list 1>running.o 2>running.e
 
-```Text
---ana-lev
-The cluster level of output profiling result, including "marker" level for gene profiling and "species" level for species profiling. The parameter work with "--prof-pipe comg".
-
---prof-pipe
-The profiling method, including "comg" and "meph", refer to Supplementary Note 4 for more details.
-
--x, --index
-The alignment index file prefix, utilized by bowtie2.
-
---large-index
-"large index" option of bowtie2.
-
--e, --extra-arg
-Extra parameters for Bowtie2.
-
--n, --partition-per-sam
-Partition number of each sample, increase the number properly may improve the performance.
-
--i, --multi-sample-list
-Input file contains the sample ID, read group ID and file path to FASTQ-format clean reads.
-
--s, --multi-sam-list
-Input file contains the sample ID, read group ID and file path to SAM-format alignment results.
-
--g, --spe-gc
-Genome information (genome length, genome GC) of each species in reference data. The file is used with "--ana-lev species" and "--prof-pipe comg".
-
---iden-filt
-Whether filter alignment results by identity.
-
---min-identity
-The minimal alignment identity of reserved sequence.
-
---len-filt
-
-Whether filter alignment results by alignment length.
-
---min-align-len
-The minimal alignment length of reserved sequence.
-
--r, --ref-matrix
-Reference information matrix file of marker gene. Including sequence length, species information of marker gene.
-
--o, --output-hdfs-dir
-Path to store alignment and profiling results, support both local path (file://) and HDFS (Hadoop Distributed File System) path.
-
---tmp-local-dir
-Local temp directory to store intermediate files.
-
---mpa-taxon-list and --mpa-marker-list and --mpa-exclude-list
-Reference database for "--prof-pipe meph", all file is excluded from MetaPhlAn2-related files. Refer to Supplementary Note 6.2 for details.
-
---skip-alignment
-Control the execution of alignment step.
-
---skip-profiling
-Control the execution of profiling step.
+# --prof-pipe meph
+spark-submit --master <URL> --deploy-mode client --driver-memory 512m --executor-memory 512m --executor-cores 1 --conf spark.task.cpus=1 --class org.bgi.flexlab.metas.SOAPMetas SOAPMetaS.jar --prof-pipe meph -i sample.list -x /path/to/Bowtie2ReferenceIndex_prefix -o /path/to/results -n 3 -e "--very-sensitive --phred33 --no-unal --xeq --threads 1" --tmp-local-dir /path/to/local_temp --ref-matrix marker_gene_info.matrix --mpa-marker-list mpa_marker_list.json --mpa-taxon-list mpa_taxonomy_list.json --mpa-exclude-list MetaPhlAn2_excluded.list 1>running.o 2>running.e
 ```
 
-#### Server mode
+Important Notes:
 
-Server mode is based on distributed system. Users should use YARN (recommended) or other manager (not tested) to start a Spark master.
++ Users can submit SOAPMetaS to Spark Standalone or YARN cluster manager, and change `--master` to correponding address.
++ It's better to set `--deploy-mode` to "client", since we haven't tested "cluster" mode.
++ `--driver-memory` should be set according to the reference matrix file (`--ref-matrix`), it must cover both reference name and other memory needs. The IGC reference matrix for `--prof-pipe comg` needs around 700MB memory (4GB is better), and metaphlanDB for `--prof-pipe meph` needs around 80MB memory (2GB is better).
++ The `--executor-memory` must be set according to the file size of reference indexes (`-x`), it must cover both index contents and other memory needs. The IGC reference for `--prof-pipe comg` needs around 20GB memory per task (25GB is better), and metaphlanDB for `--prof-pipe meph` needs around 2GB memory per task (3GB is better).
++ All reference dataset should be deployed to the same absolute path on each worker nodes, or be stored in a public sharing node.
++ Output directory (-o) "/path/to/results" can be HDFS or local (with `--local` option) path.
++ `--executor-cores`, `--conf spark.task.cpus` can affect the performance of SOAPMetaS. The best configuration is related to the volume of data.
+
+## Small Example
+
+**Environment:**
+
++ Ubuntu 18.04.4 LTS (2 processors, 4096 MB base memory) in Virtualbox
++ Java 1.8
++ Spark 2.4.4 with hadoop 2.7
+
+**Start Standalone:**
+
+```bash
+cd spark-2.4.4-bin-hadoop2.7/
+
+echo "export SPARK_MASTER_OPTS=\"-Dspark.deploy.defaultCores=2\""  >> conf/spark-env.sh
+echo "export SPARK_WORKER_CORES=1" >> conf/spark-env.sh
+echo "export SPARK_WORKER_MEMORY=1g" >> conf/spark-env.sh
+echo "export SPARK_WORKER_INSTANCES=2" >> conf/spark-env.sh
+
+bash sbin/start-master.sh
+bash sbin/start-slave.sh
+```
+
+**Run Example:**
 
 ```Bash
-# comg mode
-spark-submit --master yarn --class org.bgi.flexlab.metas.SOAPMetas SOAPMetaS.jar org.bgi.flexlab.metas.SOAPMetas --prof-pipe comg -i /path/to/sample.list -x Bowtie2ReferenceIndex_prefix --seq-mode se -o /path/to/output_directory -n 10 -e "--very-sensitive --no-unal --xeq --threads 1" --ana-lev markers --tmp-local-dir /path/to/local_temp --ref-matrix reference.matrix --spe-gc species_genome_gc.list
+## Download the example/profiling_without_HDFS folder of this repository.
+## `--prof-pipe meph` requires larger memory then our local-test machine, we thus have no small example for it.
 
-# meph mode
-spark-submit --master yarn --class org.bgi.flexlab.metas.SOAPMetas SOAPMetaS.jar org.bgi.flexlab.metas.SOAPMetas --prof-pipe meph -i /path/to/sample.list -x Bowtie2ReferenceIndex_prefix --seq-mode se -o /path/to/output_directory -n 10 -e "--very-sensitive --no-unal --xeq --threads 1" --ana-lev markers --ref-matrix reference.matrix --tmp-local-dir /path/to/local_temp --mpa-marker-list mpa_marker_list.json --mpa-taxon-list mpa_taxonomy_list.json --mpa-exclude-list MetaPhlAn2_excluded.list
+spark-submit --master spark://hostname:7077 --deploy-mode client --driver-memory 512m --executor-memory 512m --executor-cores 1 --conf spark.task.cpus=1 --conf spark.dynamicAllocation.enabled=false --class org.bgi.flexlab.metas.SOAPMetas SOAPMetas.jar --local --prof-pipe comg -i example/profiling_without_HDFS/sample.list -x example/profiling_without_HDFS/marker_data/reference_genome -o example/profiling_without_HDFS/results -n 2 -e "--very-sensitive --phred33 --no-unal --xeq --threads 1" --ana-lev species --ref-matrix example/profiling_without_HDFS/marker_data/reference_info.matrix --spe-gc example/profiling_without_HDFS/marker_data/reference_genome_gc.list --tmp-local-dir example/profiling_without_HDFS/temp 1>example/profiling_without_HDFS/running.o 2>example/profiling_without_HDFS/running.e
 ```
 
-#### Local mode
+## More Examples
 
-Change argument of `--master` from "yarn" to "local[*]'. Local mode can be executed directly without distributed server.
+Examples can be found in `example` folder.
 
-## Examples
-
-Examples of "comg" and "meph" mode, as well as local mode without HDFS, are in `example` folder.
-
-Note that the executor memory should be set according to the file size of reference indexes. The IGC reference needs around 20GB memory, and metaphlanDB needs around 3GB memory.
-
-## Building from Source
-
-### Generate SOAPMetaS Jar Package
-
-Make sure that `libbowtiel.so`, `libbowties.so`, `libtbb.so.2`, `libtbbmalloc.so.2` and `libtbbmalloc_proxy.so.2` files are in `main/native` folder. `libbowtie*` can be generated following [these steps](#Build-Bowtie2-Native-Library). `libtbb*` files are copied from C/C++ library "libtbb".
-
-These files have been put in right folder in this repository.
-
-In root directory of the maven project, run:
-
-```Bash
-mvn package
-```
-
-The command will compile and pack all files into a single `.jar` file named "SOAPMetas-*-jar-with-dependencies.jar" in `./target/` folder.
+## Build from Source
 
 ### Build Bowtie2 Native Library
 
@@ -157,14 +194,12 @@ The command will compile and pack all files into a single `.jar` file named "SOA
 + [org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.cpp](https://github.com/BGI-flexlab/SOAPMetaS/blob/dev_maple/src/main/native/org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.cpp)
 + [org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.h](https://github.com/BGI-flexlab/SOAPMetaS/blob/dev_maple/src/main/native/org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.h)
 
-
 #### Building Bowtie2 library
 
-Download Bowtie2 source code archive file, we name it as `bowtie2-source.zip`.
+1. Download Bowtie2 source code archive file, we name it as `bowtie2-source.zip`.
+2. Download all `org_bgi_flexlab_metas_alignment_metasbowtie2_Bowtie*` file to the same folder.
 
-Download all `org_bgi_flexlab_metas_alignment_metasbowtie2_Bowtie*` file to the same folder.
-
-Note that `-std=c++98` works for bowtie2-2.3.5.
++ Note that `-std=c++98` works for bowtie2-2.3.5.
 
 ```Bash
 unzip bowtie2-source.zip
@@ -188,9 +223,23 @@ cd ../
 
 The output `libbowties.so` and `libbowtiel.so` files are Bowtie2 native libraries for "short" and "large" index respectively, and these two files should be move to `main/native` before packing SOAPMetaS.
 
-## Known Problems
+### Generate SOAPMetaS Jar Package
 
-1. Multiple partitions (`-n` >1 or more than one input file) can cause execption related to native libraries, which might be caused by our local Spark configuration or incompatible native dependencies (such as `libstdc++` or others).
+Make sure that `libbowtiel.so`, `libbowties.so`, `libtbb.so.2`, `libtbbmalloc.so.2` and `libtbbmalloc_proxy.so.2` files are in `main/native` folder. `libbowtie*` can be generated following [these steps](#Build-Bowtie2-Native-Library). `libtbb*` files are copied from C/C++ library "libtbb".
+
+These files have been put in right folder in this repository.
+
+In root directory of the maven project, run:
+
+```Bash
+mvn package
+```
+
+The command will compile and pack all files into a single `.jar` file named "SOAPMetas-*-jar-with-dependencies.jar" in `./target/` folder.
+
+## Known Issues
+
+1. In Spark `local` mode, SOAPMetaS' multiple partitions (`-n` >1 or more than one input file) will trigger execption related to native libraries, and the cause of the exception hasn't been located yet. But `standalone` and `yarn` mode works well.
 2. The version of `libtbb` and `libstdc++` should match the version of Bowtie2, and it's recommended that the reference index files are generated using `bowtie2-build` of the same version.
 
 ## License
