@@ -449,7 +449,7 @@ public class MEPHWrongProfilingMethod extends ProfilingMethodBase implements Ser
 
         String markerName = record.getReferenceName();
         if (this.excludeMarkers.contains(markerName)) {
-            LOG.info("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] Exclude special marker " + markerName);
+            //LOG.info("[SOAPMetas::" + MEPHWrongProfilingMethod.class.getName() + "] Exclude special marker " + markerName);
             return new Tuple2<>(null, null);
         }
 

@@ -91,7 +91,7 @@ public class MetasSEFastqReader extends RecordReader<Text, Text> {
 
         // System.err.println("split:" + split.getPath().toString());
         String sampleListPath = jobConf.get("metas.data.mapreduce.input.fqsamplelist");
-        LOG.info("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Sample list file (in hadoop conf): " + sampleListPath);
+        //LOG.info("[SOAPMetas::" + MetasSEFastqReader.class.getName() + "] Sample list file (in hadoop conf): " + sampleListPath);
         if (sampleListPath != null && !sampleListPath.equals("")) {
             FastqMultiSampleList fastqMultiSampleList = new FastqMultiSampleList(sampleListPath, true, true, false);
             FastqSampleList slist = null;

@@ -1,15 +1,15 @@
 #!/bin/bash
 # File Name: comg_gene_profiling_example.sh
 
-sparksubmit = /path/to/spark-submit
-soapmetas = /path/to/SOAPMetas.jar
+sparksubmit=/path/to/spark-submit
+soapmetas=/path/to/SOAPMetas.jar
 
-databaseDir = example/profiling_without_HDFS
-HDFSWORKDIR = /HDFS/path/to/example
-WORKDIR = example/profiling_without_HDFS
-hdpDataDir = ${HDFSWORKDIR}/data
-outputHDFSDir = ${HDFSWORKDIR}/results
-localTempDir = ${WORKDIR}/temp
+databaseDir=example/profiling_without_HDFS
+HDFSWORKDIR=/HDFS/path/to/example
+WORKDIR=example/profiling_without_HDFS
+hdpDataDir=${HDFSWORKDIR}/data
+outputHDFSDir=${HDFSWORKDIR}/results
+localTempDir=${WORKDIR}/temp
 
 /bin/echo -e "SAMPLEID1\tSAMPLEID1\t${hdpDataDir}/read1.fastq" >sample.list
 /bin/echo -e "SAMPLEID2\tSAMPLEID2\t${hdpDataDir}/read2.fastq" >>sample.list
@@ -27,11 +27,11 @@ speciesGenoGC=${databaseDir}/marker_data/reference_genome_gc.list
 #mpaTaxonList=${databaseDir}/metaphlanDB/MetaPhlAn2_mpa.taxonomy.list.json
 #excludeMarker=${databaseDir}/metaphlanDB/mpa_exclude_marker_NewName
 
-masterURL = spark://hostname:7077
-bowtieThread = 1
-taskCores = 1
-exeCores = 1
-exeNum = 2
+masterURL=spark://hostname:7077
+bowtieThread=1
+taskCores=1
+exeCores=1
+exeNum=2
 partitionNumPerSample=2
 
 sparkOptions="--master ${masterURL} --deploy-mode client --driver-memory 512M --executor-memory 512M --conf spark.task.cpus=${taskCores} --conf spark.dynamicAllocation.enabled=false --executor-cores ${exeCores} --num-executors ${exeNum}"

@@ -465,7 +465,7 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
 
         String markerName = record.getReferenceName();
         if (this.excludeMarkers.contains(markerName)) {
-            LOG.info("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Exclude special marker " + markerName);
+            //LOG.trace("[SOAPMetas::" + MEPHProfilingMethod.class.getName() + "] Exclude special marker " + markerName);
             return new Tuple2<>(null, null);
         }
 

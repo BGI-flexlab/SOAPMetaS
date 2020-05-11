@@ -120,9 +120,9 @@ public class MEPHNewAbundanceFunction implements PairFlatMapFunction<Iterator<Tu
 
         HashMap<String, MEPHNewAbundanceFunction.CladeNode> allClades = new HashMap<>(27086); //cladename: CladeNode
 
-        LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Start Initializing allClades for sample " + smTag);
+        //LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Start Initializing allClades for sample " + smTag);
         allCladesInitialize(allClades);
-        LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Finish Initializing allClades and start adding reads for sample " + smTag);
+        //LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Finish Initializing allClades and start adding reads for sample " + smTag);
 
         /*
         Add reads
@@ -145,7 +145,7 @@ public class MEPHNewAbundanceFunction implements PairFlatMapFunction<Iterator<Tu
             putMarkerRCMap(allClades.get(cladeNameTemp), markerNameTemp, tupleTemp._2);
         }
 
-        LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Finish adding reads and start computing abundance for sample " + smTag);
+        //LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Finish adding reads and start computing abundance for sample " + smTag);
 
         /*
         Compute abundance.
@@ -160,11 +160,11 @@ public class MEPHNewAbundanceFunction implements PairFlatMapFunction<Iterator<Tu
             totalAbun += kingdomAbun;
             kingdomNreads = this.computeNodeNreads(kingdom, allClades.get(kingdom));
             totalNreads += kingdomNreads;
-            LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun + " , total mapped reads: " + kingdomNreads);
+            //LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun + " , total mapped reads: " + kingdomNreads);
         }
-        LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun + " | Total mapped reads: " + totalNreads );
+        //LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun + " | Total mapped reads: " + totalNreads );
 
-        LOG.info("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Finish computing abundance and start relative abunadnce computing for sample " + smTag);
+        LOG.trace("[SOAPMetas::" + MEPHNewAbundanceFunction.class.getName() + "] Finish computing abundance and start relative abunadnce computing for sample " + smTag);
 
         if (! (totalAbun > 0.0) ) {
             return new ArrayList<Tuple2<String, ProfilingResultRecord>>(0).iterator();

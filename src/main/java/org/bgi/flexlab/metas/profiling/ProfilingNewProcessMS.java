@@ -167,8 +167,8 @@ public class ProfilingNewProcessMS {
         SampleIDReadNamePartitioner sampleIDClusterNamePartitioner = new SampleIDReadNamePartitioner(numPartition,
                 this.numPartitionEachSample);
         SampleIDPartitioner sampleIDPartitioner = new SampleIDPartitioner(sampleCount + 1);
-        LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] SampleCount: " + sampleCount +
-                " Partition each sample: " + this.numPartitionEachSample + " Total Partition Number: " + numPartition);
+        //LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] SampleCount: " + sampleCount +
+        //        " Partition each sample: " + this.numPartitionEachSample + " Total Partition Number: " + numPartition);
 
         //LOG.info("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] All input sam file paths: " + filePath);
 

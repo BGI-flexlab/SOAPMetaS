@@ -102,7 +102,7 @@ public class BowtieTabAlignmentMethod extends AlignmentMethodBase
         FileOutputStream fos1;
         BufferedWriter bw1;
 
-        LOG.info("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Writing input file for bowtie2: " + tab5File.getAbsolutePath());
+        //LOG.info("[SOAPMetas::" + BowtieTabAlignmentMethod.class.getName() + "] Writing input file for bowtie2: " + tab5File.getAbsolutePath());
 
         try {
             fos1 = new FileOutputStream(tab5File);

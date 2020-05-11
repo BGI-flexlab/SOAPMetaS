@@ -9,7 +9,6 @@ import org.bgi.flexlab.metas.MetasOptions;
 import org.bgi.flexlab.metas.alignment.AlignmentToolWrapper;
 import org.bgi.flexlab.metas.util.DataUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -196,7 +195,7 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
     public int run() {
         String[] arguments = this.parseArguments(0);
 
-        LOG.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 arguments: " + StringUtils.join(arguments, ' '));
+        LOG.trace("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 arguments: " + StringUtils.join(arguments, ' '));
 
         int returnCode;
 
@@ -207,9 +206,9 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
         }
 
         if (returnCode == 0){
-            LOG.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 runs successfully for input: " + arguments[arguments.length-1]);
+            LOG.trace("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 runs successfully for input: " + arguments[arguments.length-1]);
         } else {
-            LOG.info("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 failed in running for input: " + arguments[arguments.length-1]);
+            LOG.trace("[SOAPMetas::" + MetasBowtie.class.getName() + "] Bowtie2 failed in running for input: " + arguments[arguments.length-1]);
         }
 
         // 0 means successful execution.

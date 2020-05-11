@@ -207,7 +207,7 @@ public class MEPHNewProfilingMethod extends ProfilingMethodBase implements Seria
 
         String markerName = record.getReferenceName();
         if (this.excludeMarkers.contains(markerName)) {
-            LOG.info("[SOAPMetas::" + MEPHNewProfilingMethod.class.getName() + "] Exclude special marker " + markerName);
+            LOG.trace("[SOAPMetas::" + MEPHNewProfilingMethod.class.getName() + "] Exclude special marker " + markerName);
             return new Tuple2<>(null, null);
         }
 

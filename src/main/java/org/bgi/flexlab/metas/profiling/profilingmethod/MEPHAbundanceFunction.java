@@ -66,7 +66,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         this.doDisqm = options.isDoDisqm();
         this.statType = options.getStatType();
         this.outFormat = options.getOutputFormat();
-        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Output format is " + this.outFormat);
+        //LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Output format is " + this.outFormat);
 
         // MetaPhlAn2 2018 database:
         // markers2clades/exts/lens: 1035649
@@ -103,9 +103,9 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
 
         HashMap<String, CladeNode> allClades = new HashMap<>(27086); //cladename: CladeNode
 
-        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Start Initializing allClades for sample " + smTag);
+        //LOG.trace("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Start Initializing allClades for sample " + smTag);
         allCladesInitialize(allClades);
-        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Finish Initializing allClades and start adding reads for sample " + smTag);
+        //LOG.trace("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Finish Initializing allClades and start adding reads for sample " + smTag);
 
         /*
         Add reads
@@ -128,7 +128,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
             putMarkerRCMap(allClades.get(cladeNameTemp), markerNameTemp, tupleTemp._2);
         }
 
-        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Finish adding reads and start computing abundance for sample " + smTag);
+        //LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Finish adding reads and start computing abundance for sample " + smTag);
 
 
         //for (HashMap.Entry<String, HashMap<String, Tuple2<Integer, Double>>> entry: cladeMarkers2nreads.entrySet()) {
@@ -147,9 +147,9 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         for (String kingdom : kingdomList) {
             kingdomAbun = this.computeNodeAbundance(kingdom, allClades);
             totalAbun += kingdomAbun;
-            LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun);
+            //LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun);
         }
-        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun);
+        //LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun);
         //try {
         //    double kingdomAbun;
         //    for (String kingdom : kingdomList) {
@@ -162,7 +162,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         //    LOG.error("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] computeAbundance null pointer. " + e.toString());
         //}
 
-        LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Finish computing abundance and start relative abunadnce computing for sample " + smTag);
+        //LOG.info("[SOAPMetas::" + MEPHAbundanceFunction.class.getName() + "] Finish computing abundance and start relative abunadnce computing for sample " + smTag);
 
 
         //try (BufferedWriter bw = new BufferedWriter(new FileWriter("/hwfssz1/BIGDATA_COMPUTING/heshixu/SOAPMetas_TEST/Version0.0.2_TEST/01.profiling/HMP_HMASM_MetaWUGSCStool/SOAPMetas_MEPHProcessM2/cladeNodeInfo_SOAPMetas_After-" + smTag + ".list"))) {

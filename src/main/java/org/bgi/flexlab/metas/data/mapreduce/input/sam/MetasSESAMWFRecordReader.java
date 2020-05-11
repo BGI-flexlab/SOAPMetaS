@@ -71,8 +71,7 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
         final FileSystem fs = file.getFileSystem(conf);
         this.splitFileName = file.getName();
 
-        LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Current split file: "  +
-                file.getName() + " File position: " + this.start + " Split length: " + split.getLength());
+        //LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Current split file: " + file.getName() + " File position: " + this.start + " Split length: " + split.getLength());
 
         String samSampleListPath = conf.get("metas.data.mapreduce.input.samsamplelist");
         //LOG.trace("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] SAM sample list configure metas.data.mapreduce.input.samsamplelist is " + samSampleListPath);
@@ -88,7 +87,7 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
             sampleID = 0;
         }
 
-        LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Start read split " + file.getName());
+        //LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Start read split " + file.getName());
 
         input = fs.open(file);
 
@@ -197,7 +196,7 @@ public class MetasSESAMWFRecordReader extends RecordReader<Text, MetasSAMPairRec
                 this.lastRecord = null;
                 return true;
             }
-            LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Finish reading SAM of sample " + sampleID + " , split " + this.splitFileName);
+            //LOG.info("[SOAPMetas::" + MetasSESAMWFRecordReader.class.getName() + "] Finish reading SAM of sample " + sampleID + " , split " + this.splitFileName);
             return false;
         }
 

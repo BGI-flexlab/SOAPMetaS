@@ -149,7 +149,7 @@ public class GCBiasDefaultModel extends GCBiasModelBase implements Serializable{
                     default: {
                         // The next string must be extracted or the nextName() method will cause an exception.
                         String currentStr = jsonReader.nextString();
-                        LOG.info("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Json Item Name " + itemName + " value: " + currentStr);
+                        //LOG.trace("[SOAPMetas::" + GCBiasDefaultModel.class.getName() + "] Json Item Name " + itemName + " value: " + currentStr);
                     }
                 }
             }

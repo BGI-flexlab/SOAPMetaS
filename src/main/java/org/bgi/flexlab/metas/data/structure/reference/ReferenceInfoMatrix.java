@@ -71,7 +71,7 @@ public class ReferenceInfoMatrix implements Serializable {
             }
         }
 
-        LOG.info("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Construct species gc matrix.");
+        //LOG.info("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Construct species gc matrix.");
     }
 
     //public ReferenceInfoMatrix(String referenceMatrixFilePath){
@@ -109,7 +109,7 @@ public class ReferenceInfoMatrix implements Serializable {
                 this.markerRecordMap.put(lineSplit[1], geneRecord);
                 //LOG.trace("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Marker gene matrix file. " + "Current line: " + currentLine + " || Key of current line: " + lineSplit[1]);
             }
-            LOG.info("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Construct marker gene matrix file.");
+            //LOG.info("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Construct marker gene matrix file.");
             matrixBR.close();
 
         } catch (NumberFormatException e){

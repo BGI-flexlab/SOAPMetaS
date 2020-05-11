@@ -33,7 +33,7 @@ public class RelativeAbundanceFunction implements Serializable, PairFlatMapFunct
     public Iterator<Tuple2<String, ProfilingResultRecord>> call(Iterator<Tuple2<String, ProfilingResultRecord>> tuple2Iterator) throws Exception {
 
         if (this.skip) {
-            LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Skip relative abundance computing. (metaphlan pipeline)");
+            //LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Skip relative abundance computing. (metaphlan pipeline)");
             return tuple2Iterator;
         }
         ArrayList<Tuple2<String, ProfilingResultRecord>> relativeProfilingList;
@@ -48,12 +48,12 @@ public class RelativeAbundanceFunction implements Serializable, PairFlatMapFunct
             totalAbun += tup0._2.getAbundance();
             //LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Abundance of cluster " + tup0._2.getClusterName() + " is " + tup0._2.getAbundance());
             sampleID = tup0._1;
-            LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Relative abundance calculation for sampleID: " + sampleID + " sample TAG: " + smTag);
+            //LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Relative abundance calculation for sampleID: " + sampleID + " sample TAG: " + smTag);
 
             relativeProfilingList = new ArrayList<>(128);
             relativeProfilingList.add(tup0);
         } else {
-            LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Skip null partition.");
+            //LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Skip null partition.");
             return new ArrayList<Tuple2<String, ProfilingResultRecord>>(0).iterator();
         }
 
@@ -72,13 +72,13 @@ public class RelativeAbundanceFunction implements Serializable, PairFlatMapFunct
             relativeProfilingList.add(tup);
         }
 
-        LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Total abundance of sample " + smTag + " is " + totalAbun);
+        //LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] Total abundance of sample " + smTag + " is " + totalAbun);
 
         for(Tuple2<String, ProfilingResultRecord> tup: relativeProfilingList){
             tup._2.setRelAbun(tup._2.getAbundance()/totalAbun * 100);
         }
 
-        LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] SampleTAG: " + smTag + " . SampleID recheck: " + relativeProfilingList.get(relativeProfilingList.size()-1)._1);
+        //LOG.info("[SOAPMetas::" + RelativeAbundanceFunction.class.getName() + "] SampleTAG: " + smTag + " . SampleID recheck: " + relativeProfilingList.get(relativeProfilingList.size()-1)._1);
         return relativeProfilingList.iterator();
     }
 }

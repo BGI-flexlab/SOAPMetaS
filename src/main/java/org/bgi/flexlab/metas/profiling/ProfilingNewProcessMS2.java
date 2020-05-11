@@ -167,7 +167,7 @@ public class ProfilingNewProcessMS2 {
     public List<String> runProfilingProcess(){
 
         String filePath = samMultiSampleList.getAllSAMFilePath();
-        LOG.info("[SOAPMetas::" + ProfilingNewProcessMS2.class.getName() + "] All input sam file paths: " + filePath);
+        //LOG.info("[SOAPMetas::" + ProfilingNewProcessMS2.class.getName() + "] All input sam file paths: " + filePath);
 
         HashMap<String, Integer> sampleIDs = samMultiSampleList.getSampleIDbySampleName();
 

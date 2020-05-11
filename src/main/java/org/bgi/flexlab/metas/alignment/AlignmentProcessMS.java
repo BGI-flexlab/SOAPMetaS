@@ -329,10 +329,10 @@ public class AlignmentProcessMS {
         JavaPairRDD<String, String> partitionedTab5RDD;
 
         if (this.seqMode.equals(SequencingMode.PAIREDEND)) {
-            LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Handling input reads. Paired-end mode.");
+            //LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Handling input reads. Paired-end mode.");
             partitionedTab5RDD = handleMultiSampleReads();
         } else {
-            LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Handling input reads. Single-end mode.");
+            //LOG.info("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] Handling input reads. Single-end mode.");
             partitionedTab5RDD = handleSingleEndReads();
         }
 

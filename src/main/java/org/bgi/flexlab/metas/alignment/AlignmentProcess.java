@@ -218,8 +218,8 @@ public class AlignmentProcess {
         }
 
         long endTime = System.nanoTime();
-        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] End of sorting. Timing: " + endTime);
-        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Total time: " + (endTime - startTime) / 1e9 / 60.0 + " minutes");
+        //LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] End of sorting. Timing: " + endTime);
+        //LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Total time: " + (endTime - startTime) / 1e9 / 60.0 + " minutes");
 
         //readsRDD.persist(StorageLevel.MEMORY_ONLY());
 
@@ -292,8 +292,8 @@ public class AlignmentProcess {
 
         long endTime = System.nanoTime();
 
-        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] End of sorting. Timing: " + endTime);
-        LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Total time: " + (endTime - startTime) / 1e9 / 60.0 + " minutes");
+        //LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] End of sorting. Timing: " + endTime);
+        //LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Total time: " + (endTime - startTime) / 1e9 / 60.0 + " minutes");
         //readsRDD.persist(StorageLevel.MEMORY_ONLY());
 
         return readsRDD;
@@ -378,7 +378,7 @@ public class AlignmentProcess {
 
                 // We iterate over the resulting files in HDFS and agregate them into only one file.
                 for (int i = 0; i < returnedValues.size(); i++) {
-                    LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Returned file: " + returnedValues.get(i));
+                    //LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Returned file: " + returnedValues.get(i));
                     BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(new Path(returnedValues.get(i)))));
 
                     String line;

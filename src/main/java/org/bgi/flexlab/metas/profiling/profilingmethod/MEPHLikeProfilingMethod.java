@@ -60,14 +60,13 @@ public class MEPHLikeProfilingMethod extends ProfilingMethodBase implements Seri
         this.doGCRecalibration = options.isDoGcBiasRecalibration();
 
         if (this.doGCRecalibration) {
-            LOG.info("[SOAPMetas::" + MEPHLikeProfilingMethod.class.getName() + "] Do GC recalibration.");
+            //LOG.info("[SOAPMetas::" + MEPHLikeProfilingMethod.class.getName() + "] Do GC recalibration.");
             this.gcBiasRecaliModel = new GCBiasModelFactory(options.getGcBiasRecaliModelType(),
                     options.getGcBiasModelInput()).getGCBiasRecaliModel();
             //this.gcBiasRecaliModel.outputCoefficients(options.getProfilingOutputHdfsDir() + "/builtin_model.json");
-        } else {
-            LOG.info("[SOAPMetas::" + MEPHLikeProfilingMethod.class.getName() + "] Skip GC recalibration.");
-
-        }
+        } //else {
+            //LOG.info("[SOAPMetas::" + MEPHLikeProfilingMethod.class.getName() + "] Skip GC recalibration.");
+        //}
         //final ReferenceInfoMatrix refMatrix = new ReferenceInfoMatrix(this.metasOpt.getReferenceMatrixFilePath(), this.metasOpt.getSpeciesGenomeGCFilePath());
         //final Broadcast<ReferenceInfoMatrix> broadcastRefMatrix = this.jscontext.broadcast(refMatrix);
         //this.referenceInfoMatrix = jsc.broadcast(new ReferenceInfoMatrix(options.getReferenceMatrixFilePath(), options.getSpeciesGenomeGCFilePath()));

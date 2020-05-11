@@ -198,9 +198,9 @@ public class MEPHWrongAbundanceFunction implements PairFlatMapFunction<Iterator<
             for (String kingdom : kingdomList) {
                 kingdomAbun = this.computeNodeAbundance(kingdom, allClades);
                 totalAbun += kingdomAbun;
-                LOG.info("[SOAPMetas::" + MEPHWrongAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun);
+                //LOG.info("[SOAPMetas::" + MEPHWrongAbundanceFunction.class.getName() + "] Kingdom " + kingdom + " total abundance: " + kingdomAbun);
             }
-            LOG.info("[SOAPMetas::" + MEPHWrongAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun);
+            //LOG.info("[SOAPMetas::" + MEPHWrongAbundanceFunction.class.getName() + "] Total abundance: " + totalAbun);
         } catch (NullPointerException e) {
             LOG.error("[SOAPMetas::" + MEPHWrongAbundanceFunction.class.getName() + "] computeAbundance null pointer. " + e.toString());
         }
@@ -463,7 +463,7 @@ public class MEPHWrongAbundanceFunction implements PairFlatMapFunction<Iterator<
                 recaliRCSum += entry.getValue()._2;
             }
         } //else {
-        //    LOG.info("[SOAPMetas::" + MEPHWrongAbundanceFunction.class.getName() + "] Current clade: " + clade + " doesn't have markers2nreads information. ");
+            //LOG.info("[SOAPMetas::" + MEPHWrongAbundanceFunction.class.getName() + "] Current clade: " + clade + " doesn't have markers2nreads information. ");
         //}
 
         int nDiscard = discardLenCountList.size();

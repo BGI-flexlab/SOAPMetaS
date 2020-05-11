@@ -126,7 +126,7 @@ public class GCBiasTrainingProcess implements Serializable {
         fastaSeqFile.close();
         final MetasSAMRecordIdentityFilter identityFilter = new MetasSAMRecordIdentityFilter(0.97);
 
-        LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Input SAM file for training: " + samPathsStB.toString());
+        //LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Input SAM file for training: " + samPathsStB.toString());
         List<Tuple2<String, Integer>> recordPosList = jsc.newAPIHadoopFile(samPathsStB.toString(),
                 SAMInputFormat.class, LongWritable.class, SAMRecordWritable.class, jsc.hadoopConfiguration())
                 .values()
@@ -146,7 +146,7 @@ public class GCBiasTrainingProcess implements Serializable {
         samPathsStB = null;
 
         //jsc.close();
-        LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish reading SAM files. Start setting point value.");
+        //LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish reading SAM files. Start setting point value.");
 
 
         for (Tuple2<String, Integer> tup: recordPosList){
@@ -174,7 +174,7 @@ public class GCBiasTrainingProcess implements Serializable {
                 }
             }
         }
-        LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish set point value. Start training.");
+       // LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish set point value. Start training.");
 
         this.trainer.train();
         LOG.info("[SOAPMetas::" + GCBiasTrainingProcess.class.getName() + "] Finish training.");
