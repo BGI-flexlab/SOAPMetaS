@@ -79,7 +79,7 @@ public class ProfilingNewProcessMS2 {
 
     private void processConstruct(){
 
-        this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartitionEachSample(), 1);
+        this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartProf(), 1);
 
         this.pipeline = this.metasOpt.getProfilingPipeline();
         //this.analysisMode = this.metasOpt.getProfilingAnalysisMode();

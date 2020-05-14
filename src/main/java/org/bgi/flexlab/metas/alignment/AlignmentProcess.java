@@ -173,7 +173,7 @@ public class AlignmentProcess {
         JavaPairRDD<Long, String> singleReadsKeyVal = loadFastq(this.jscontext, this.options.getInputFastqPath());
 
         // Sort in memory with no partitioning
-        if ((options.getPartitionNumber() == 0) && (options.isSortFastqReads())) {
+        if ((options.getNumPartAlign() == 0) && (options.isSortFastqReads())) {
             // First, the join operation is performed. After that,
             // a sortByKey. The resulting values are obtained
             readsRDD = singleReadsKeyVal.sortByKey().values();
@@ -181,14 +181,14 @@ public class AlignmentProcess {
         }
 
         // Sort in memory with partitioning
-        else if ((options.getPartitionNumber() != 0) && (options.isSortFastqReads())) {
-            singleReadsKeyVal = singleReadsKeyVal.repartition(options.getPartitionNumber());
+        else if ((options.getNumPartAlign() != 0) && (options.isSortFastqReads())) {
+            singleReadsKeyVal = singleReadsKeyVal.repartition(options.getNumPartAlign());
             readsRDD = singleReadsKeyVal.sortByKey().values();//.persist(StorageLevel.MEMORY_ONLY());
             LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition with sort");
         }
 
         // No Sort with no partitioning
-        else if ((options.getPartitionNumber() == 0) && (!options.isSortFastqReads())) {
+        else if ((options.getNumPartAlign() == 0) && (!options.isSortFastqReads())) {
             LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] No sort and no partitioning");
             readsRDD = singleReadsKeyVal.values();
         }
@@ -203,7 +203,7 @@ public class AlignmentProcess {
              * if we want to achieve the maximum speedup, so, repartition
              * is used.
              */
-            if ((numPartitions) <= options.getPartitionNumber()) {
+            if ((numPartitions) <= options.getNumPartAlign()) {
                 LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition with no sort");
             }
             else {
@@ -211,7 +211,7 @@ public class AlignmentProcess {
             }
 
             readsRDD = singleReadsKeyVal
-                    .repartition(options.getPartitionNumber())
+                    .repartition(options.getNumPartAlign())
                     .values();
             //.persist(StorageLevel.MEMORY_ONLY());
 
@@ -250,20 +250,20 @@ public class AlignmentProcess {
         datasetTmp2.unpersist();
 
         // Sort in memory with no partitioning
-        if ((options.getPartitionNumber() == 0) && (options.isSortFastqReads())) {
+        if ((options.getNumPartAlign() == 0) && (options.isSortFastqReads())) {
             readsRDD = pairedReadsRDD.sortByKey().values();
             LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Sorting in memory without partitioning");
         }
 
         // Sort in memory with partitioning
-        else if ((options.getPartitionNumber() != 0) && (options.isSortFastqReads())) {
-            pairedReadsRDD = pairedReadsRDD.repartition(options.getPartitionNumber());
+        else if ((options.getNumPartAlign() != 0) && (options.isSortFastqReads())) {
+            pairedReadsRDD = pairedReadsRDD.repartition(options.getNumPartAlign());
             readsRDD = pairedReadsRDD.sortByKey().values();//.persist(StorageLevel.MEMORY_ONLY());
             LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition with sort");
         }
 
         // No Sort with no partitioning
-        else if ((options.getPartitionNumber() == 0) && (!options.isSortFastqReads())) {
+        else if ((options.getNumPartAlign() == 0) && (!options.isSortFastqReads())) {
             LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] No sort and no partitioning");
         }
 
@@ -277,7 +277,7 @@ public class AlignmentProcess {
              * if we want to achieve the maximum speedup, so, repartition
              * is used.
              */
-            if ((numPartitions) <= options.getPartitionNumber()) {
+            if ((numPartitions) <= options.getNumPartAlign()) {
                 LOG.info("[SOAPMetas::" + AlignmentProcess.class.getName() + "] Repartition with no sort");
             }
             else {
@@ -285,7 +285,7 @@ public class AlignmentProcess {
             }
 
             readsRDD = pairedReadsRDD
-                    .repartition(options.getPartitionNumber())
+                    .repartition(options.getNumPartAlign())
                     .values();
             //.persist(StorageLevel.MEMORY_ONLY());
         }
@@ -465,7 +465,7 @@ public class AlignmentProcess {
             this.sparkConf = new SparkConf().setAppName("AlignmentProcess"
                     + options.getInputFastqPath().split("/")[options.getInputFastqPath().split("/").length - 1]
                     + "-"
-                    + options.getPartitionNumber()
+                    + options.getNumPartAlign()
                     + "-"
                     + sorting);
 

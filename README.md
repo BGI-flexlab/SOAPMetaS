@@ -142,7 +142,7 @@ Important Notes:
 + It's better to set `--deploy-mode` to "client", since we haven't tested "cluster" mode.
 + `--driver-memory` should be set according to the reference matrix file (`--ref-matrix`), it must cover both reference name and other memory needs. The IGC reference matrix for `--prof-pipe comg` needs around 700MB memory (4GB is better), and metaphlanDB for `--prof-pipe meph` needs around 80MB memory (2GB is better).
 + The `--executor-memory` must be set according to the file size of reference indexes (`-x`), it must cover both index contents and other memory needs. The IGC reference for `--prof-pipe comg` needs around 20GB memory per task (25GB is better), and metaphlanDB for `--prof-pipe meph` needs around 2GB memory per task (3GB is better).
-+ All reference dataset should be deployed to the same absolute path on each worker nodes, or be stored in a public sharing node.
++ **All reference dataset should be deployed to the same absolute path on each worker nodes, or be stored in a public sharing node.**
 + Output directory (-o) "/path/to/results" can be HDFS or local (with `--local` option) path.
 + `--executor-cores`, `--conf spark.task.cpus` can affect the performance of SOAPMetaS. The best configuration is related to the volume of data.
 

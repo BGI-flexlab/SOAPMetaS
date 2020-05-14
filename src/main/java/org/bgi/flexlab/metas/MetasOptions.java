@@ -48,6 +48,8 @@ public class MetasOptions implements Serializable {
 
     private String multiSampleList;
     private int numPartitionEachSample = 10;// Partition number of each sample. The final partition number is partNumEachSample*NumberOfSample
+    private int numPartEachSampleAlign = 10; // Partition number in alignment process
+    private int numPartEachSampleProf = 10; // Partition number in profiling process
 
     //private String alignLog;
 
@@ -103,6 +105,15 @@ public class MetasOptions implements Serializable {
     private boolean isLocal = false;
     private boolean retainTemp = false;
 
+    private String alignmentExeMemory = "2g";
+    private String alignmentExeNumber = "3";
+    private String profilingExeMemory = "512m";
+    private String profilingExeNumber = "3";
+    private String alignmentExeCores = "1";
+    //private String alignmentTaskCpus = "1";
+    private String profilingExeCores = "1";
+    private String profilingTaskCpus = "1";
+
     //private String optionsAbbr = "\t\t[other options] --seqmod <pe|se> [--anamod <name>] [--pipemod <name>] [--analev <name>]\n" +
     //        "\t\t[-e/--extra-arg <\"AlignmentTool arguments\">] [--min-identity <float>] [--insert <int>]\n" +
     //        "\t\t[--stage (not support now)] [--merge-sam-sample (not support now)]" +
@@ -156,8 +167,12 @@ public class MetasOptions implements Serializable {
                         "For example, if you have 10 samples and set the para to 5, the RDD will be split to 50 partitions. " +
                         " Increase the number properly may improve the performance. Default: 10");
         partitionPerSam.setArgName("INT");
+        Option nPartAlign = new Option(null, "npart-align", true, "Partition number of each sample in alignment process. Default is the value of \"-n\".");
+        //Option nPartProf = new Option(null, "npart-prof", true, "Partition number of each sample in profiling process. Default is the value of \"-n\".");
+        nPartAlign.setArgName("INT");
+        //nPartProf.setArgName("INT");
         //partitionPerSam.setType(Integer.TYPE);
-        this.options.addOption(partitionPerSam);
+        this.options.addOption(partitionPerSam).addOption(nPartAlign);//.addOption(nPartProf);
 
         //this.options.addOption(Option.builder("n").longOpt("partition-per-sam")
         //        .desc("Partition number of each sample. Default: 10\n" +
@@ -211,11 +226,11 @@ public class MetasOptions implements Serializable {
         this.options.addOption(speciesGC);
 
         // Species genome sequence fastq
-        Option speciesGenome = new Option(null, "spe-fa", true,
-                "Genome sequence of reference species used in training process of GC bias recalibration model. " +
-                        "The file is necessary merely for training process, and is the exact ref used in alignment process.");
-        speciesGenome.setArgName("FILE");
-        this.options.addOption(speciesGenome);
+        //Option speciesGenome = new Option(null, "spe-fa", true,
+        //        "Genome sequence of reference species used in training process of GC bias recalibration model. " +
+        //                "The file is necessary merely for training process, and is the exact ref used in alignment process.");
+        //speciesGenome.setArgName("FILE");
+        //this.options.addOption(speciesGenome);
 
         //this.options.addOption(null, "gc-model-type", true,
         //        "Statistical model used for GC bias recalibration. Now merely support builtin model.");
@@ -385,6 +400,34 @@ public class MetasOptions implements Serializable {
                 "Switch option. If set, the profiling process will be skipped, and users must provide formatted FASTQ sample list (argument \"-i\").");
         this.options.addOption(null, "retain-temp", false, "Switch option. If set, interval temp files will be retained.");
 
+
+        /*
+        Resource Management
+         */
+        Option alnExeMem = new Option(null, "align-executor-memory", true,
+                "Executor memory in alignment process. The value is related to the size of bowtie index file. Refer to the README in SOAPOMetas repo for more information. Example: 2g, 1600m, etc. Default: 2g");
+        alnExeMem.setArgName("VALUE");
+        Option alnExeNum = new Option(null, "align-executor-number", true,
+                "Executor number in alignment process. Since alignment step doesn't support multi-tasks on one executor, user should adjust both this option and \"-n\" option for better performance. Refer to the README in SOAPOMetas repo for more information. Default: 3");
+        alnExeNum.setArgName("INT");
+        Option proExeMem = new Option(null, "prof-executor-memory", true,
+                "Executor memory in profiling process. The value should be at least 512m or users may encounter some exception of memory. Example: 512m 1g. Default: 512m");
+        proExeMem.setArgName("VALUE");
+        Option proExeNum = new Option(null, "prof-executor-number", true,
+                "Executor number in profiling process. Users may choose the value according to availible resource. Default: 3");
+        proExeNum.setArgName("INT");
+        this.options.addOption(alnExeMem).addOption(alnExeNum).addOption(proExeMem).addOption(proExeNum);
+
+        Option alnExeCore = new Option(null, "align-executor-cores", true,
+                "Executor core number in alignment process. The config in Spark is spark.executor.cores/--executor-cores , we make it more flexible. Default: 1");
+        //Option alnTaskCpu = new Option(null, "align-task-cpus", true,
+        //        "Task cpu (core) number in alignment process. The config in Spark is spark.task.cpu , we make it more flexible. Default: 1");
+        Option proExeCore = new Option(null, "prof-executor-cores", true,
+                "Executor core number in profiling process. The config in Spark is spark.executor.cores/--executor-cores , we make it more flexible. Default: 1");
+        Option proTaskCpu = new Option(null, "prof-task-cpus", true,
+                "Task cpu (core) number in profiling process. The config in Spark is spark.task.cpu , we make it more flexible.Default: 1");
+        this.options.addOption(alnExeCore).addOption(proExeCore).addOption(proTaskCpu);
+
         /*
         Supplementary arguments. Not useful in current version.
 
@@ -463,6 +506,19 @@ public class MetasOptions implements Serializable {
 
             this.extraAlignmentArguments = commandLine.getOptionValue('e', "--very-sensitive --no-unal");
             this.numPartitionEachSample = Integer.parseInt(commandLine.getOptionValue('n', "10"));
+
+            if (commandLine.hasOption("npart-align")) {
+                this.numPartEachSampleAlign = Integer.parseInt(commandLine.getOptionValue("npart-align"));
+            } else {
+                this.numPartEachSampleAlign = this.numPartitionEachSample;
+            }
+            
+            //if (commandLine.hasOption("npart-prof")) {
+            //    this.numPartEachSampleProf = Integer.parseInt(commandLine.getOptionValue("npart-prof"));
+            //} else {
+            //    this.numPartEachSampleProf = this.numPartitionEachSample;
+            //}
+            
 
             if (commandLine.hasOption("merge-sam-sample")){
                 this.mergeSamBySample = true;
@@ -606,7 +662,7 @@ public class MetasOptions implements Serializable {
             Process controling arguments parsing/
              */
             if (commandLine.hasOption("skip-alignment")) {
-                LOG.debug("[SOAPMetas::" + MetasOptions.class.getName() + "] Option \"--skip-alignment\" is set. Skip alignment process. SAM file list: " + this.SAMSampleList);
+                LOG.trace("[SOAPMetas::" + MetasOptions.class.getName() + "] Option \"--skip-alignment\" is set. Skip alignment process. SAM file list: " + this.SAMSampleList);
                 this.doAlignment = false;
                 if (this.SAMSampleList == null) {
                     throw new MissingOptionException("Missing --multi-sam-list option.");
@@ -638,6 +694,19 @@ public class MetasOptions implements Serializable {
             if (commandLine.hasOption("retain-temp")){
                 this.retainTemp = true;
             }
+
+            this.alignmentExeMemory = commandLine.getOptionValue("align-executor-memory", "2g");
+            this.alignmentExeNumber = commandLine.getOptionValue("align-executor-number", "3");
+            this.profilingExeMemory = commandLine.getOptionValue("prof-executor-memory", "512m");
+            this.profilingExeNumber = commandLine.getOptionValue("prof-executor-number", "3");
+            this.alignmentExeCores = commandLine.getOptionValue("align-executor-cores", "1");
+            //this.alignmentTaskCpus = commandLine.getOptionValue("align-task-cpus", "1");
+            this.profilingExeCores = commandLine.getOptionValue("prof-executor-cores", "1");
+            this.profilingTaskCpus = commandLine.getOptionValue("prof-task-cpus", "1");
+            //if (!this.alignmentExeCores.equals(this.alignmentTaskCpus)) {
+            //    LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] The alignment process only support one-task-one-executor, or the Bowtie2 library ccould cause error. Here we readjust \"align-executor-cores\" and \"align-task-cpus\" to the smaller one.");
+            //    String cpuValue = Integer.toString(Math.max(Math.min(Integer.parseInt(this.alignmentExeCores), Integer.parseInt(this.alignmentTaskCpus)), 1));
+            //}
 
         } catch (UnrecognizedOptionException e) {
             LOG.error("[SOAPMetas::" + MetasOptions.class.getName() + "] Unrecognized option." + e.toString());
@@ -862,8 +931,16 @@ public class MetasOptions implements Serializable {
         return this.alignmentShortIndex;
     }
 
-    public int getPartitionNumber() {
-        return Math.abs(this.numPartitionEachSample);
+    //public int getPartitionNumber() {
+    //    return Math.abs(this.numPartitionEachSample);
+    //}
+
+    public int getNumPartAlign() {
+        return Math.abs(this.numPartEachSampleAlign);
+    }
+
+    public int getNumPartProf() {
+        return Math.abs(this.numPartEachSampleProf);
     }
 
     public boolean isSortFastqReads() {
@@ -925,5 +1002,34 @@ public class MetasOptions implements Serializable {
 
     public boolean isRetainTemp() {
         return retainTemp;
+    }
+
+    /*
+    Resource management
+     */
+    public String getAlignmentExeMemory() {
+        return this.alignmentExeMemory;
+    }
+    public String getAlignmentExeNumber() {
+        return this.alignmentExeNumber;
+    }
+    public String getProfilingExeMemory() {
+        return this.profilingExeMemory;
+    }
+    public String getProfilingExeNumber() {
+        return this.profilingExeNumber;
+    }
+
+    public String getAlignmentExeCores() {
+        return this.alignmentExeCores;
+    }
+    //public String getAlignmentTaskCpus() {
+    //    return this.alignmentTaskCpus;
+    //}
+    public String getProfilingExeCores() {
+        return this.profilingExeCores;
+    }
+    public String getProfilingTaskCpus() {
+        return this.profilingTaskCpus;
     }
 }

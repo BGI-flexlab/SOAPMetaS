@@ -11,7 +11,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.bgi.flexlab.metas.alignment.AlignmentProcessMS;
 import org.bgi.flexlab.metas.data.mapreduce.input.sam.HdfsHeaderLineReader;
-import org.bgi.flexlab.metas.profiling.ProfilingNewProcessMS;
+//import org.bgi.flexlab.metas.profiling.ProfilingNewProcessMS;
 import org.bgi.flexlab.metas.profiling.ProfilingNewProcessMS2;
 import org.bgi.flexlab.metas.profiling.recalibration.gcbias.GCBiasTrainingProcess;
 
@@ -34,10 +34,22 @@ public class SOAPMetas {
     public static void main(String[] args){
 
         SparkConf sconf = new SparkConf().setAppName("SOAPMetas-" + System.nanoTime());
-        sconf.set("spark.network.timeout", "600");
-                //.set("spark.eventLog.dir", "/tmp/SOAPMetas/spark-events");
-        JavaSparkContext jsc = new JavaSparkContext(sconf);
-        //jsc.hadoopConfiguration().set("metas.application.name", jsc.appName());
+
+        // User configuration: executor-memory, num-executor/executorCores, task_cpus
+        // executor_number = sc.statusTracker.getExecutorInfos.length - 1
+        // yarn executor number: sc.getConf.get("spark.executor.instances", "-1")
+
+        // these four values can be obtain before jsc starts, but won't exist if user doesn't set when submit-submit
+        //System.out.println(sconf.get("spark.executor.instances", "-1")); // --num-executor (only for yarn)
+        //System.out.println(sconf.get("spark.task.cpus", "-1"));
+        //System.out.println(sconf.get("spark.executor.cores", "-1")); // --executor-cores
+        //System.out.println(sconf.get("spark.executor.memory", "-1")); // --executor-memory
+
+        //System.exit(0);
+        String exeNum = sconf.get("spark.executor.instances", "-1");
+        String exeMem = sconf.get("spark.executor.memory", "-1");
+        String taskCpus = sconf.get("spark.task.cpus", "-1");
+        String exeCores = sconf.get("spark.executor.cores", "-1");
 
         // Options initialize
         MetasOptions metasOptions = new MetasOptions(args);
@@ -49,6 +61,35 @@ public class SOAPMetas {
         //    jsc.close();
         //    System.exit(1);
         //}
+
+        if (exeNum.equals("-1")) {
+            sconf.set("spark.executor.instances", metasOptions.getAlignmentExeNumber());
+        } else {
+            LOG.warn("[SOAPMetas::" + SOAPMetas.class.getName() + "] The executor number is set by spark-submit, we recommend to set it by SOAPMetaS \"--align-executor-number\" and \"--prof-executor-number\"");
+        }
+
+        if (exeMem.equals("-1")) {
+            sconf.set("spark.executor.memory", metasOptions.getAlignmentExeMemory());
+        } else {
+            LOG.warn("[SOAPMetas::" + SOAPMetas.class.getName() + "] The executor memory is set by spark-submit, we recommend to set it by SOAPMetaS \"--align-executor-memory\" and \"--prof-executor-memory\"");
+        }
+        
+        if (taskCpus.equals("-1") && exeCores.equals("-1")) {
+            sconf.set("spark.executor.cores", metasOptions.getAlignmentExeCores()).set("spark.task.cpus", metasOptions.getAlignmentExeCores());
+        } else {
+            LOG.warn("[SOAPMetas::" + SOAPMetas.class.getName() + "] We recommend setting task cpus and executor cores by SOAPMetaS option for better control of performance. Since the alignment process only support one-task-one-executor, we readjust both \"spark.executor.cores\" and \"spark.task.cpus\" to the larger provided value in alignment process.");
+            String cpuValue = Integer.toString(Math.max(Math.max(Integer.parseInt(taskCpus), Integer.parseInt(exeCores)), Integer.parseInt(metasOptions.getAlignmentExeCores())));
+            sconf.set("spark.executor.cores", cpuValue).set("spark.task.cpus", cpuValue);
+        }
+
+        //sconf.set("spark.executor.cores", "1").set("spark.task.cpus", "1")
+        //        .set("spark.executor.memory", metasOptions.getAlignmentExeMemory())
+        //        .set("spark.executor.instances", metasOptions.getAlignmentExeNumber());
+        //.set("spark.eventLog.dir", "/tmp/SOAPMetas/spark-events");
+
+
+        JavaSparkContext jsc = new JavaSparkContext(sconf);
+        //jsc.hadoopConfiguration().set("metas.application.name", jsc.appName());
 
         List<String> alignmentOutputList = null;
 
@@ -79,7 +120,7 @@ public class SOAPMetas {
         //if gc training, no profiling process (standard data)
         if (metasOptions.isGCBiasTrainingMode()){
 
-            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start training GC bias recalibration model.");
+            LOG.trace("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start training GC bias recalibration model.");
             GCBiasTrainingProcess modelTraining = new GCBiasTrainingProcess(metasOptions);
 
             if (alignmentOutputList == null){
@@ -98,6 +139,35 @@ public class SOAPMetas {
         List<String> profilingOutputList;
 
         if (metasOptions.doProfiling()) {
+            if (!jsc.sc().isStopped()) {
+                jsc.stop();
+            }
+            if (exeNum.equals("-1")) {
+                sconf.set("spark.executor.instances", metasOptions.getProfilingExeNumber());
+            } else {
+                LOG.warn("[SOAPMetas::" + SOAPMetas.class.getName() + "] The executor number is set by spark-submit, we recommend to set it by SOAPMetaS \"--align-executor-number\" and \"--prof-executor-number\"");
+            }
+
+            if (exeMem.equals("-1")) {
+                sconf.set("spark.executor.memory", metasOptions.getProfilingExeMemory());
+            } else {
+                LOG.warn("[SOAPMetas::" + SOAPMetas.class.getName() + "] The executor memory is set by spark-submit, we recommend to set it by SOAPMetaS \"--align-executor-memory\" and \"--prof-executor-memory\"");
+            }
+
+            if (exeCores.equals("-1")) {
+                sconf.set("spark.executor.cores", metasOptions.getProfilingExeCores());
+            } else {
+                sconf.set("spark.executor.cores", exeCores);
+            }
+
+            if (taskCpus.equals("-1")) {
+                sconf.set("spark.task.cpus", metasOptions.getProfilingTaskCpus());
+            } else {
+                sconf.set("spark.task.cpus", taskCpus);
+            }
+           
+            jsc = new JavaSparkContext(sconf);
+
             //ProfilingProcess
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing profiling process.");
             ProfilingNewProcessMS2 profilingMS = new ProfilingNewProcessMS2(metasOptions, jsc);

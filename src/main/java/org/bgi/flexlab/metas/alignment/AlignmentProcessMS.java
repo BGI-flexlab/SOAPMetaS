@@ -83,7 +83,7 @@ public class AlignmentProcessMS {
 
         this.seqMode = this.options.getSequencingMode();
 
-        this.numPartitionEachSample = Math.max(this.options.getNumPartitionEachSample(), 1);
+        this.numPartitionEachSample = Math.max(this.options.getNumPartAlign(), 1);
 
         //String samOutputHdfsDir = this.options.getSamOutputHdfsDir();
 
