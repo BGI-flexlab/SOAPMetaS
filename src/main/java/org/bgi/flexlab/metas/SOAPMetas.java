@@ -33,6 +33,12 @@ public class SOAPMetas {
 
     public static void main(String[] args){
 
+        long ALIGNMENTJSC_TIME = 0;
+        long ALIGNMENT_TIME = 0;
+        long PROFILINGJSC_TIME = 0;
+        long PROFILING_TIME = 0;
+        long STARTTIME = System.currentTimeMillis();
+
         SparkConf sconf = new SparkConf().setAppName("SOAPMetas-" + System.nanoTime());
 
         // User configuration: executor-memory, num-executor/executorCores, task_cpus
@@ -91,6 +97,9 @@ public class SOAPMetas {
         JavaSparkContext jsc = new JavaSparkContext(sconf);
         //jsc.hadoopConfiguration().set("metas.application.name", jsc.appName());
 
+        ALIGNMENTJSC_TIME = System.currentTimeMillis() - STARTTIME;
+        STARTTIME = System.currentTimeMillis();
+
         List<String> alignmentOutputList = null;
 
         if (metasOptions.doAlignment()) {
@@ -104,23 +113,26 @@ public class SOAPMetas {
             alignmentOutputList = alignmentMS.runAlignment();
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete multiple sample alignment process.");
 
+            ALIGNMENT_TIME = System.currentTimeMillis() - STARTTIME;
+            STARTTIME = System.currentTimeMillis();
+
             if (metasOptions.mergeSamBySample()) {
                 LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Merging of sam is not supported in current version.");
                 //LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start merge SAM output.");
                 //LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Complete merging SAM output.");
             }
+        } else {
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Skip alignment process.");
         }
 
-
         //create multi-header
-//        SAMFileHeader samFileHeader = getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), jsc.hadoopConfiguration());
-
+        //SAMFileHeader samFileHeader = getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), jsc.hadoopConfiguration());
 
         //GC Training control
         //if gc training, no profiling process (standard data)
         if (metasOptions.isGCBiasTrainingMode()){
 
-            LOG.trace("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start training GC bias recalibration model.");
+            LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start training GC bias recalibration model.");
             GCBiasTrainingProcess modelTraining = new GCBiasTrainingProcess(metasOptions);
 
             if (alignmentOutputList == null){
@@ -147,26 +159,25 @@ public class SOAPMetas {
             } else {
                 LOG.warn("[SOAPMetas::" + SOAPMetas.class.getName() + "] The executor number is set by spark-submit, we recommend to set it by SOAPMetaS \"--align-executor-number\" and \"--prof-executor-number\"");
             }
-
             if (exeMem.equals("-1")) {
                 sconf.set("spark.executor.memory", metasOptions.getProfilingExeMemory());
             } else {
                 LOG.warn("[SOAPMetas::" + SOAPMetas.class.getName() + "] The executor memory is set by spark-submit, we recommend to set it by SOAPMetaS \"--align-executor-memory\" and \"--prof-executor-memory\"");
             }
-
             if (exeCores.equals("-1")) {
                 sconf.set("spark.executor.cores", metasOptions.getProfilingExeCores());
             } else {
                 sconf.set("spark.executor.cores", exeCores);
             }
-
             if (taskCpus.equals("-1")) {
                 sconf.set("spark.task.cpus", metasOptions.getProfilingTaskCpus());
             } else {
                 sconf.set("spark.task.cpus", taskCpus);
             }
-           
             jsc = new JavaSparkContext(sconf);
+
+            PROFILINGJSC_TIME = System.currentTimeMillis() - STARTTIME;
+            STARTTIME = System.currentTimeMillis();
 
             //ProfilingProcess
             LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Start initializing profiling process.");
@@ -192,6 +203,7 @@ public class SOAPMetas {
                 LOG.info("[SOAPMetas::" + SOAPMetas.class.getName() + "] Output profiling result files are: " +
                         StringUtils.join(profilingOutputList, ','));
             }
+            PROFILING_TIME = System.currentTimeMillis() - STARTTIME;
         } else if (alignmentOutputList != null) {
 
             File tmpDir = new File(metasOptions.getProfilingTmpDir());
@@ -227,6 +239,10 @@ public class SOAPMetas {
         // delete all temp file?
 
         jsc.close();
+        System.out.println("[SOAPMetas::" + SOAPMetas.class.getName() + "] Alignment JSC creation time: " + Double.toString((double) ALIGNMENTJSC_TIME/1000) + "s");
+        System.out.println("[SOAPMetas::" + SOAPMetas.class.getName() + "] Alignment time: " + Double.toString((double) ALIGNMENT_TIME/1000) + "s");
+        System.out.println("[SOAPMetas::" + SOAPMetas.class.getName() + "] Profiling JSC creation time: " + Double.toString((double) PROFILINGJSC_TIME/1000) + "s");
+        System.out.println("[SOAPMetas::" + SOAPMetas.class.getName() + "] Profiling time: " + Double.toString((double) PROFILING_TIME/1000) + "s");
         System.exit(0);
     }
 

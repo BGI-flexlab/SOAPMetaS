@@ -184,7 +184,7 @@ public class MetasOptions implements Serializable {
         //        .build());
 
         OptionGroup inputSampleGroup = new OptionGroup();
-        Option multiFqSampleListOpt = new Option("i", "multi-sample-list", true,
+        Option multiFqSampleListOpt = new Option("i", "multi-fq-list", true,
                 "Multiple-sample clean FASTQ files list, one line per sample. The option is exclusive to \"-s\". Note that ReadGroupID info is not considered in current version. File format (tab delimited):\n" +
                         "\t\tReadGroupID1 Sample(SMTag)1 /path/to/read1_1.fq [/path/to/read1_2.fq]\n" +
                         "\t\tReadGroupID1 Sample(SMTag)1 /path/to/read2_1.fq [/path/to/read2_2.fq]\n" +
@@ -203,7 +203,7 @@ public class MetasOptions implements Serializable {
 
         //Option singleFqSampleOpt = new Option("1", "fastq1", true,
         //        "Comma-seperated Fastq file. File paseed by this argument is treated as single sample, " +
-        //                "and this arg is mutually exclusive with --multi-sample-list(support single sample).");
+        //                "and this arg is mutually exclusive with --multi-fq-list(support single sample).");
         //singleFqSampleOpt.setArgName("FILE");
         //Option fastq2 = new Option("2", "fastq2", true,
         //        "Mate fastq file of pair-end sequence (use with --fastq1). In single-end sequencing " +
@@ -524,10 +524,12 @@ public class MetasOptions implements Serializable {
                 this.mergeSamBySample = true;
             }
 
-            //if (commandLine.hasOption('i') || commandLine.hasOption("multi-sample-list")){
+            //if (commandLine.hasOption('i') || commandLine.hasOption("multi-fq-list")){
             //    this.multiSampleList = commandLine.getOptionValue('i');
             //} else if (commandLine.hasOption('1') || commandLine.hasOption("fastq1")){
-            //    LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] Single sample mode. multi-sample-list is recommended.");
+            //    LOG.warn("[SOAPMetas::" + MetasOptions.class.getName() + "] Single sample mode. multi-fq-list is
+            //    recommended
+            //    .");
             //    this.inputFastqPath = commandLine.getOptionValue('1');
             //    this.singleSample = true;
             //    if (commandLine.hasOption('2') || commandLine.hasOption("fastq2")){
@@ -659,10 +661,11 @@ public class MetasOptions implements Serializable {
             }
 
             /*
-            Process controling arguments parsing/
+            Process controlling arguments parsing/
              */
             if (commandLine.hasOption("skip-alignment")) {
-                LOG.trace("[SOAPMetas::" + MetasOptions.class.getName() + "] Option \"--skip-alignment\" is set. Skip alignment process. SAM file list: " + this.SAMSampleList);
+                //LOG.trace("[SOAPMetas::" + MetasOptions.class.getName() + "] Option \"--skip-alignment\" is set. " +
+                //        "Skip alignment process. SAM file list: " + this.SAMSampleList);
                 this.doAlignment = false;
                 if (this.SAMSampleList == null) {
                     throw new MissingOptionException("Missing --multi-sam-list option.");
@@ -672,7 +675,7 @@ public class MetasOptions implements Serializable {
                     throw new MissingOptionException("Missing -x (--index) option.");
                 }
                 if (this.multiSampleList == null) {
-                    throw new MissingOptionException("Missing -i (--multi-sample-list) option.");
+                    throw new MissingOptionException("Missing -i (--multi-fq-list) option.");
                 }
             }
             if (commandLine.hasOption("skip-profiling")){
