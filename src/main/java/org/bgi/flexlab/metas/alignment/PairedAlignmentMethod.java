@@ -46,15 +46,8 @@ public class PairedAlignmentMethod extends AlignmentMethodBase implements Serial
         String fastqFileName1;
         String fastqFileName2;
 
-        if(this.tmpDir.endsWith("/")) {
-            fastqFileName1 = this.tmpDir + this.appId + "-RDD" + arg0 + "_1";
-            fastqFileName2 = this.tmpDir + this.appId + "-RDD" + arg0 + "_2";
-        }
-        else {
-            fastqFileName1 = this.tmpDir + "/" + this.appId + "-RDD" + arg0 + "_1";
-            fastqFileName2 = this.tmpDir + "/" + this.appId + "-RDD" + arg0 + "_2";
-        }
-
+        fastqFileName1 = this.tmpDir + "/" + this.appId + "-RDD" + arg0 + "_1";
+        fastqFileName2 = this.tmpDir + "/" + this.appId + "-RDD" + arg0 + "_2";
 
         //LOG.trace("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] Writing file: " + fastqFileName1);
         //LOG.trace("[SOAPMetas::" + PairedAlignmentMethod.class.getName() + "] Writing file: " + fastqFileName2);

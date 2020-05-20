@@ -206,7 +206,7 @@ public class SOAPMetas {
             PROFILING_TIME = System.currentTimeMillis() - STARTTIME;
         } else if (alignmentOutputList != null) {
 
-            File tmpDir = new File(metasOptions.getProfilingTmpDir());
+            File tmpDir = new File(metasOptions.getDriverTmpDir());
             if (! tmpDir.exists()){
                 tmpDir.mkdirs();
             }

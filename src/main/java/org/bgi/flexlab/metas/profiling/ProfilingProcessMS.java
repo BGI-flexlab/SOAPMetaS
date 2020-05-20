@@ -78,7 +78,7 @@ public class ProfilingProcessMS {
         }
         Configuration conf = this.jscontext.hadoopConfiguration();
 
-        this.tmpDir = this.metasOpt.getProfilingTmpDir();
+        this.tmpDir = this.metasOpt.getDriverTmpDir();
         if (this.tmpDir == null || this.tmpDir.isEmpty()) {
             this.tmpDir = "/tmp/" + this.jscontext.appName() + "_TEMP/profiling";
         }
