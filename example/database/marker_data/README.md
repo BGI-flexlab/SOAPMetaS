@@ -7,7 +7,7 @@
 content:
 
 ```Text
-No.	geneName	geneLength	s__genus_species	GC_content
+No._of_gene	geneName	geneLength	s__genus_species	GC_content
 ```
 
 ## Species\_genome\_gc.list
@@ -22,5 +22,5 @@ s__genus_species	genomeLength	genomeGC_content	otherInformation
 
 ## IGC\_9.9M\_uniqGene.\*
 
-Bowtie2 index files of [IGC gene sequence](http://meta.genomics.cn/meta/dataTools).
+Bowtie2 index files of [Integrated non-redundant gene catalog](http://meta.genomics.cn/meta/dataTools), download link is <ftp://parrot.genomics.cn/gigadb/pub/10.5524/100001_101000/100064/1.GeneCatalogs/IGC.fa.gz>
 

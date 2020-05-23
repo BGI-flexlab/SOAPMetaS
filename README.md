@@ -2,7 +2,13 @@
 
 An Apache Spark<sup>TM</sup> based tool for profiling large metagenome datasets accurately on distributed cluster.
 
-## Prerequisites
+## 1. Prerequisites
+
+### Hardware
+
+Distributed cluster or any single node with enough computing resource (for multiple bowtie2 process with index files as large as human genome).
+
+### Software
 
 + Necessary
   + Java (1.8 tested)
@@ -16,9 +22,46 @@ An Apache Spark<sup>TM</sup> based tool for profiling large metagenome datasets 
   + YARN latest (for distributed system)
   + HDFS latest (for distributed file storage)
 
-## Important Parameters
+<br/>
+
+SOAPMetaS has been tested in the environments of local, Spark standalone cluster as well as YARN cluster. Users should [download Spark](https://archive.apache.org/dist/spark/) and use `spark-submit` file to launch SOAPMetaS.
+
+### Reference Dataset
+
+#### "meph" mode reference (recommended for new microbe communities where MetaPhlAn2 is preferable)
+
+Including five (types of) files:
+
++ reference matrix
++ mpa markers json file
++ mpa taxonomy json file
++ MetaPhlAn2 excluded marker list
++ MetaPhlAn2 markers reference sequence index for Bowtie2
+
+File demos are listed in `example/database/metaphlanDB` folder, refer to related [README](https://github.com/BGI-flexlab/SOAPMetaS/tree/dev_maple/example/database/metaphlanDB/README.md) for more information.
+
+#### "comg" mode reference (recommended for new samples of known microbe communities which has known gene set)
+
+Including three (types of) files:
+
++ reference matrix
++ species genome gc list
++ reference sequence index for Bowtie2
+
+File demos are listed in `example/database/marker_data` folder, refer to related [README](https://github.com/BGI-flexlab/SOAPMetaS/tree/dev_maple/example/database/marker_data/README.md) for more information.
+
+## 2. Important Parameters (alphabetical oder)
 
 ```Text
+--align-executor-cores
+Executor core number in alignment process. The config in Spark is spark.executor.cores/--executor-cores , we make it more flexible. Default: 1".
+
+--align-executor-memory
+Executor memory in alignment process. The value is related to the size of bowtie index file. Refer to the README in SOAPOMetas repo for more information. Example: 2g, 1600m, etc. Default: 2g".
+
+--align-executor-number
+Executor number in alignment process. Since alignment step doesn't support multi-tasks on one executor, user should adjust both this option and \"-n\" option for better performance. Refer to the README in SOAPOMetas repo for more information. Default: 3".
+
 --ana-lev
 The cluster level of output profiling result, including "marker" level for gene profiling and "species" level for species profiling. The parameter work with "--prof-pipe comg". Default: species.
 
@@ -65,13 +108,25 @@ Markers to exclude for "--prof-pipe meph", one marker gene per line. Please refe
 Taxonomy information list for "--prof-pipe meph", extracted from MetaPhlAn2 database mpa_v20_m200.pkl. The file is in json format. User may generate the file using python3 json.dump(mpa_pkl["taxonomy"]).
 
 -n, --partition-per-sam
-Partition number of each sample. The real partition number for Spark partitioner is (sampleNumber * partition-per-sam). For example, if you have 10 samples and set this para as 5, the RDD will be split to 50 partitions. Increase the number properly may improve the performance. Default: 10
+Partition number of each sample (for alignment process only, thus we recommend using "--npart-align"). The real partition number for Spark partitioner is (sampleNumber * partition-per-sam). For example, if you have 10 samples and set this para as 5, the RDD will be split to 50 partitions. Increase the number properly may improve the performance. Default: 10
 
 -o, --output-hdfs-dir
 Path to store alignment and profiling results, support both local path (file://) and HDFS (Hadoop Distributed File System) path. Note that the "alignment" and "profiling" subdirectory will be created.
 
+--prof-executor-cores
+Executor core number in profiling process. The config in Spark is spark.executor.cores/--executor-cores , we make it more flexible. Default: 1".
+
+--prof-executor-memory
+Executor memory in profiling process. The value should be at least 512m or users may encounter some exception of memory. Example: 512m 1g. Default: 512m".
+
+--prof-executor-number
+Executor number in profiling process. Users may choose the value according to availible resource. Default: 3.
+
 --prof-pipe
 Pipeline of profiling. Option: comg (doi:10.1038/nbt.2942), meph (MetaPhlAn2). Default: comg.
+
+--prof-task-cpus
+Task cpu (core) number in profiling process. The config in Spark is spark.task.cpu , we make it more flexible.Default: 1.
 
 -r, --ref-matrix
 Reference information matrix file of marker gene. Including sequence length, species information of marker gene. File format (tab delimited):
@@ -94,98 +149,90 @@ Switch option. If set, the alignment process will be skipped, and users must pro
 --skip-profiling
 Switch option. If set, the profiling process will be skipped, and users must provide formatted FASTQ sample list (argument "-i").
 
---tmp-local-dir
-Local temp directory for intermediate files. Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. The temp directory is used to save alignment results and sample list file.
+--driver-tmp-dir
+Local temp directory on driver. The directory is used for storing files generated by non-spark codes.   Default is spark.local.dir or hadoop.tmp.dir, or /tmp/ if none is set. The temp directory is used to save alignment results and sample list file.
 
 -x, --index
 The alignment index file prefix, utilized by bowtie2. Refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information.
-
 ```
 
-## Database
+## 3. Usage
 
-### "comg" mode
-
-Including three (types of) files:
-
-+ reference matrix
-+ species genome gc list
-+ reference sequence index for Bowtie2
-
-File demos are listed in `example/database/marker_data` folder, refer to related [README](https://github.com/BGI-flexlab/SOAPMetaS/tree/dev_maple/example/database/marker_data/README.md) for more information.
-
-### "meph" mode
-
-Including five (types of) files:
-
-+ reference matrix
-+ mpa markers json file
-+ mpa taxonomy json file
-+ MetaPhlAn2 excluded marker list
-+ MetaPhlAn2 markers reference sequence index for Bowtie2
-
-File demos are listed in `example/database/metaphlanDB` folder, refer to related [README](https://github.com/BGI-flexlab/SOAPMetaS/tree/dev_maple/example/database/metaphlanDB/README.md) for more information.
-
-## Usage
+### 3.1 Simple command
 
 ```bash
 # --prof-pipe comg
-spark-submit --master <URL> --deploy-mode client --driver-memory 512m --executor-memory 512m --executor-cores 1 --conf spark.task.cpus=1 --class org.bgi.flexlab.metas.SOAPMetas SOAPMetaS.jar --prof-pipe comg -i sample.list -x /path/to/Bowtie2ReferenceIndex_prefix --large-index -o /path/to/results -n 3 -e "--very-sensitive --phred33 --no-unal --xeq --threads 1" --tmp-local-dir /path/to/local/temp --ana-lev species --ref-matrix marker_gene_info.matrix --spe-gc reference_genome_info.list 1>running.o 2>running.e
+spark-submit --master <URL> --deploy-mode client --driver-memory 512m --executor-memory 512m --executor-cores 1 --conf spark.task.cpus=1 --class org.bgi.flexlab.metas.SOAPMetas SOAPMetaS.jar --prof-pipe comg -i sample.list -x /path/to/Bowtie2ReferenceIndex_prefix --large-index -o /path/to/results -n 3 -e "--very-sensitive --phred33 --no-unal --xeq --threads 1" --driver-tmp-dir /path/to/local/temp --ana-lev species --ref-matrix marker_gene_info.matrix --spe-gc reference_genome_info.list 1>running.o 2>running.e
 
 # --prof-pipe meph
-spark-submit --master <URL> --deploy-mode client --driver-memory 512m --executor-memory 512m --executor-cores 1 --conf spark.task.cpus=1 --class org.bgi.flexlab.metas.SOAPMetas SOAPMetaS.jar --prof-pipe meph -i sample.list -x /path/to/Bowtie2ReferenceIndex_prefix -o /path/to/results -n 3 -e "--very-sensitive --phred33 --no-unal --xeq --threads 1" --tmp-local-dir /path/to/local_temp --ref-matrix marker_gene_info.matrix --mpa-marker-list mpa_marker_list.json --mpa-taxon-list mpa_taxonomy_list.json --mpa-exclude-list MetaPhlAn2_excluded.list 1>running.o 2>running.e
+spark-submit --master <URL> --deploy-mode client --driver-memory 512m --executor-memory 512m --executor-cores 1 --conf spark.task.cpus=1 --class org.bgi.flexlab.metas.SOAPMetas SOAPMetaS.jar --prof-pipe meph -i sample.list -x /path/to/Bowtie2ReferenceIndex_prefix -o /path/to/results -n 3 -e "--very-sensitive --phred33 --no-unal --xeq --threads 1" --driver-tmp-dir /path/to/local_temp --ref-matrix marker_gene_info.matrix --mpa-marker-list mpa_marker_list.json --mpa-taxon-list mpa_taxonomy_list.json --mpa-exclude-list MetaPhlAn2_excluded.list 1>running.o 2>running.e
 ```
 
-Important Notes:
+### 3.2 IMPORTANT NOTES BEFORE RUNNING
 
++ **All reference dataset should be deployed to the same absolute path on each worker nodes, or be stored in a public sharing node.**
++ **During our test, we found that Spark executor doesn't support two or more simultaneous call of Bowtie2 JNI. This means that parameters `--executor-cores` (`--conf spark.executor.cores`) and `--conf spark.task.cpus` configuration must be equal to avoid memory exception in alignment process. However, these two parameters will also affect the performance of profiling process, we thus provide seven parameters to control the allocation of resource in two processes seperately, they are `align-executor-memory`,`align-executor-number`,`align-executor-cores`,`prof-executor-memory`,`prof-executor-number`,`prof-executor-cores` and `prof-task-cpus`. The JavaSparkContext will be stopped and recreated before profiling process.**
 + Users can submit SOAPMetaS to Spark Standalone or YARN cluster manager, and change `--master` to correponding address.
 + It's better to set `--deploy-mode` to "client", since we haven't tested "cluster" mode.
 + `--driver-memory` should be set according to the reference matrix file (`--ref-matrix`), it must cover both reference name and other memory needs. The IGC reference matrix for `--prof-pipe comg` needs around 700MB memory (4GB is better), and metaphlanDB for `--prof-pipe meph` needs around 80MB memory (2GB is better).
-+ The `--executor-memory` must be set according to the file size of reference indexes (`-x`), it must cover both index contents and other memory needs. The IGC reference for `--prof-pipe comg` needs around 20GB memory per task (25GB is better), and metaphlanDB for `--prof-pipe meph` needs around 2GB memory per task (3GB is better).
-+ **All reference dataset should be deployed to the same absolute path on each worker nodes, or be stored in a public sharing node.**
 + Output directory (-o) "/path/to/results" can be HDFS or local (with `--local` option) path.
-+ `--executor-cores`, `--conf spark.task.cpus` can affect the performance of SOAPMetaS. The best configuration is related to the volume of data.
 
-## Small Example
+### 3.3 Advanced usage
 
-**Environment:**
+As we explain in section 3.2, seven parameters are used for resource configuration: `align-executor-memory`,`align-executor-number`,`align-executor-cores`,`prof-executor-memory`,`prof-executor-number`,`prof-executor-cores` and `prof-task-cpus`. All of these parameters can affect the performance of SOAPMetaS, besides, `partition-per-sam` parameter also has effect on performance. In order to limit the executor number, executor memory and total cores allocated to SOAPMetaS , users should set the value of these parameters carefully.
 
-+ Ubuntu 18.04.4 LTS (2 processors, 4096 MB base memory) in Virtualbox
+<br/>
+
+For example, we have 96g memory and 32 cores for SOAPMetaS for 16 samples, we could use the following combination:
+
+  ```text
+  --partition-per-sam 2
+  --align-executor-memory 3g
+  --align-executor-number 32
+  --align-executor-cores 1
+  --prof-executor-memory 6g
+  --prof-executor-number 16
+  --prof-executor-cores 2
+  --prof-task-cpus 1
+  ```
+
+This combination could maximize the resource utilization ratio ideally (but doesn't necessarily mean the best and most speedy).
+
+## 4. Examples
+
+**1) Environment:**
+
++ Ubuntu 18.04.4 LTS (2 processors, 4096 MB base memory) in Virtualbox (MacOS) **OR** 5.4.39-1-MANJARO on PC (4 Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz, 8GB memory)
 + Java 1.8
-+ Spark 2.4.4 with hadoop 2.7
++ Spark 2.4.4 with hadoop 2.7 ([download link](https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz))
 
-**Start Standalone:**
+**2) Start Standalone:**
 
 ```bash
 cd spark-2.4.4-bin-hadoop2.7/
 
-echo "export SPARK_MASTER_OPTS=\"-Dspark.deploy.defaultCores=2\""  >> conf/spark-env.sh
-echo "export SPARK_WORKER_CORES=1" >> conf/spark-env.sh
-echo "export SPARK_WORKER_MEMORY=1g" >> conf/spark-env.sh
+echo "export SPARK_MASTER_OPTS=\"-Dspark.deploy.defaultCores=4\""  >> conf/spark-env.sh
+echo "export SPARK_WORKER_CORES=2" >> conf/spark-env.sh
+echo "export SPARK_WORKER_MEMORY=2g" >> conf/spark-env.sh
 echo "export SPARK_WORKER_INSTANCES=2" >> conf/spark-env.sh
 
 bash sbin/start-master.sh
 bash sbin/start-slave.sh
 ```
 
-**Run Example:**
+**3) Run Example:**
 
-```Bash
-## Download the example/profiling_without_HDFS folder of this repository.
-## `--prof-pipe meph` requires larger memory then our local-test machine, we thus have no small example for it.
++ step 1: Download the `example/profiling_without_HDFS` folder in SOAPMetaS github repository.
++ step 2: Modify `profiling_without_HDFS_example.sh` script in `example/profiling_without_HDFS`. Users should change the file location and paths, and change master URL to actual spark master address.
++ step 3: Run shell script in folder `example/profiling_without_HDFS`.
 
-spark-submit --master spark://hostname:7077 --deploy-mode client --driver-memory 512m --executor-memory 512m --executor-cores 1 --conf spark.task.cpus=1 --conf spark.dynamicAllocation.enabled=false --class org.bgi.flexlab.metas.SOAPMetas SOAPMetas.jar --local --prof-pipe comg -i example/profiling_without_HDFS/sample.list -x example/profiling_without_HDFS/marker_data/reference_genome -o example/profiling_without_HDFS/results -n 2 -e "--very-sensitive --phred33 --no-unal --xeq --threads 1" --ana-lev species --ref-matrix example/profiling_without_HDFS/marker_data/reference_info.matrix --spe-gc example/profiling_without_HDFS/marker_data/reference_genome_gc.list --tmp-local-dir example/profiling_without_HDFS/temp 1>example/profiling_without_HDFS/running.o 2>example/profiling_without_HDFS/running.e
-```
+**More examples scripts can be found in `example` folder in this repository.**
 
-## More Examples
+## 5. Build from Source
 
-Examples can be found in `example` folder.
+### 5.1 Build Bowtie2 Native Library
 
-## Build from Source
-
-### Build Bowtie2 Native Library
-
-#### Bowtie2 library prerequisites
+#### 1) Bowtie2 library prerequisites
 
 + Bowtie2 source code >=2.3.5
 + libtbb (Install through package manager. Please follow [Bowtie2 manual](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#building-from-source) for more information)
@@ -194,42 +241,37 @@ Examples can be found in `example` folder.
 + [org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.cpp](https://github.com/BGI-flexlab/SOAPMetaS/blob/dev_maple/src/main/native/org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.cpp)
 + [org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.h](https://github.com/BGI-flexlab/SOAPMetaS/blob/dev_maple/src/main/native/org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.h)
 
-#### Building Bowtie2 library
+#### 2) Building Bowtie2 library
 
-1. Download Bowtie2 source code archive file, we name it as `bowtie2-source.zip`.
-2. Download all `org_bgi_flexlab_metas_alignment_metasbowtie2_Bowtie*` file to the same folder.
++ step 1: Download Bowtie2 source code archive file, we name it as `bowtie2-source.zip`.
++ step 2: Download all `org_bgi_flexlab_metas_alignment_metasbowtie2_Bowtie*` file to the same folder.
++ step 3: Run commands:
 
-+ Note that `-std=c++98` works for bowtie2-2.3.5.
+  ```Bash
+  unzip bowtie2-source.zip
 
-```Bash
-unzip bowtie2-source.zip
+  # compile bowties_jni
+  g++ -c -O3 -m64 -msse2 -funroll-loops -g3 -DCOMPILER_OPTIONS="\"-O3 -m64 -msse2 -funroll-loops -g3 -std=c++98   -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1\"" -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB  -DNO_SPINLOCK -DWITH_QUEUELOCK=1 -fno-strict-aliasing -DBUILD_HOST="\"`hostname`\"" -DBUILD_TIME="\"`date`\""  -DCOMPILER_VERSION="\"`g++ -v 2>&1 | tail -1`\"" -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DBOWTIE_MM  -DBOWTIE2 -DNDEBUG -Wall -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux   org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieSJNI.cpp -o bowties_jni.o -lz -lpthread -ltbb -ltbbmalloc_proxy  -fPIC -shared
 
-# compile bowties_jni
-g++ -c -O3 -m64 -msse2 -funroll-loops -g3 -DCOMPILER_OPTIONS="\"-O3 -m64 -msse2 -funroll-loops -g3 -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1\"" -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1 -fno-strict-aliasing -DBUILD_HOST="\"`hostname`\"" -DBUILD_TIME="\"`date`\"" -DCOMPILER_VERSION="\"`g++ -v 2>&1 | tail -1`\"" -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DBOWTIE_MM -DBOWTIE2 -DNDEBUG -Wall -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieSJNI.cpp -o bowties_jni.o -lz -lpthread -ltbb -ltbbmalloc_proxy -fPIC -shared
+  # compile bowtiel_jni
+  g++ -c -O3 -m64 -msse2 -funroll-loops -g3 -DCOMPILER_OPTIONS="\"-O3 -m64 -msse2 -funroll-loops -g3 -std=c++98   -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1\"" -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB  -DNO_SPINLOCK -DWITH_QUEUELOCK=1 -fno-strict-aliasing -DBUILD_HOST="\"`hostname`\"" -DBUILD_TIME="\"`date`\""  -DCOMPILER_VERSION="\"`g++ -v 2>&1 | tail -1`\"" -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DBOWTIE_MM  -DBOWTIE2 -DBOWTIE_64BIT_INDEX -DNDEBUG -Wall -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux  org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.cpp -o bowtiel_jni.o -lz -lpthread -ltbb -ltbbmalloc_proxy   -fPIC -shared
 
-# compile bowtiel_jni
-g++ -c -O3 -m64 -msse2 -funroll-loops -g3 -DCOMPILER_OPTIONS="\"-O3 -m64 -msse2 -funroll-loops -g3 -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1\"" -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1 -fno-strict-aliasing -DBUILD_HOST="\"`hostname`\"" -DBUILD_TIME="\"`date`\"" -DCOMPILER_VERSION="\"`g++ -v 2>&1 | tail -1`\"" -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DBOWTIE_MM -DBOWTIE2 -DBOWTIE_64BIT_INDEX -DNDEBUG -Wall -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux org_bgi_flexlab_metas_alignment_metasbowtie2_BowtieLJNI.cpp -o bowtiel_jni.o -lz -lpthread -ltbb -ltbbmalloc_proxy -fPIC -shared
+  cd bowtie2-source
 
-cd bowtie2-source
+  # compiling and linking of libbowtie_s.so
+  g++ -O3 -m64 -msse2 -funroll-loops -g3 -DCOMPILER_OPTIONS="\"-O3 -m64 -msse2 -funroll-loops -g3 -std=c++98  -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1\"" -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB   -DNO_SPINLOCK -DWITH_QUEUELOCK=1 -fno-strict-aliasing -DBOWTIE2_VERSION="\"`cat VERSION`\""   -DBUILD_HOST="\"`hostname`\"" -DBUILD_TIME="\"`date`\"" -DCOMPILER_VERSION="\"`g++ -v 2>&1 | tail -1`\""  -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DBOWTIE_MM -DBOWTIE2 -DNDEBUG -Wall -I third_party -I$ {JAVA_HOME}/include -I${JAVA_HOME}/include/linux -o ../libbowties.so bt2_search.cpp ccnt_lut.cpp ref_read.cpp alphabet.  cpp shmem.cpp edit.cpp bt2_idx.cpp bt2_io.cpp bt2_util.cpp reference.cpp ds.cpp multikey_qsort.cpp limit.cpp  random_source.cpp qual.cpp pat.cpp sam.cpp read_qseq.cpp aligner_seed_policy.cpp aligner_seed.cpp aligner_seed2.cpp  aligner_sw.cpp aligner_sw_driver.cpp aligner_cache.cpp aligner_result.cpp ref_coord.cpp mask.cpp pe.cpp aln_sink.cpp   dp_framer.cpp scoring.cpp presets.cpp unique.cpp simple_func.cpp random_util.cpp aligner_bt.cpp sse_util.cpp  aligner_swsse.cpp outq.cpp aligner_swsse_loc_i16.cpp aligner_swsse_ee_i16.cpp aligner_swsse_loc_u8.cpp   aligner_swsse_ee_u8.cpp aligner_driver.cpp ../bowties_jni.o -lz -lpthread -ltbb -ltbbmalloc_proxy -fPIC -shared
 
-# compiling and linking of libbowtie_s.so
-g++ -O3 -m64 -msse2 -funroll-loops -g3 -DCOMPILER_OPTIONS="\"-O3 -m64 -msse2 -funroll-loops -g3 -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1\"" -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1 -fno-strict-aliasing -DBOWTIE2_VERSION="\"`cat VERSION`\"" -DBUILD_HOST="\"`hostname`\"" -DBUILD_TIME="\"`date`\"" -DCOMPILER_VERSION="\"`g++ -v 2>&1 | tail -1`\"" -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DBOWTIE_MM -DBOWTIE2 -DNDEBUG -Wall -I third_party -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -o ../libbowties.so bt2_search.cpp ccnt_lut.cpp ref_read.cpp alphabet.cpp shmem.cpp edit.cpp bt2_idx.cpp bt2_io.cpp bt2_util.cpp reference.cpp ds.cpp multikey_qsort.cpp limit.cpp random_source.cpp qual.cpp pat.cpp sam.cpp read_qseq.cpp aligner_seed_policy.cpp aligner_seed.cpp aligner_seed2.cpp aligner_sw.cpp aligner_sw_driver.cpp aligner_cache.cpp aligner_result.cpp ref_coord.cpp mask.cpp pe.cpp aln_sink.cpp dp_framer.cpp scoring.cpp presets.cpp unique.cpp simple_func.cpp random_util.cpp aligner_bt.cpp sse_util.cpp aligner_swsse.cpp outq.cpp aligner_swsse_loc_i16.cpp aligner_swsse_ee_i16.cpp aligner_swsse_loc_u8.cpp aligner_swsse_ee_u8.cpp aligner_driver.cpp ../bowties_jni.o -lz -lpthread -ltbb -ltbbmalloc_proxy -fPIC -shared
+  # compiling and linking of libbowtie_l.so
+  g++ -O3 -m64 -msse2 -funroll-loops -g3 -DCOMPILER_OPTIONS="\"-O3 -m64 -msse2 -funroll-loops -g3 -std=c++98  -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1\"" -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB   -DNO_SPINLOCK -DWITH_QUEUELOCK=1 -fno-strict-aliasing -DBOWTIE2_VERSION="\"`cat VERSION`\""   -DBUILD_HOST="\"`hostname`\"" -DBUILD_TIME="\"`date`\"" -DCOMPILER_VERSION="\"`g++ -v 2>&1 | tail -1`\""  -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DBOWTIE_MM -DBOWTIE2 -DBOWTIE_64BIT_INDEX -DNDEBUG -Wall -I  third_party -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -o ../libbowtiel.so bt2_search.cpp ccnt_lut.cpp  ref_read.cpp alphabet.cpp shmem.cpp edit.cpp bt2_idx.cpp bt2_io.cpp bt2_util.cpp reference.cpp ds.cpp multikey_qsort.  cpp limit.cpp random_source.cpp qual.cpp pat.cpp sam.cpp read_qseq.cpp aligner_seed_policy.cpp aligner_seed.cpp   aligner_seed2.cpp aligner_sw.cpp aligner_sw_driver.cpp aligner_cache.cpp aligner_result.cpp ref_coord.cpp mask.cpp pe.  cpp aln_sink.cpp dp_framer.cpp scoring.cpp presets.cpp unique.cpp simple_func.cpp random_util.cpp aligner_bt.cpp  sse_util.cpp aligner_swsse.cpp outq.cpp aligner_swsse_loc_i16.cpp aligner_swsse_ee_i16.cpp aligner_swsse_loc_u8.cpp  aligner_swsse_ee_u8.cpp aligner_driver.cpp ../bowtiel_jni.o -lz -lpthread -ltbb -ltbbmalloc_proxy -fPIC -shared
 
-# compiling and linking of libbowtie_l.so
-g++ -O3 -m64 -msse2 -funroll-loops -g3 -DCOMPILER_OPTIONS="\"-O3 -m64 -msse2 -funroll-loops -g3 -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1\"" -std=c++98 -DPOPCNT_CAPABILITY -DWITH_TBB -DNO_SPINLOCK -DWITH_QUEUELOCK=1 -fno-strict-aliasing -DBOWTIE2_VERSION="\"`cat VERSION`\"" -DBUILD_HOST="\"`hostname`\"" -DBUILD_TIME="\"`date`\"" -DCOMPILER_VERSION="\"`g++ -v 2>&1 | tail -1`\"" -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DBOWTIE_MM -DBOWTIE2 -DBOWTIE_64BIT_INDEX -DNDEBUG -Wall -I third_party -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -o ../libbowtiel.so bt2_search.cpp ccnt_lut.cpp ref_read.cpp alphabet.cpp shmem.cpp edit.cpp bt2_idx.cpp bt2_io.cpp bt2_util.cpp reference.cpp ds.cpp multikey_qsort.cpp limit.cpp random_source.cpp qual.cpp pat.cpp sam.cpp read_qseq.cpp aligner_seed_policy.cpp aligner_seed.cpp aligner_seed2.cpp aligner_sw.cpp aligner_sw_driver.cpp aligner_cache.cpp aligner_result.cpp ref_coord.cpp mask.cpp pe.cpp aln_sink.cpp dp_framer.cpp scoring.cpp presets.cpp unique.cpp simple_func.cpp random_util.cpp aligner_bt.cpp sse_util.cpp aligner_swsse.cpp outq.cpp aligner_swsse_loc_i16.cpp aligner_swsse_ee_i16.cpp aligner_swsse_loc_u8.cpp aligner_swsse_ee_u8.cpp aligner_driver.cpp ../bowtiel_jni.o -lz -lpthread -ltbb -ltbbmalloc_proxy -fPIC -shared
-
-cd ../
-```
+  cd ../
+  ```
 
 The output `libbowties.so` and `libbowtiel.so` files are Bowtie2 native libraries for "short" and "large" index respectively, and these two files should be move to `main/native` before packing SOAPMetaS.
 
-### Generate SOAPMetaS Jar Package
+### 5.2 Generate SOAPMetaS Jar Package
 
-Make sure that `libbowtiel.so`, `libbowties.so`, `libtbb.so.2`, `libtbbmalloc.so.2` and `libtbbmalloc_proxy.so.2` files are in `main/native` folder. `libbowtie*` can be generated following [these steps](#Build-Bowtie2-Native-Library). `libtbb*` files are copied from C/C++ library "libtbb".
-
-These files have been put in right folder in this repository.
-
-In root directory of the maven project, run:
+Make sure that `libbowtiel.so`, `libbowties.so`, `libtbb.so.2`, `libtbbmalloc.so.2` and `libtbbmalloc_proxy.so.2` files are in `main/native` folder. `libtbb*` files are copied from C/C++ library "libtbb", `libbowtie*` files are generated in section 4.1 . We provide all these files in `main/native` folder of our repository. And finally, in project root directory, run:
 
 ```Bash
 mvn package
@@ -237,13 +279,15 @@ mvn package
 
 The command will compile and pack all files into a single `.jar` file named "SOAPMetas-*-jar-with-dependencies.jar" in `./target/` folder.
 
-## Known Issues
+## 6. Known Issues
 
-1. In Spark `local` mode, SOAPMetaS' multiple partitions (`-n` >1 or more than one input file) will trigger execption related to native libraries, and the cause of the exception hasn't been located yet. But `standalone` and `yarn` mode works well.
-2. The version of `libtbb` and `libstdc++` should match the version of Bowtie2, and it's recommended that the reference index files are generated using `bowtie2-build` of the same version.
++ The version of `libtbb` and `libstdc++` should match the version of Bowtie2, and it's recommended that the reference index files are generated using `bowtie2-build` of the same version.
++ `-std=c++98` parameter works well when compile bowtie2-2.3.5 .
++ Stage-level resource scheduling method is not supported in current version of Spark, we thus "recreate JavaSparkContext" to adjust resourc configuration, and in consequence, one SOAPMetaS will create two Spark applications for alignment and profiling.
++ Multiple alignment tasks in one Spark executor will cause memory-related exception. So the `spark.executor.cores` and `spark.task.cpus` configurations must be the equal (we've mentioned in section 3.2), and this is the reason we didn't provide `align-task-cpus` option.
 
-## License
+## 7. License
 
 This project is licensed under the GPLv3 License, see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## 8. Acknowledgments

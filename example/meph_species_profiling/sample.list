@@ -1,2 +1,4 @@
 SAMPLEID1	SAMPLEID1	/HDFS/path/to/data/S1read.fastq
 SAMPLEID2	SAMPLEID2	/HDFS/path/to/data/S2read.fastq
+SAMPLEID3	SAMPLEID3	file:///local/path/to/data/S3read.fastq
+SAMPLEID4	SAMPLEID4	file:///local/path/to/data/S4read.fastq

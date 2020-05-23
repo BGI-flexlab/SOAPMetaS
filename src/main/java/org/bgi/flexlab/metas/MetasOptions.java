@@ -162,7 +162,7 @@ public class MetasOptions implements Serializable {
                         "All parameters should be enclosed together with quotation marks \"\". Default: \"--very-sensitive --no-unal\"");
 
         Option partitionPerSam = new Option("n", "partition-per-sam", true,
-                "Partition number of each sample. " +
+                "Partition number of each sample (for alignment process only, thus we recommend using \"--npart-align\"). " +
                         "The real partition number for Spark partitioner is (sampleNumber * partition-per-sam). " +
                         "For example, if you have 10 samples and set the para to 5, the RDD will be split to 50 partitions. " +
                         " Increase the number properly may improve the performance. Default: 10");
