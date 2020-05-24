@@ -144,7 +144,7 @@ public class MetasOptions implements Serializable {
 
         this.options = new Options();
         /*
-        Alignment Process Parameters group.
+        Alignment Process Options group.
           */
         this.options.addOption("a", "align-tool", true,
                 "Alignment tool. Now only support Bowtie2. SparkBWA is not integrated in as it doesn't " +
@@ -158,8 +158,8 @@ public class MetasOptions implements Serializable {
         this.options.addOption(null, "large-index", false,
                 "Bowtie2 large index mode.");
         this.options.addOption("e", "extra-arg", true,
-                "Other parameters for Bowtie2. Please refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information. " +
-                        "All parameters should be enclosed together with quotation marks \"\". Default: \"--very-sensitive --no-unal\"");
+                "Other options for Bowtie2. Please refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information. " +
+                        "All options should be enclosed together with quotation marks \"\". Default: \"--very-sensitive --no-unal\"");
 
         Option partitionPerSam = new Option("n", "partition-per-sam", true,
                 "Partition number of each sample (for alignment process only, thus we recommend using \"--npart-align\"). " +
@@ -286,9 +286,9 @@ public class MetasOptions implements Serializable {
         this.options.addOption(minAlignLen);
 
         this.options.addOption(null, "no-disqm", false,
-                "Switch for the procedure of disambiguating the quasi-markers. Refer to MetaPhlAn2 --avoid_disqm parameter for detail description.");
+                "Switch for the procedure of disambiguating the quasi-markers. Refer to MetaPhlAn2 --avoid_disqm option for detail description.");
         this.options.addOption(null, "meph-abun-algorithm", false,
-                "Algorithm used to compute abundance. Refer to MetaPhlAn2 --stat parameter for details.");
+                "Algorithm used to compute abundance. Refer to MetaPhlAn2 --stat option for details.");
 
         Option minMapQ = new Option(null, "min-map-quality", true,
                 "Minimal mapping quality threshold of the remained mapped reads. Default: 5");
@@ -314,7 +314,7 @@ public class MetasOptions implements Serializable {
 
         Option analysisLevel = new Option(null, "ana-lev", true,
                 "The cluster level of output profiling result, including \"marker\" level for gene profiling and \"species\" level for species profiling." +
-                        "The parameter work with \"--prof-pipe comg\". Default: species." + " Default: species");
+                        "The option work with \"--prof-pipe comg\". Default: species." + " Default: species");
         analysisLevel.setArgName("MODE");
         this.options.addOption(analysisLevel);
 
@@ -438,7 +438,7 @@ public class MetasOptions implements Serializable {
         //this.options.addOption(null, "read-length", true, "Standard read length (theoretical value from sequencing) of the data. Default: 100");
         //this.options.addOption("f", "hdfs", false, "The HDFS is used to perform the input FASTQ reads sort.");
         //this.options.addOption("k", "spark", false, "the Spark engine is used to perform the input FASTQ reads sort.");
-        //this.options.addOption(null, "zz-control", true, "Parameters for controling nls " +
+        //this.options.addOption(null, "zz-control", true, "Options for controling nls " +
         //        "estimates. Refer to manual of nls.control in R for more help. This option might be " +
         //        "deprecated in future version. Users who want to control nls estimation in detail in RStudio " +
         //        "may use \"--zz-opoint\" and \"--zz-point-file\" to output data matrix of Normalized Cov, " +

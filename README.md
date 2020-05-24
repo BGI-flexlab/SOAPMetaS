@@ -4,11 +4,11 @@ An Apache Spark<sup>TM</sup> based tool for profiling large metagenome datasets 
 
 ## 1. Prerequisites
 
-### Hardware
+### 1.1 Hardware
 
-Distributed cluster or any single node with enough computing resource (for multiple bowtie2 process with index files as large as human genome).
+Distributed cluster or any single node with **enough computing resource** (for multiple bowtie2 process with index files as large as human genome).
 
-### Software
+### 1.2 Software
 
 + Necessary
   + Java (1.8 tested)
@@ -26,7 +26,7 @@ Distributed cluster or any single node with enough computing resource (for multi
 
 SOAPMetaS has been tested in the environments of local, Spark standalone cluster as well as YARN cluster. Users should [download Spark](https://archive.apache.org/dist/spark/) and use `spark-submit` file to launch SOAPMetaS.
 
-### Reference Dataset
+### 1.3 Reference Dataset
 
 #### "meph" mode reference (recommended for new microbe communities where MetaPhlAn2 is preferable)
 
@@ -50,7 +50,7 @@ Including three (types of) files:
 
 File demos are listed in `example/database/marker_data` folder, refer to related [README](https://github.com/BGI-flexlab/SOAPMetaS/tree/dev_maple/example/database/marker_data/README.md) for more information.
 
-## 2. Important Parameters (alphabetical oder)
+## 2. Important Options (alphabetical oder)
 
 ```Text
 --align-executor-cores
@@ -63,10 +63,10 @@ Executor memory in alignment process. The value is related to the size of bowtie
 Executor number in alignment process. Since alignment step doesn't support multi-tasks on one executor, user should adjust both this option and \"-n\" option for better performance. Refer to the README in SOAPOMetas repo for more information. Default: 3".
 
 --ana-lev
-The cluster level of output profiling result, including "marker" level for gene profiling and "species" level for species profiling. The parameter work with "--prof-pipe comg". Default: species.
+The cluster level of output profiling result, including "marker" level for gene profiling and "species" level for species profiling. The option work with "--prof-pipe comg". Default: species.
 
 -e, --extra-arg
-Other parameters for Bowtie2. Please refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information. All parameters should be enclosed together with quotation marks "". Default: "--very-sensitive --no-unal".
+Other options for Bowtie2. Please refer to Bowtie2 manual (http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) for more information. All options should be enclosed together with quotation marks "". Default: "--very-sensitive --no-unal".
 
 -g, --spe-gc
 Genome information (genome length, genome GC) of each species in reference data. The file is used with "--ana-lev species" and "--prof-pipe comg". File format (tab delimited):
@@ -171,15 +171,16 @@ spark-submit --master <URL> --deploy-mode client --driver-memory 512m --executor
 ### 3.2 IMPORTANT NOTES BEFORE RUNNING
 
 + **All reference dataset should be deployed to the same absolute path on each worker nodes, or be stored in a public sharing node.**
-+ **During our test, we found that Spark executor doesn't support two or more simultaneous call of Bowtie2 JNI. This means that parameters `--executor-cores` (`--conf spark.executor.cores`) and `--conf spark.task.cpus` configuration must be equal to avoid memory exception in alignment process. However, these two parameters will also affect the performance of profiling process, we thus provide seven parameters to control the allocation of resource in two processes seperately, they are `align-executor-memory`,`align-executor-number`,`align-executor-cores`,`prof-executor-memory`,`prof-executor-number`,`prof-executor-cores` and `prof-task-cpus`. The JavaSparkContext will be stopped and recreated before profiling process.**
++ **During our test, we found that Spark executor doesn't support two or more simultaneous call of Bowtie2 JNI. This means that options `--executor-cores` (`--conf spark.executor.cores`) and `--conf spark.task.cpus` configuration must be equal to avoid memory exception in alignment process. However, these two options will also affect the performance of profiling process, we thus provide seven options to control the allocation of resource in two processes seperately, they are `align-executor-memory`,`align-executor-number`,`align-executor-cores`,`prof-executor-memory`,`prof-executor-number`,`prof-executor-cores` and `prof-task-cpus`. The JavaSparkContext will be stopped and recreated before profiling process.**
 + Users can submit SOAPMetaS to Spark Standalone or YARN cluster manager, and change `--master` to correponding address.
 + It's better to set `--deploy-mode` to "client", since we haven't tested "cluster" mode.
 + `--driver-memory` should be set according to the reference matrix file (`--ref-matrix`), it must cover both reference name and other memory needs. The IGC reference matrix for `--prof-pipe comg` needs around 700MB memory (4GB is better), and metaphlanDB for `--prof-pipe meph` needs around 80MB memory (2GB is better).
++ The `--executor-memory` must be set according to the file size of reference indexes (`-x`), it must cover both index contents and other memory needs. The IGC reference for `--prof-pipe comg` needs around 20GB memory per executor (25GB is better), and metaphlanDB for `--prof-pipe meph` needs around 2GB memory per executor (3GB is better).
 + Output directory (-o) "/path/to/results" can be HDFS or local (with `--local` option) path.
 
 ### 3.3 Advanced usage
 
-As we explain in section 3.2, seven parameters are used for resource configuration: `align-executor-memory`,`align-executor-number`,`align-executor-cores`,`prof-executor-memory`,`prof-executor-number`,`prof-executor-cores` and `prof-task-cpus`. All of these parameters can affect the performance of SOAPMetaS, besides, `partition-per-sam` parameter also has effect on performance. In order to limit the executor number, executor memory and total cores allocated to SOAPMetaS , users should set the value of these parameters carefully.
+As we explain in section 3.2, seven options are used for resource scheduling: `align-executor-memory`,`align-executor-number`,`align-executor-cores`,`prof-executor-memory`,`prof-executor-number`,`prof-executor-cores` and `prof-task-cpus`. All of these options can affect the performance of SOAPMetaS, besides, `partition-per-sam` option also has effect on performance. In order to limit the executor number, executor memory and total cores allocated to SOAPMetaS , users should set the value of these option carefully.
 
 <br/>
 
@@ -198,13 +199,31 @@ For example, we have 96g memory and 32 cores for SOAPMetaS for 16 samples, we co
 
 This combination could maximize the resource utilization ratio ideally (but doesn't necessarily mean the best and most speedy).
 
+<br/>
+
+If users decide to use these seven options, similar configurations of `spark-submit` (passed by its commandline option or `--conf`) should be discarded, otherwise they will not take effect. Here is the table of corresponding options and configurations:
+
+|SOAPMetaS Options|Spark Configurations|`spark-submit` Options|
+|-------|--------|-------|
+|`--align-executor-memory`|`spark.executor.memory`|`--executor-memory`|
+|`--align-executor-number`|`spark.executor.instances`|`--num-executors`|
+|`--align-executor-cores`|`spark.executor.cores`|`--executor-cores`|
+|`--prof-executor-memory`|`spark.executor.memory`|`--executor-memory`|
+|`--prof-executor-number`|`spark.executor.instances`|`--num-executors`|
+|`--prof-executor-cores`|`spark.executor.cores`|`--executor-cores`|
+|`--prof-task-cpus`|`spark.task.cpus`|-|
+
 ## 4. Examples
 
 **1) Environment:**
 
-+ Ubuntu 18.04.4 LTS (2 processors, 4096 MB base memory) in Virtualbox (MacOS) **OR** 5.4.39-1-MANJARO on PC (4 Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz, 8GB memory)
++ CentOS, Ubuntu or Manjaro
 + Java 1.8
 + Spark 2.4.4 with hadoop 2.7 ([download link](https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz))
+
+<br/>
+
+We have tested SOAPMetaS on Ubuntu 18.04.4 LTS (2 processors, 4096 MB base memory) in Virtualbox (MacOS), 5.4.39-1-MANJARO on PC (4 Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz, 8GB memory), and CentOS 3.10.0-514.el7.x86_64 on our server.
 
 **2) Start Standalone:**
 
@@ -282,7 +301,7 @@ The command will compile and pack all files into a single `.jar` file named "SOA
 ## 6. Known Issues
 
 + The version of `libtbb` and `libstdc++` should match the version of Bowtie2, and it's recommended that the reference index files are generated using `bowtie2-build` of the same version.
-+ `-std=c++98` parameter works well when compile bowtie2-2.3.5 .
++ `-std=c++98` option works well when compile bowtie2-2.3.5 .
 + Stage-level resource scheduling method is not supported in current version of Spark, we thus "recreate JavaSparkContext" to adjust resourc configuration, and in consequence, one SOAPMetaS will create two Spark applications for alignment and profiling.
 + Multiple alignment tasks in one Spark executor will cause memory-related exception. So the `spark.executor.cores` and `spark.task.cpus` configurations must be the equal (we've mentioned in section 3.2), and this is the reason we didn't provide `align-task-cpus` option.
 
