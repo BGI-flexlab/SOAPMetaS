@@ -85,14 +85,21 @@ public class ProfilingNewProcessMS {
         this.jcf = new JobConf(conf);
 
         this.tmpDir = this.metasOpt.getDriverTmpDir();
-        if (this.tmpDir == null || this.tmpDir.isEmpty()) {
-            this.tmpDir = "/tmp/" + this.jscontext.appName() + "_TEMP/profiling";
+        //if (this.tmpDir == null || this.tmpDir.isEmpty()) {
+        //    this.tmpDir = "/tmp/" + this.jscontext.appName() + "_TEMP/profiling";
+        //}
+        File tmpDirF = new File(this.tmpDir);
+        if (! tmpDirF.exists()){
+            if (! tmpDirF.mkdirs()) {
+                LOG.error("[SOAPMetas::" + ProfilingNewProcessMS2.class.getName() + "] Fail to create driver temp directory " + this.tmpDir);
+            }
         }
-        try {
-            DataUtils.createHDFSFolder(conf, "file://" + this.tmpDir, false);
-        } catch (IOException e){
-            LOG.error("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Fail to create profiling temp directory. " + e.toString());
-        }
+
+        //try {
+        //    DataUtils.createHDFSFolder(conf, "file://" + this.tmpDir, false);
+        //} catch (IOException e){
+        //    LOG.error("[SOAPMetas::" + ProfilingNewProcessMS.class.getName() + "] Fail to create profiling temp directory. " + e.toString());
+        //}
 
         this.outputHdfsDir = this.metasOpt.getProfilingOutputHdfsDir();
         //try {

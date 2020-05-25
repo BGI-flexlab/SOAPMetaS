@@ -55,18 +55,19 @@ public class MetasBowtie extends AlignmentToolWrapper implements Serializable {
         this.setOutputHdfsDir(dirName);
 
         // Set alignment temp directory
-        dirName = jsc.getLocalProperty("spark.local.dir");
-        if (dirName == null || dirName.isEmpty()) {
-            // We use local temp directory here during development for convenience.
-            dirName = "/tmp/SOAPMetaS_TEMP";
-            //try {
-            //    DataUtils.createHDFSFolder(conf, "file://" + dirName, true);
-            //} catch (IOException e){
-            //    LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Fail to create temp directory" + dirName + "for alignment. " + e.toString());
-            //}
-        } else {
-            dirName = dirName + "/SOAPMetaS_TEMP";
-        }
+        //dirName = jsc.getLocalProperty("spark.local.dir");
+        dirName = options.getAlignmentTmpDir();
+        //if (dirName == null || dirName.isEmpty()) {
+        //    // We use local temp directory here during development for convenience.
+        //    dirName = "/tmp/SOAPMetaS_TEMP";
+        //    //try {
+        //    //    DataUtils.createHDFSFolder(conf, "file://" + dirName, true);
+        //    //} catch (IOException e){
+        //    //    LOG.error("[SOAPMetas::" + MetasBowtie.class.getName() + "] Fail to create temp directory" + dirName + "for alignment. " + e.toString());
+        //    //}
+        //} else {
+        //    dirName = dirName + "/SOAPMetaS_TEMP";
+        //}
         //if (dirName == null || dirName.isEmpty()) {
         //    dirName = jsc.hadoopConfiguration().get("hadoop.tmp.dir");
         //}
