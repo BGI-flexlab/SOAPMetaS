@@ -2,6 +2,28 @@
 
 An Apache Spark<sup>TM</sup> based tool for profiling large metagenome datasets accurately on distributed cluster.
 
+- [SOAPMetaS](#soapmetas)
+  - [1. Prerequisites](#1-prerequisites)
+    - [1.1 Hardware](#11-hardware)
+    - [1.2 Software](#12-software)
+    - [1.3 Reference Dataset](#13-reference-dataset)
+      - ["meph" mode reference (recommended for new microbe communities where MetaPhlAn2 is preferable)](#meph-mode-reference-recommended-for-new-microbe-communities-where-metaphlan2-is-preferable)
+      - ["comg" mode reference (recommended for new samples of known microbe communities which has known gene set)](#comg-mode-reference-recommended-for-new-samples-of-known-microbe-communities-which-has-known-gene-set)
+  - [2. Important Options (alphabetical oder)](#2-important-options-alphabetical-oder)
+  - [3. Usage](#3-usage)
+    - [3.1 Simple command](#31-simple-command)
+    - [3.2 IMPORTANT NOTES BEFORE RUNNING](#32-important-notes-before-running)
+    - [3.3 Advanced usage](#33-advanced-usage)
+  - [4. Examples](#4-examples)
+  - [5. Build from Source](#5-build-from-source)
+    - [5.1 Build Bowtie2 Native Library](#51-build-bowtie2-native-library)
+      - [1) Bowtie2 library prerequisites](#1-bowtie2-library-prerequisites)
+      - [2) Building Bowtie2 library](#2-building-bowtie2-library)
+    - [5.2 Generate SOAPMetaS Jar Package](#52-generate-soapmetas-jar-package)
+  - [6. Known Issues](#6-known-issues)
+  - [7. License](#7-license)
+  - [8. Acknowledgments](#8-acknowledgments)
+
 ## 1. Prerequisites
 
 ### 1.1 Hardware
@@ -63,7 +85,7 @@ Executor memory in alignment process. The value is related to the size of bowtie
 Executor number in alignment process. Since alignment step doesn't support multi-tasks on one executor, user should adjust both this option and "-n" option for better performance. Refer to the README in SOAPOMetas repo for more information. Default: 3.
 
 --align-tmp-dir
-Local temp directory on executor nodes. The directory is used for storing intermediate tab5, sam and alignment log files. Default is /tmp/SOAPMetaS_TEMP . Users should delete the directory manually if SOAPMetaS is finished or interrupted. For example: ssh <nodeIP> "rm -r /tmp/SOAPMetaS_TEMP".
+Local temp directory on executor nodes. The directory is used for storing intermediate tab5, sam and alignment log files. Default is /tmp/SOAPMetaS_Align_temp . Users should delete the directory manually if SOAPMetaS is finished or interrupted. For example: ssh <nodeIP> "rm -r /tmp/SOAPMetaS_Align_temp".
 
 --ana-lev
 The cluster level of output profiling result, including "marker" level for gene profiling and "species" level for species profiling. The option work with "--prof-pipe comg". Default: species.
@@ -162,6 +184,8 @@ The alignment index file prefix, utilized by bowtie2. Refer to Bowtie2 manual (h
 ## 3. Usage
 
 ### 3.1 Simple command
+
+All options exist in these two commands are either necessary or highly-recommended.
 
 ```bash
 # --prof-pipe comg

@@ -86,15 +86,15 @@ public class AlignmentMethodBase implements Serializable {
         //boolean deleteSrc = true;
         boolean deleteSrc = ! this.toolWrapper.isRetainTemp();
 
-        LOG.trace("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
-                this.appName + " Copy output sam files to output directory.");
+        //LOG.trace("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
+        //        this.appName + " Copy output sam files to output directory.");
         String hdfsSamPath = this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName;
         Configuration conf = new Configuration();
         FileSystem fs;
         try {
             //if (outputDir.startsWith("hdfs")) {
             fs = FileSystem.get(conf);
-
+            //LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName + ": src: " + this.toolWrapper.getOutputFile() + " | dst: " + hdfsSamPath);
             fs.copyFromLocalFile(deleteSrc, true,
                     new Path(this.toolWrapper.getOutputFile()),
                     new Path(hdfsSamPath)

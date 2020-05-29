@@ -110,10 +110,32 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
         //TODO 获取sampleID
         Broadcast<HashMap<String, Integer>>  sampleNamesBroadcast = ctx.broadcast(this.sampleIDbySampleName);
 
+        /*
+        Input:
+         JavaRDD<SAMRecord>
+         Partition: default
+
+        After mapToPair:
+         key: sampleID"\t"clusterName(species/gene)
+         value: tuple<sampleName, 1, gc_recali_value, "">
+         Partition: default
+
+        After reduceByKey:
+         key: sampleID"\t"clusterName(species/gene)
+         value: tuple<sampleName, count, gc_recali_count, "">
+         Partition: default
+
+        Output:
+         Type: JavaPairRDD
+         key: sampleID
+         value: ProfilingResultRecord (clusterName includes taxonomy information)
+         Partition: default
+        */
         return reads.mapToPair(samRecord -> {
             String rg = samRecord.getStringAttribute("RG");
             int sampleID = sampleNamesBroadcast.value().get(rg);
-            return countTupleGenerator(String.valueOf(sampleID), samRecord);})
+            return countTupleGenerator(String.valueOf(sampleID), samRecord);
+        })
                 .filter(tuple -> tuple._1 != null)
                 .reduceByKey((a, b) -> new Tuple4<>(a._1(), a._2() + b._2(), a._3() + b._3(), ""))
                 .mapToPair(tuple -> {

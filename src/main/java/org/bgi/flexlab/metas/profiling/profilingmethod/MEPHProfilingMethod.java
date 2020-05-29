@@ -449,7 +449,6 @@ public class MEPHProfilingMethod extends ProfilingMethodBase implements Serializ
          value: tuple<count, gc_recali_count>
          Partition: sampleID
 
-
         Output:
          Type: JavaPairRDD
          key: sampleID

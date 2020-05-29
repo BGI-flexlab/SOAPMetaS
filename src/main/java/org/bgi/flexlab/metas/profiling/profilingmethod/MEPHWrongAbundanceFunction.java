@@ -146,7 +146,7 @@ public class MEPHWrongAbundanceFunction implements PairFlatMapFunction<Iterator<
             cladeNodeTemp.nonZeroMarkerCount = nonzeroMarkerCountTemp;
         }
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("/hwfssz1/BIGDATA_COMPUTING/heshixu/SOAPMetas_TEST/Version0.0.2_TEST/01.profiling/HMP_HMASM_MetaWUGSCStool/SOAPMetas_MEPHProcessM2/cladeNodeInfo_SOAPMetas_Before-" + smTag + ".list"))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("Version0.0.2_TEST/01.profiling/HMP_HMASM_MetaWUGSCStool/SOAPMetas_MEPHProcessM2/cladeNodeInfo_SOAPMetas_Before-" + smTag + ".list"))) {
             String cName;
             String mName;
             CladeNode currentnode;

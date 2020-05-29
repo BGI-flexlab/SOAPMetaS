@@ -25,7 +25,7 @@ public abstract class AlignmentToolWrapper implements Serializable {
     private String smTag;
 
     private String samOutputHdfsDir;
-    private String localTmpDir;
+    //private String localTmpDir;
     private String alnTmpDir;
     protected String alnLog;
 
