@@ -28,7 +28,7 @@ class SetEncoder(json.JSONEncoder):
             return list(obj)
         return json.JSONEncoder.default(self, obj)
 
-def mpaPickleFileRead(mpaPickleFile, markerListJsonFile, taxonListJsonFile, acc2SpeDict = dict(), geneInfoDict = dict()):
+def mpaPickleFileRead(mpaPickleFile, markerListJsonFile, taxonListJsonFile, old_pickle = False, acc2SpeDict = dict(), geneInfoDict = dict()):
     '''
     Combination of mpaMarkerListRead() and taxonListFileRead() function, but generated from mpa_v20_m200.pkl file.
     Generate marker (new name) list file in json format.
@@ -50,8 +50,12 @@ def mpaPickleFileRead(mpaPickleFile, markerListJsonFile, taxonListJsonFile, acc2
     
     nformTaxon = dict()
     npkl["taxonomy"] = pklc["taxonomy"]
-    for k, v in pklc["taxonomy"].items():
-        nformTaxon[k] = {"genoLen": v}
+    if old_pickle:
+        for k, v in pklc["taxonomy"].items():
+            nformTaxon[k] = {"genoLen": v}
+    else:
+        for k, v in pklc["taxonomy"].items():
+            nformTaxon[k] = {"genoLen": v[1], "taxid": v[0]}
     with open(taxonListJsonFile, "w") as outfile:
         json.dump(nformTaxon, outfile, cls=SetEncoder, indent=4)
     nformTaxon = None
@@ -68,8 +72,12 @@ def mpaPickleFileRead(mpaPickleFile, markerListJsonFile, taxonListJsonFile, acc2
         markerCladeDict[k] = clade
     
     gcfToGenoLenDict = dict()
-    for k, v in pklc["taxonomy"].items():
-        gcfToGenoLenDict[re.sub(r"^t__", "", re.split(r"\|", k)[-1])] = int(v)
+    if old_pickle:
+        for k, v in pklc["taxonomy"].items():
+            gcfToGenoLenDict[re.sub(r"^t__", "", re.split(r"\|", k)[-1])] = int(v)
+    else:
+        for k, v in pklc["taxonomy"].items():
+            gcfToGenoLenDict[re.sub(r"^t__", "", re.split(r"\|", k)[-1])] = int(v[1])
 
     return gcfToGenoLenDict, markerCladeDict
 
@@ -129,24 +137,32 @@ def markerSeqFnaRead(markerGeneFnaFile, newIDOutputFNA, IDcorresFile, norename, 
     count = 1
     
     if nobzip:
-        with open(markerGeneFnaFile, "rt") as handle:
+        with open(markerGeneFnaFile, "rt") as handle, bz2.open(newIDOutputFNA, "wt") as newFNA:
             for record in SeqIO.parse(handle, "fasta"):
-                geneInfoDict[record.id] = {"len": len(record), "gc": GC(record.seq), "nname": record.id}
-    else if norename:
-        with bz2.open(markerGeneFnaFile, "rt") as bzHandle:#, bz2.open(newIDOutputFNA, "wt") as newFNA:
-            for record in SeqIO.parse(bzHandle, "fasta"):
-                geneInfoDict[record.id] = {"len": len(record), "gc": GC(record.seq), "nname": record.id}
-    else:
-        with bz2.open(markerGeneFnaFile, "rt") as bzHandle:#, bz2.open(newIDOutputFNA, "wt") as newFNA:
+                nid = "MEPH_Marker_g" + str(count)
+                geneInfoDict[record.id] = {"len": len(record), "gc": GC(record.seq), "nname": nid}
+                record.id = nid
+                SeqIO.write(record, newFNA, "fasta")
+                count+=1
+    elif norename:
+        with bz2.open(markerGeneFnaFile, "rt") as bzHandle, bz2.open(newIDOutputFNA, "wt") as newFNA:
             for record in SeqIO.parse(bzHandle, "fasta"):
                 nid = "MEPH_Marker_g" + str(count)
                 geneInfoDict[record.id] = {"len": len(record), "gc": GC(record.seq), "nname": nid}
                 record.id = nid
-                #SeqIO.write(record, newFNA, "fasta")
+                SeqIO.write(record, newFNA, "fasta")
                 count+=1
-        with open(IDcorresFile, "wt") as idf:
-            for k, v in geneInfoDict.items():
-                idf.write("{nid}\t{oid}\n".format(nid=v["nname"], oid=k))
+    else:
+        with bz2.open(markerGeneFnaFile, "rt") as bzHandle, bz2.open(newIDOutputFNA, "wt") as newFNA:
+            for record in SeqIO.parse(bzHandle, "fasta"):
+                nid = "MEPH_Marker_g" + str(count)
+                geneInfoDict[record.id] = {"len": len(record), "gc": GC(record.seq), "nname": nid}
+                record.id = nid
+                SeqIO.write(record, newFNA, "fasta")
+                count+=1
+    with open(IDcorresFile, "wt") as idf:
+        for k, v in geneInfoDict.items():
+            idf.write("{nid}\t{oid}\n".format(nid=v["nname"], oid=k))
 
     return geneInfoDict
 
@@ -478,14 +494,20 @@ def checkArgv():
         "--no-rename",
         required = False,
         action = 'store_true',
-        help="weather or not rename reads. if set, read name will be renamed and namelist file will be generated"
+        help="Whether or not rename reads. if set, read name will be renamed and namelist file will be generated"
     )
 
     _parser.add_argument(
         "--no-bzip",
         required = False,
+        action = 'store_true'
+    )
+
+    _parser.add_argument(
+        "--old-pickle",
+        required = False,
         action = 'store_true',
-        action = 'store_true',
+        help="whether or not the pickle file (eg. mpa_v20_m200.pkl) is old version. In old version, the \"taxonomy\" subdictionary contains both taxID and genome length information. So the data structure is changed."
     )
     
     return _parser.parse_args()
@@ -509,7 +531,7 @@ def main():
     acc2SpeDict, spe2accDict = species2GenomeRead(args.species2genome)
 
     if (args.mpa_fna_bz2 != None) and (args.mpa_pickle != None):
-        gcfToGenoLenDict, markerCladeDict = mpaPickleFileRead(args.mpa_pickle, args.marker_json_output, args.taxon_json_output, acc2SpeDict = acc2SpeDict, geneInfoDict = geneInfoDict)
+        gcfToGenoLenDict, markerCladeDict = mpaPickleFileRead(args.mpa_pickle, args.marker_json_output, args.taxon_json_output, args.old_pickle, acc2SpeDict = acc2SpeDict, geneInfoDict = geneInfoDict)
     else:
         gcfToGenoLenDict = taxonListFileRead(args.mpa_taxon_list)
         if args.mpa_marker_list != None:
@@ -521,12 +543,12 @@ def main():
     if (args.mpa_fna_bz2 != None) and (args.mpa_marker_list != None or args.mpa_pickle != None):
         outputGenMatrix(args.output_matrix, markerCladeDict=markerCladeDict, geneInfoDict=geneInfoDict)
 
-    if args.mapping_results != None:
-        outputSelectedMarker(args.output_sel_mar, spe2accDict=spe2accDict, gcfTaxIDDict=gcfTaxIDDict, speTaxIDDict=speTaxIDDict)
-    gcfPathDict = dict()
-    gcfPathDictUpdate(args.assembly_refseq, pathDict=gcfPathDict, dataPath=args.ncbi_db_path)
-    gcfPathDictUpdate(args.assembly_genbank, pathDict=gcfPathDict, dataPath=args.ncbi_db_path)
-    outputSpeGenomeGC(args.output_spe_geno, gcfToGenoLenDict=gcfToGenoLenDict, spe2accDict=spe2accDict, gcfPathDict = gcfPathDict)
+    #if args.mapping_results != None:
+    #    outputSelectedMarker(args.output_sel_mar, spe2accDict=spe2accDict, gcfTaxIDDict=gcfTaxIDDict, speTaxIDDict=speTaxIDDict)
+    #gcfPathDict = dict()
+    #gcfPathDictUpdate(args.assembly_refseq, pathDict=gcfPathDict, dataPath=args.ncbi_db_path)
+    #gcfPathDictUpdate(args.assembly_genbank, pathDict=gcfPathDict, dataPath=args.ncbi_db_path)
+    #outputSpeGenomeGC(args.output_spe_geno, gcfToGenoLenDict=gcfToGenoLenDict, spe2accDict=spe2accDict, gcfPathDict = gcfPathDict)
 
 if __name__ == "__main__":
     main()

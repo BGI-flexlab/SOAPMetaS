@@ -13,7 +13,7 @@ soapmetas=/path/to/SOAPMetasS.jar
 outputHDFSDir=${HDFSWORKDIR}/results
 driverTmp=${WORKDIR}/temp
 
-referenceIndex=${databaseDir}/metaphlanDB/referenceIndex/mpa_v20_m200 # bowtie2 index file prefix
+referenceIndex=${databaseDir}/metaphlanDB/mpa_v20_m200 # bowtie2 index file prefix
 refMatrix=${databaseDir}/metaphlanDB/MetaPhlAn2_marker.matrix
 mpaMarkerList=${databaseDir}/metaphlanDB/MetaPhlAn2_mpa.markers.list.json
 mpaTaxonList=${databaseDir}/metaphlanDB/MetaPhlAn2_mpa.taxonomy.list.json

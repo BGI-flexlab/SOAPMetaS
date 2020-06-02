@@ -15,6 +15,9 @@ An Apache Spark<sup>TM</sup> based tool for profiling large metagenome datasets 
     - [3.2 IMPORTANT NOTES BEFORE RUNNING](#32-important-notes-before-running)
     - [3.3 Advanced usage](#33-advanced-usage)
   - [4. Examples](#4-examples)
+    - [4.1 "comg" Example on Small Sample](#41-comg-example-on-small-sample)
+    - ["meph" Example on Small Sample](#meph-example-on-small-sample)
+    - [Other Examples](#other-examples)
   - [5. Build from Source](#5-build-from-source)
     - [5.1 Build Bowtie2 Native Library](#51-build-bowtie2-native-library)
       - [1) Bowtie2 library prerequisites](#1-bowtie2-library-prerequisites)
@@ -242,7 +245,9 @@ If users decide to use these seven options, similar configurations of `spark-sub
 
 ## 4. Examples
 
-**1) Environment:**
+### 4.1 "comg" Example on Small Sample
+
+1) Environment:
 
 + CentOS, Ubuntu or Manjaro
 + Java 1.8
@@ -252,7 +257,7 @@ If users decide to use these seven options, similar configurations of `spark-sub
 
 We have tested SOAPMetaS on Ubuntu 18.04.4 LTS (2 processors, 4096 MB base memory) in Virtualbox (MacOS), 5.4.39-1-MANJARO on PC (4 Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz, 8GB memory), and CentOS 3.10.0-514.el7.x86_64 on our server.
 
-**2) Start Standalone:**
+2) Start Standalone:
 
 ```bash
 cd spark-2.4.4-bin-hadoop2.7/
@@ -266,11 +271,25 @@ bash sbin/start-master.sh
 bash sbin/start-slave.sh
 ```
 
-**3) Run Example:**
+3) Run Example:
 
 + step 1: Download the `example/profiling_without_HDFS` folder in SOAPMetaS github repository.
 + step 2: Modify `profiling_without_HDFS_example.sh` script in `example/profiling_without_HDFS`. Users should change the file location and paths, and change master URL to actual spark master address.
 + step 3: Run shell script in folder `example/profiling_without_HDFS`.
+
+### "meph" Example on Small Sample
+
+1) Environment
+
++ CentOS, Ubuntu or Manjaro (Memory >= 8GB)
++ Java 1.8
++ Spark 2.4.4 with hadoop 2.7 ([download link](https://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz))
+
+2) Start Standalone
+
+
+
+### Other Examples
 
 **More examples scripts can be found in `example` folder in this repository.**
 
@@ -329,8 +348,9 @@ The command will compile and pack all files into a single `.jar` file named "SOA
 
 + The version of `libtbb` and `libstdc++` should match the version of Bowtie2, and it's recommended that the reference index files are generated using `bowtie2-build` of the same version.
 + `-std=c++98` option works well when compile bowtie2-2.3.5 .
-+ Stage-level resource scheduling method is not supported in current version of Spark, we thus "recreate JavaSparkContext" to adjust resourc configuration, and in consequence, one SOAPMetaS will create two Spark applications for alignment and profiling.
++ Stage-level resource scheduling method is not supported in current version of Spark (https://issues.apache.org/jira/browse/SPARK-27495), we thus "recreate JavaSparkContext" to adjust resourc configuration, and in consequence, one SOAPMetaS will create two Spark applications for alignment and profiling.
 + Multiple alignment tasks in one Spark executor will cause memory-related exception. So the `spark.executor.cores` and `spark.task.cpus` configurations must be the equal (we've mentioned in section 3.2), and this is the reason we didn't provide `align-task-cpus` option.
++ The performance might be further improved if rdd partition could be increased without shuffle (https://issues.apache.org/jira/browse/SPARK-5997).
 
 ## 7. License
 
