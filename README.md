@@ -2,30 +2,30 @@
 
 An Apache Spark<sup>TM</sup> based tool for profiling large metagenome datasets accurately on distributed cluster.
 
-- [SOAPMetaS](#soapmetas)
-  - [1. Prerequisites](#1-prerequisites)
-    - [1.1 Hardware](#11-hardware)
-    - [1.2 Software](#12-software)
-    - [1.3 Reference Dataset](#13-reference-dataset)
-      - ["meph" mode reference (recommended for new microbe communities where MetaPhlAn2 is preferable)](#meph-mode-reference-recommended-for-new-microbe-communities-where-metaphlan2-is-preferable)
-      - ["comg" mode reference (recommended for new samples of known microbe communities which has known gene set)](#comg-mode-reference-recommended-for-new-samples-of-known-microbe-communities-which-has-known-gene-set)
-  - [2. Important Options (alphabetical oder)](#2-important-options-alphabetical-oder)
-  - [3. Usage](#3-usage)
-    - [3.1 Simple command](#31-simple-command)
-    - [3.2 IMPORTANT NOTES BEFORE RUNNING](#32-important-notes-before-running)
-    - [3.3 Advanced usage](#33-advanced-usage)
-  - [4. Examples](#4-examples)
-    - [4.1 "comg" Example on Small Sample](#41-comg-example-on-small-sample)
-    - ["meph" Example on Small Sample](#meph-example-on-small-sample)
-    - [Other Examples](#other-examples)
-  - [5. Build from Source](#5-build-from-source)
-    - [5.1 Build Bowtie2 Native Library](#51-build-bowtie2-native-library)
-      - [1) Bowtie2 library prerequisites](#1-bowtie2-library-prerequisites)
-      - [2) Building Bowtie2 library](#2-building-bowtie2-library)
-    - [5.2 Generate SOAPMetaS Jar Package](#52-generate-soapmetas-jar-package)
-  - [6. Known Issues](#6-known-issues)
-  - [7. License](#7-license)
-  - [8. Acknowledgments](#8-acknowledgments)
++ [SOAPMetaS](#soapmetas)
+  + [1. Prerequisites](#1-prerequisites)
+    + [1.1 Hardware](#11-hardware)
+    + [1.2 Software](#12-software)
+    + [1.3 Reference Dataset](#13-reference-dataset)
+      + ["meph" mode reference (recommended for new microbe communities where MetaPhlAn2 is preferable)](#meph-mode-reference-recommended-for-new-microbe-communities-where-metaphlan2-is-preferable)
+      + ["comg" mode reference (recommended for new samples of known microbe communities which has known gene set)](#comg-mode-reference-recommended-for-new-samples-of-known-microbe-communities-which-has-known-gene-set)
+  + [2. Important Options (alphabetical oder)](#2-important-options-alphabetical-oder)
+  + [3. Usage](#3-usage)
+    + [3.1 Simple command](#31-simple-command)
+    + [3.2 IMPORTANT NOTES BEFORE RUNNING](#32-important-notes-before-running)
+    + [3.3 Advanced usage](#33-advanced-usage)
+  + [4. Examples](#4-examples)
+    + [4.1 "comg" Example on Small Sample](#41-comg-example-on-small-sample)
+    + [4.2 "meph" Example on Small Sample](#42-meph-example-on-small-sample)
+    + [4.3 Other Examples](#43-other-examples)
+  + [5. Build from Source](#5-build-from-source)
+    + [5.1 Build Bowtie2 Native Library](#51-build-bowtie2-native-library)
+      + [1) Bowtie2 library prerequisites](#1-bowtie2-library-prerequisites)
+      + [2) Building Bowtie2 library](#2-building-bowtie2-library)
+    + [5.2 Generate SOAPMetaS Jar Package](#52-generate-soapmetas-jar-package)
+  + [6. Known Issues](#6-known-issues)
+  + [7. License](#7-license)
+  + [8. Acknowledgments](#8-acknowledgments)
 
 ## 1. Prerequisites
 
@@ -277,7 +277,7 @@ bash sbin/start-slave.sh
 + step 2: Modify `profiling_without_HDFS_example.sh` script in `example/profiling_without_HDFS`. Users should change the file location and paths, and change master URL to actual spark master address.
 + step 3: Run shell script in folder `example/profiling_without_HDFS`.
 
-### "meph" Example on Small Sample
+### 4.2 "meph" Example on Small Sample
 
 1) Environment
 
@@ -289,7 +289,7 @@ bash sbin/start-slave.sh
 
 
 
-### Other Examples
+### 4.3 Other Examples
 
 **More examples scripts can be found in `example` folder in this repository.**
 
