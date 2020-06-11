@@ -202,6 +202,7 @@ spark-submit --master <URL> --deploy-mode client --driver-memory 512m --executor
 
 + **All reference dataset should be deployed to the same absolute path on each worker nodes, or be stored in a public sharing node.**
 + **During our test, we found that Spark executor doesn't support two or more simultaneous call of Bowtie2 JNI. This means that options `--executor-cores` (`--conf spark.executor.cores`) and `--conf spark.task.cpus` configuration must be equal to avoid memory exception in alignment process. However, these two options will also affect the performance of profiling process, we thus provide seven options to control the allocation of resource in two processes seperately, they are `align-executor-memory`,`align-executor-number`,`align-executor-cores`,`prof-executor-memory`,`prof-executor-number`,`prof-executor-cores` and `prof-task-cpus`. The JavaSparkContext will be stopped and recreated before profiling process.**
++ **We found that `--master local[N]` with `--prof-pipe meph` could also cause unexpected memory exception. We are working on this bug. Users are recommended to use YARN or Standalone for tests of current version.**
 + Users can submit SOAPMetaS to Spark Standalone or YARN cluster manager, and change `--master` to correponding address.
 + It's better to set `--deploy-mode` to "client", since we haven't tested "cluster" mode.
 + `--driver-memory` should be set according to the reference matrix file (`--ref-matrix`), it must cover both reference name and other memory needs. The IGC reference matrix for `--prof-pipe comg` needs around 700MB memory (4GB is better), and metaphlanDB for `--prof-pipe meph` needs around 80MB memory (2GB is better).
@@ -287,7 +288,7 @@ bash sbin/start-slave.sh
 
 2) Start Standalone
 
-
+(The details will be added as soon as possible.)
 
 ### 4.3 Other Examples
 
