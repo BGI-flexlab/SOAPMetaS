@@ -349,9 +349,9 @@ The command will compile and pack all files into a single `.jar` file named "SOA
 
 + The version of `libtbb` and `libstdc++` should match the version of Bowtie2, and it's recommended that the reference index files are generated using `bowtie2-build` of the same version.
 + `-std=c++98` option works well when compile bowtie2-2.3.5 .
-+ Stage-level resource scheduling method is not supported in current version of Spark (https://issues.apache.org/jira/browse/SPARK-27495), we thus "recreate JavaSparkContext" to adjust resourc configuration, and in consequence, one SOAPMetaS will create two Spark applications for alignment and profiling.
++ Stage-level resource scheduling method is not supported in current version of Spark (<https://issues.apache.org/jira/browse/SPARK-27495>), we thus "recreate JavaSparkContext" to adjust resourc configuration, and in consequence, one SOAPMetaS will create two Spark applications for alignment and profiling.
 + Multiple alignment tasks in one Spark executor will cause memory-related exception. So the `spark.executor.cores` and `spark.task.cpus` configurations must be the equal (we've mentioned in section 3.2), and this is the reason we didn't provide `align-task-cpus` option.
-+ The performance might be further improved if rdd partition could be increased without shuffle (https://issues.apache.org/jira/browse/SPARK-5997).
++ The performance might be further improved if rdd partition could be increased without shuffle (<https://issues.apache.org/jira/browse/SPARK-5997>).
 
 ## 7. License
 

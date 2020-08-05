@@ -109,6 +109,9 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
 
         /*
         Add reads
+        This process contains MetaPhlAn2's map2bbh function and add_reads of all markers2reads, and produces markers2nreads.
+        In SOAPMetaS, the map2bbh function is integrated into previous data reading process.
+        MetaPhlAn2 only reserves two information: the marker name and the number of reads. In SOAPMetaS, this was achieved by previous reduceByKey transformation.
          */
         String markerNameTemp;
         String cladeNameTemp;
@@ -215,6 +218,7 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         cladeNameTemp = null;
         String unclSuffix = "_unclassified".intern();
         if (taxaLevel.startsWith("a")) {
+            // Here we don't sort the entries, but MetaPhlAn2 does sort.
             for (HashMap.Entry<String, CladeNode> entry : allClades.entrySet()) {
                 cladeNameTemp = entry.getKey();
                 CladeNode node = entry.getValue();
@@ -302,6 +306,8 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
 
         // markersInformation dict DataStructure: {marker: Tuple(cladename, len, extsList)}
         // Note: the markerRCMap must be initialized here for disqm mode, because the "nonZeroMarkerCount" relies on these "zero' value.
+
+        // The filtration of excluded marker genes are put forward to MEPHProfilingMethod class.
         for (HashMap.Entry<String, Tuple3<String, Integer, ArrayList<String>>> entry: this.markersInformationBroad.value().entrySet()) {
             putMarkerRCMap(allClades.get(entry.getValue()._1()), entry.getKey(), new Tuple2<>(0, 0.0));
         }
@@ -432,15 +438,15 @@ public class MEPHAbundanceFunction implements PairFlatMapFunction<Iterator<Tuple
         int nDiscard = discardLenCountList.size();
         int nRetain = retainLenCountList.size();
         if (doDisqm && nDiscard > 0){
-            int nRipr = 10;
+            int nLeastMarkerNum = 10; //n_ripr in MetaPhlAn2
             if (isSingleTerminal(node)) {
-                nRipr = 0;
+                nLeastMarkerNum = 0;
             }
             if (node.kingdom.equals("k__Viruses")){
-                nRipr = 0;
+                nLeastMarkerNum = 0;
             }
-            if (nRetain < nRipr) {
-                int upBound = Math.min(nRipr - nRetain, nDiscard);
+            if (nRetain < nLeastMarkerNum) {
+                int upBound = Math.min(nLeastMarkerNum - nRetain, nDiscard);
                 double recaliRCTemp;
                 for (int i=0; i<upBound; i++){
                     Tuple3<Integer, Double, Integer> item = discardLenCountList.get(i);
