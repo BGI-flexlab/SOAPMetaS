@@ -6,7 +6,7 @@
     Email:	heshixu@genomics.cn
     Date:	2019-08-23
     ------
-    Plot for SOAPMetaS Fig.2
+    Plot for SOAPMetaS
     ------
     Version:
 '''
@@ -16,6 +16,7 @@
 
 import numpy as np
 from numpy.polynomial.polynomial import polyfit
+from matplotlib.patches import Rectangle
 import scipy.stats
 import matplotlib
 matplotlib.use('Agg')
@@ -52,37 +53,62 @@ def plotTest():
     #plt.savefig("output.pdf", quality=100, format="pdf")
     plt.show()
 
-def readGeneProfiling(abundanceFile, colN):
+def readGeneProfiling(abundanceFile, colN, mod):
     taxIDAbunDict = dict()
-    with open(abundanceFile, 'rt', encoding='utf-8') as _abunf:
-        if colN == 2:
+    if mod.startswith("simple"):
+        with open(abundanceFile, 'rt', encoding='utf-8') as _abunf:
+            if colN == 2:
+                while True:
+                    lines = _abunf.readlines(65535)
+                    if not lines:
+                        break
+                    for line in lines:
+                        lineEle = re.split(r"\t", line.rstrip())
+                        taxIDAbunDict[lineEle[0]] = float(lineEle[1])
+            elif colN == 5:
+                while True:
+                    lines = _abunf.readlines(65535)
+                    if not lines:
+                        break
+                    for line in lines:
+                        lineEle = re.split(r"\t", line.rstrip())
+                        taxIDAbunDict[lineEle[0]] = float(lineEle[4])
+            else:
+                cn = colN - 1
+                while True:
+                    lines = _abunf.readlines(65535)
+                    if not lines:
+                        break
+                    for line in lines:
+                        lineEle = re.split(r"\t", line.rstrip())
+                        taxIDAbunDict[lineEle[0]] = float(lineEle[cn])
+    elif mod.startswith("cami"):
+        with open(abundanceFile, 'rt', encoding='utf-8') as _abunf:
+            while True:
+                lastPos = _abunf.tell()
+                line = _abunf.readline()
+                if line.startswith("@"):
+                    continue
+                if line.startswith("#"):
+                    continue
+                if len(re.split(r"\t", line.rstrip())) < 4:
+                    continue
+                _abunf.seek(lastPos)
+                break
             while True:
                 lines = _abunf.readlines(65535)
                 if not lines:
                     break
                 for line in lines:
                     lineEle = re.split(r"\t", line.rstrip())
-                    taxIDAbunDict[lineEle[0]] = float(lineEle[1])
-        elif colN == 5:
-            while True:
-                lines = _abunf.readlines(65535)
-                if not lines:
-                    break
-                for line in lines:
-                    lineEle = re.split(r"\t", line.rstrip())
-                    taxIDAbunDict[lineEle[0]] = float(lineEle[4])
-        else:
-            cn = colN - 1
-            while True:
-                lines = _abunf.readlines(65535)
-                if not lines:
-                    break
-                for line in lines:
-                    lineEle = re.split(r"\t", line.rstrip())
-                    taxIDAbunDict[lineEle[0]] = float(lineEle[cn])
+                    try:
+                        if (lineEle[1] == "species"):
+                            taxIDAbunDict[lineEle[0]] = float(lineEle[4])
+                    except IndexError as e:
+                        print(e + " . Current line: " + str(lineEle))
     return taxIDAbunDict
 
-def drawLine(title="Sample Plot", xAbunDict=dict(), xLabel="x", yAbunDict=dict(), yLabel="y", pic_format="pdf", outFile = "SOAPMetas_Scatter_plot_sample.pdf", doLog=False):
+def drawLine(title="Sample Plot", xAbunDict=dict(), xLabel="x", yAbunDict=dict(), yLabel="y", pic_format="pdf", outFile = "SOAPMetas_Scatter_plot_sample.pdf", doLog=False, doReg=False):
     # all values for draw dots
     #x_values = []
     #y_values = []
@@ -146,24 +172,41 @@ def drawLine(title="Sample Plot", xAbunDict=dict(), xLabel="x", yAbunDict=dict()
 
 
     fig, axes = plt.subplots(1, 1)
-    plt.title(title)
-    plt.xlabel(xLabel)
-    plt.ylabel(yLabel)
+    if title != None:
+        plt.title(title)
+    if doLog:
+        plt.xlabel(xLabel+ " (log)")
+        plt.ylabel(yLabel+ " (log)")
+    else:
+        plt.xlabel(xLabel)
+        plt.ylabel(yLabel)
 
-    fig.text(0.90, 0.85, "r^2 = {0:.4}".format(r_value**2), ha="right")
-    fig.text(0.90, 0.80, "p = {0:.4}".format(p_value), ha="right")
-    fig.text(0.90, 0.75, "slope = {0:.4}".format(slope), ha="right")
-    fig.text(0.90, 0.70, "intercept = {0:.4}".format(intercept), ha="right")
-    axes.grid(True)
-
-    axes.plot(x_uncon, y_uncon, ".", color="gray")
-    axes.plot(x_common, y_common, '.', color="orchid")
+    if doReg:
+        fig.text(0.90, 0.85, "r^2 = {0:.4}".format(r_value**2), ha="right")
+        fig.text(0.90, 0.80, "p = {0:.4}".format(p_value), ha="right")
+        fig.text(0.90, 0.75, "slope = {0:.4}".format(slope), ha="right")
+        fig.text(0.90, 0.70, "intercept = {0:.4}".format(intercept), ha="right")
+        axes.grid(True)
+        axes.plot(x_uncon, y_uncon, ".", color="gray")
+        axes.plot(x_common, y_common, '.', color="orchid")
+        xc = np.asarray(x_common)
+        plt.plot(xc, intercept + slope * xc, '-', color="tomato")
+        #axes.plot(xc, xc, "-", color="tomato")
+    else:
+        axes.set_xlim(-6, 1)
+        axes.set_ylim(-6, 1)
+        dots1, = axes.plot(x_uncon, y_uncon, "x", color="gray")
+        dots2, = axes.plot(x_common, y_common, 's', color="red")
+        xc = np.asarray(x_common)
+        #plt.plot(xc, c_0 + c_1 * xc, '-', color="tomato")
+        line1 = axes.plot(xc, xc, "-", color="black", linewidth=1)
+        extra1 = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
+        extra2 = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
+        axes.legend([dots1, dots2, extra1, extra2], ("Uncommon", "Common", "l1norm (all): {0:.4}".format(l1norm_all), "l1norm (>0): {0:.4}".format(l1norm_valid)), loc = 1)
     
-    xc = np.asarray(x_common)
-    plt.plot(xc, intercept + slope * xc, '-', color="tomato")
-    #axes.plot(xc, xc, "-", color="tomato")
     #plt.axis("equal")
-    fig.tight_layout()
+    #fig.tight_layout()
+    plt.tight_layout()
     plt.savefig(outFile, quality=100, format=pic_format)
     #plt.show()
 
@@ -214,7 +257,8 @@ def checkArgv():
     _parser.add_argument(
         "--pic-format",
         required=False,
-        default="pdf"
+        default="pdf",
+        help="Plot format. [pdf, png, jpg, ...]"
     )
 
     _parser.add_argument(
@@ -230,6 +274,21 @@ def checkArgv():
         help="The abundance column in .abundance file. 2 for SOAPMetaS default output, 5 for SOAOPMetaS detailed output"
     )
 
+    _parser.add_argument(
+        "--regression",
+        action="store_true",
+        help="Do regression analysis, and the straight line will be fitted line."
+    )
+
+    _parser.add_argument(
+        "--mode",
+        required=False,
+        type=str,
+        default="simple",
+        choices=["cami","simple"],
+        help="species or gene abundance"
+    )
+
 
     return _parser.parse_args()
 
@@ -238,9 +297,9 @@ def main():
     #plotTest()
     xInputFile = args.input_abun_x
     yInputFile = args.input_abun_y
-    xAbunDict = readGeneProfiling(xInputFile, args.abun_col)
-    yAbunDict = readGeneProfiling(yInputFile, args.abun_col)
-    drawLine(title=args.title, xAbunDict = xAbunDict, xLabel=args.xlabel, yAbunDict = yAbunDict, yLabel=args.ylabel, pic_format=args.pic_format, outFile=args.output, doLog =args.log_norm)
+    xAbunDict = readGeneProfiling(xInputFile, args.abun_col, args.mode)
+    yAbunDict = readGeneProfiling(yInputFile, args.abun_col, args.mode)
+    drawLine(title=args.title, xAbunDict = xAbunDict, xLabel=args.xlabel, yAbunDict = yAbunDict, yLabel=args.ylabel, pic_format=args.pic_format, outFile=args.output, doLog =args.log_norm, doReg=args.regression)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ An Apache Spark<sup>TM</sup> based tool for profiling large metagenome datasets 
     + [5.2 Generate SOAPMetaS Jar Package](#52-generate-soapmetas-jar-package)
   + [6. Known Issues](#6-known-issues)
   + [7. License](#7-license)
-  + [8. Acknowledgments](#8-acknowledgments)
+  + [8. Citation](#8-citation)
 
 ## 1. Prerequisites
 
@@ -357,4 +357,6 @@ The command will compile and pack all files into a single `.jar` file named "SOA
 
 This project is licensed under the GPLv3 License, see the [LICENSE](LICENSE) file for details.
 
-## 8. Acknowledgments
+## 8. Citation
+
+Shixu He, Zhibo Huang, et al. SOAPMetaS: profiling large metagenome datasets efficiently on distributed clusters. *Bioinformatics*. 2020. doi:10.1093/bioinformatics/btaa697

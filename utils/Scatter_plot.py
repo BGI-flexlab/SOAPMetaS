@@ -38,6 +38,8 @@ import sys
 import re
 import argparse
 
+l1normscale=0.0
+
 def plotTest():
     # Sample data
     x = -np.random.rand(20)
@@ -65,6 +67,7 @@ def plotTest():
     plt.show()
 
 def readCAMIFormAbunData(abundanceFile):
+    global l1normscale
     taxIDAbunDict = dict()
     with open(abundanceFile, 'rt', encoding='utf-8') as _abunf:
         while True:
@@ -113,11 +116,13 @@ def drawLine(title=None, xAbunDict=dict(), xLabel="x", yAbunDict=dict(), yLabel=
     x_uncon = []
     y_uncon = []
 
+    global l1normscale
     taxSet = set(xAbunDict.keys()).union(yAbunDict.keys())
     for tax in taxSet:
         x0 = xAbunDict.get(tax, 0.0)/xScaleNum
         y0 = yAbunDict.get(tax, 0.0)/yScaleNum
         l1norm_all += abs(x0-y0)
+        #print("{0:012d}: {1:.7f} -- {2:.7f} -- {3:.5f}".format(int(tax), x0, y0, abs(x0-y0)))
         #x_values.append(x0)
         #y_values.append(y0)
         #if (x0>0 and y0>0):
@@ -129,6 +134,9 @@ def drawLine(title=None, xAbunDict=dict(), xLabel="x", yAbunDict=dict(), yLabel=
         #    y_uncon.append(y0)
         #else:
         #    continue
+        #if ((x0 > 0 and x0 < 0.01) or (y0>0 and y0 < 0.01)):
+        #    continue
+        l1normscale = l1normscale + x0
         if (x0>0 and y0>0):
             l1norm_valid += abs(x0-y0)
             x_common.append(math.log10(x0))
@@ -147,8 +155,8 @@ def drawLine(title=None, xAbunDict=dict(), xLabel="x", yAbunDict=dict(), yLabel=
     fig, axes = plt.subplots(1, 1)
     if title != None:
         plt.title(title)
-    plt.xlabel(xLabel+ " (log)")
-    plt.ylabel(yLabel+ " (log)")
+    plt.xlabel(xLabel+ " (log)", fontsize = 14)
+    plt.ylabel(yLabel+ " (log)", fontsize = 14)
 
     #fig.text(0.95, 0.85, "l1norm (all): {0:.4}".format(l1norm_all), ha="right")
     #fig.text(0.95, 0.8, "l1norm (>0): {0:.4}".format(l1norm_valid), ha="right")
@@ -157,7 +165,9 @@ def drawLine(title=None, xAbunDict=dict(), xLabel="x", yAbunDict=dict(), yLabel=
     axes.set_xlim(-6, 1)
     axes.set_ylim(-6, 1)
     dots1, = axes.plot(x_uncon, y_uncon, "x", color="gray")
-    dots2, = axes.plot(x_common, y_common, 's', color="red")
+    dots2, = axes.plot(x_common, y_common, 's', color="black")
+    axes.set_xlim(right=2)
+    axes.set_ylim(top=2)
  
     xc = np.asarray(x_common)
     #plt.plot(xc, c_0 + c_1 * xc, '-', color="tomato")
@@ -165,8 +175,10 @@ def drawLine(title=None, xAbunDict=dict(), xLabel="x", yAbunDict=dict(), yLabel=
 
     extra1 = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
     extra2 = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
-    axes.legend([dots1, dots2, extra1, extra2], ("Uncommon", "Common", "l1norm (all): {0:.4}".format(l1norm_all), "l1norm (>0): {0:.4}".format(l1norm_valid)), loc = 1)
+    #lg = axes.legend([dots1, dots2, extra1, extra2], ("Uncommon", "Common", "Proximity (all): {0:.4}".format(1-l1norm_all/2*l1normscale), "Proximity (>0): {0:.4}".format(1-l1norm_valid/2*l1normscale)), loc = 1)
+    lg = axes.legend([dots1, dots2, extra1, extra2], ("Uncommon", "Common", "L1-norm(all): {0:.4}".format(l1norm_all), "L1-norm(>0): {0:.4}".format(l1norm_valid)), loc = 1)
     #plt.axis("equal")
+    plt.setp(axes.get_legend().get_texts(), fontsize='14')
     plt.tight_layout()
     plt.savefig(outFile, quality=100, format="pdf")
     #plt.show()
