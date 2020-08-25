@@ -388,7 +388,7 @@ public class MetasOptions implements Serializable {
         //this.options.addOption(null, "prof-out-dir", true, "Output directory of profiling results. Default is output-dir/profiling.")
 
         Option local = new Option(null, "local", false,
-                "Input fastq/SAM files are stored in local file system. By default, fastq/SAM file paths are treated as HDFS format.");
+                "Input fastq/SAM files and output SAM files are stored in local file system. By default, all paths are treated as HDFS format.");
         this.options.addOption(local);
 
         /*

@@ -9,6 +9,7 @@ package org.bgi.flexlab.metas.alignment;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,6 +17,7 @@ import org.apache.spark.SparkContext;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 
 public class AlignmentMethodBase implements Serializable {
@@ -88,39 +90,56 @@ public class AlignmentMethodBase implements Serializable {
 
         //LOG.trace("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " +
         //        this.appName + " Copy output sam files to output directory.");
-        String hdfsSamPath = this.toolWrapper.getOutputHdfsDir() + "/" + outSamFileName;
+        String outDir = this.toolWrapper.getOutputHdfsDir();
+        String hdfsSamPath = outDir + "/" + outSamFileName;
+        String hdfsLogPath = outDir + "/" + alnLogFileName;
+        Path samSrc =  new Path(this.toolWrapper.getOutputFile());
+        Path samDst = new Path(hdfsSamPath);
+        Path logSrc = new Path(this.toolWrapper.getAlnLog());
+        Path logDst = new Path(hdfsLogPath);
+
         Configuration conf = new Configuration();
-        FileSystem fs;
+
+        FileSystem srcFS = null;
         try {
-            //if (outputDir.startsWith("hdfs")) {
-            fs = FileSystem.get(conf);
-            //LOG.info("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] " + this.appId + " - " + this.appName + ": src: " + this.toolWrapper.getOutputFile() + " | dst: " + hdfsSamPath);
-            fs.copyFromLocalFile(deleteSrc, true,
-                    new Path(this.toolWrapper.getOutputFile()),
-                    new Path(hdfsSamPath)
-            );
+             srcFS = FileSystem.newInstanceLocal(conf);
         } catch (IOException e) {
-            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Original alignment result file: "
-                    + this.toolWrapper.getOutputFile() + ". " + e.toString());
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Fail to construct source FileSystem. Source directory: " + this.toolWrapper.getAlnTmpDir() + " . Message: " + e.toString());
+        }
+        FileSystem dstFS = null;
+        try {
+            if (outDir.startsWith("file://")) {
+                dstFS = FileSystem.newInstanceLocal(conf);
+            } else {
+                dstFS = FileSystem.get(conf);
+            }
+        } catch (IOException e) {
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Fail to construct destination FileSystem. Destination directory: " + outDir + " . Message: " + e.toString());
         }
 
         try {
-            fs = FileSystem.get(conf);
-
-            fs.copyFromLocalFile(deleteSrc, true,
-                    new Path(this.toolWrapper.getAlnLog()),
-                    new Path(this.toolWrapper.getOutputHdfsDir() + "/" + alnLogFileName));
+            if (srcFS != null && dstFS != null) {
+                FileUtil.copy(srcFS, samSrc, dstFS, samDst, deleteSrc, conf);
+            } else {
+                LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] FileSystem is NULL for source file: " + samSrc.getName() + " . dest file: " + samDst.getName());
+            }
         } catch (IOException e) {
-            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Original alignment log file: "
-                    + this.toolWrapper.getOutputFile() + ". " + e.toString());
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Fail to copy SAM file + " + samSrc + ". " + e.toString());
+        } catch (Exception e) {
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] SAM file copy exception. " + this.appId + " - " + this.appName + ": src: " + this.toolWrapper.getOutputFile() + " | dst: " + hdfsSamPath);
         }
 
-        //// Delete the old results file
-        //File localSam = new File(this.toolWrapper.getOutputFile());
-        //if (!localSam.delete()){
-        //    LOG.warn("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Fail to delete temp SAM output file: "
-        //            + this.toolWrapper.getOutputFile());
-        //}
+        try {
+            if (srcFS != null && dstFS != null) {
+                FileUtil.copy(srcFS, logSrc, dstFS, logDst, deleteSrc, conf);
+            } else {
+                LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] FileSystem is NULL for source file: " + logSrc.getName() + " . dest file: " + logDst.getName());
+            }
+        } catch (IOException e) {
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Fail to copy alignment log file + " + samSrc + ". " + e.toString());
+        } catch (Exception e) {
+            LOG.error("[SOAPMetas::" + AlignmentMethodBase.class.getName() + "] Log file copy exception. " + this.appId + " - " + this.appName + ": src: " + this.toolWrapper.getAlnLog() + " | dst: " + hdfsLogPath);
+        }
 
         if (smTag != null) {
             returnedValues.add(readGroupID + '\t' + smTag + '\t' + hdfsSamPath);

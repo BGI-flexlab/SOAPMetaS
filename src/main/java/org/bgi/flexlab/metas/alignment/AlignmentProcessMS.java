@@ -167,11 +167,11 @@ public class AlignmentProcessMS {
                                         .append('\t').append(values1[2])
                                         .append("||").append(values2[3]);
                             } else {
-                                LOG.warn("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] " +
-                                        "Wrong mate number, there are three reads with the same name. Please check fastq file. ReadGroupID1: " + values1[1] +
-                                        "\tmate1: " + mate1 + "\tSampleID_and_ReadName1: " + values1[3] +
-                                        "\tReadGroupID2: " + values2[1] + "\tmate2: " + mate2 +
-                                        "\tSampleID_and_ReadName2:" + values2[3]);
+                                //LOG.warn("[SOAPMetas::" + AlignmentProcessMS.class.getName() + "] " +
+                                //        "Wrong mate number, there are three reads with the same name. Please check fastq file. ReadGroupID1: " + values1[1] +
+                                //        "\tmate1: " + mate1 + "\tSampleID_and_ReadName1: " + values1[3] +
+                                //        "\tReadGroupID2: " + values2[1] + "\tmate2: " + mate2 +
+                                //        "\tSampleID_and_ReadName2:" + values2[3]);
                                 return null;
                             }
                             return newsr.toString();
