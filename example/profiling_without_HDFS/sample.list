@@ -1,0 +1,4 @@
+SAMPLEID1	SAMPLEID1	/path/to/readS1.1.fastq
+SAMPLEID1	SAMPLEID1	/path/to/readS1.2.fastq
+SAMPLEID2	SAMPLEID2	/path/to/readS2.1.fastq
+SAMPLEID2	SAMPLEID2	/path/to/readS2.2.fastq
