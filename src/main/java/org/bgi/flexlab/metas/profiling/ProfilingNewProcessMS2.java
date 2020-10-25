@@ -43,17 +43,17 @@ import java.util.List;
 public class ProfilingNewProcessMS2 {
     private static final Log LOG = LogFactory.getLog(ProfilingNewProcessMS2.class); // The LOG
 
-    private MetasOptions metasOpt;
-    private JavaSparkContext jscontext;
+    final private MetasOptions metasOpt;
+    final private JavaSparkContext jscontext;
 
     private String pipeline;
     //private ProfilingAnalysisMode analysisMode;
-    private SequencingMode seqMode;
+    //private SequencingMode seqMode;
 
     private SAMMultiSampleList samMultiSampleList; //需要简化
-    private int numPartitionEachSample;
+    //private int numPartitionEachSample;
 
-    private boolean doIdentityFiltering = false;
+    //private boolean doIdentityFiltering = false;
     private MetasSAMRecordIdentityFilter identityFilter;
 
     private String tmpDir;
@@ -61,9 +61,9 @@ public class ProfilingNewProcessMS2 {
 
     private JobConf jcf;
 
-    private String referenceMatrixFilePath;
+    final private String referenceMatrixFilePath;
 
-    private String speciesGenomeGCFilePath;
+    //private String speciesGenomeGCFilePath;
 
     private boolean skipRelAbun = false;
 
@@ -74,16 +74,16 @@ public class ProfilingNewProcessMS2 {
 
         referenceMatrixFilePath = options.getReferenceMatrixFilePath();
 
-        speciesGenomeGCFilePath = options.getSpeciesGenomeGCFilePath();
+        //speciesGenomeGCFilePath = options.getSpeciesGenomeGCFilePath();
     }
 
     private void processConstruct(){
 
-        this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartProf(), 1);
+        //this.numPartitionEachSample = Math.max(this.metasOpt.getNumPartProf(), 1);
 
         this.pipeline = this.metasOpt.getProfilingPipeline();
         //this.analysisMode = this.metasOpt.getProfilingAnalysisMode();
-        this.seqMode = this.metasOpt.getSequencingMode();
+        //this.seqMode = this.metasOpt.getSequencingMode();
         if (this.pipeline.equals("meph")) {
             this.skipRelAbun = true;
         }
@@ -184,7 +184,7 @@ public class ProfilingNewProcessMS2 {
         final SAMFileHeader header = new SAMFileHeaderFactory().createHeader(referenceMatrixFilePath, sampleIDs.keySet());
 
         // TODO  根据 metasOpt.getReferenceMatrixFilePath() 和 samMultiSampleList 创建header
-//        final SAMFileHeader header = SOAPMetas.getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), jscontext.hadoopConfiguration());
+        //final SAMFileHeader header = SOAPMetas.getHeader(new Path("file:///hwfssz1/BIGDATA_COMPUTING/huangzhibo/workitems/SOAPMeta/SRS014287_header.sam"), jscontext.hadoopConfiguration());
 
         profilingMethod.setSampleIDbySampleName(sampleIDs);
 
@@ -221,9 +221,9 @@ public class ProfilingNewProcessMS2 {
         Note: Result Record doesn't contains relative abundance. And the RDD has been partitioned
          according to the sampleID and clusterName.hash.
         */
-//        if (this.metasOpt.isDoInsRecalibration()) {
-//            reads.persist(StorageLevel.MEMORY_AND_DISK());
-//        }
+        //if (this.metasOpt.isDoInsRecalibration()) {
+        //    reads.persist(StorageLevel.MEMORY_AND_DISK());
+        //}
 
         JavaPairRDD<String, ProfilingResultRecord> profilingResultRecordRDD = profilingMethod
                 .runProfiling(reads, jscontext);
@@ -232,9 +232,9 @@ public class ProfilingNewProcessMS2 {
                 .partitionBy(new SampleIDPartitioner(sampleIDs.size() + 1))
                 .mapPartitionsToPair(new RelativeAbundanceFunction(this.skipRelAbun), true);
 
-//        if (this.metasOpt.isDoInsRecalibration()) {
-//            cleanMetasSamRecordRDD.unpersist();
-//        }
+        //if (this.metasOpt.isDoInsRecalibration()) {
+        //    cleanMetasSamRecordRDD.unpersist();
+        //}
 
         relAbunResultRDD.persist(StorageLevel.MEMORY_AND_DISK());
 

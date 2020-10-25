@@ -27,8 +27,8 @@ public class ReferenceInfoMatrix implements Serializable {
 
     private static final Log LOG = LogFactory.getLog(ReferenceInfoMatrix.class);
 
-    private final int MARKER_NUMBER = 10;
-    private final int SPECIES_NUMBER = 5;
+    private final int MARKER_NUMBER = 5000000;
+    private final int SPECIES_NUMBER = 500;
 
     private Map<String, ReferenceGeneRecord> markerRecordMap;
     private Map<String, ReferenceSpeciesRecord> refSpeciesRecordMap;
@@ -89,7 +89,7 @@ public class ReferenceInfoMatrix implements Serializable {
      */
     private void readMatrixFile(String matrixFilePath){
         try (FileInputStream matrixFR = new FileInputStream(new File(matrixFilePath))) {
-            this.markerRecordMap = new HashMap<>(MARKER_NUMBER); // Number of genes in IGC_9.9M_update.ref
+            this.markerRecordMap = new HashMap<>(MARKER_NUMBER); // Number of genes in customized marker matrix like IGC_9.9M_update.ref
 
             BufferedReader matrixBR = new BufferedReader(new InputStreamReader(matrixFR));
 
@@ -109,7 +109,7 @@ public class ReferenceInfoMatrix implements Serializable {
                 this.markerRecordMap.put(lineSplit[1], geneRecord);
                 //LOG.trace("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Marker gene matrix file. " + "Current line: " + currentLine + " || Key of current line: " + lineSplit[1]);
             }
-            //LOG.info("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Construct marker gene matrix file.");
+            //LOG.info("[SOAPMetas::" + ReferenceInfoMatrix.class.getName() + "] Constructed marker gene matrix file.");
             matrixBR.close();
 
         } catch (NumberFormatException e){

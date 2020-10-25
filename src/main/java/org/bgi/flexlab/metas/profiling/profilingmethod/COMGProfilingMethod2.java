@@ -41,13 +41,13 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
 
     private Broadcast<ReferenceInfoMatrix> referenceInfoMatrix = null;
 
-    private boolean doGCRecalibration;
+    final private boolean doGCRecalibration;
 
     private GCBiasModelBase gcBiasRecaliModel;
 
-    private String referenceMatrixFilePath;
+    final private String referenceMatrixFilePath;
 
-    private String speciesGenomeGCFilePath;
+    final private String speciesGenomeGCFilePath;
 
     private boolean doIdentityFiltering = false;
     private boolean doAlignLenFiltering = false;
@@ -101,7 +101,9 @@ public final class COMGProfilingMethod2 extends ProfilingMethodBase implements S
                                                                    JavaSparkContext ctx) {
 
         if(referenceInfoMatrix == null){
+            //LOG.info("[SOAPMetas::" + COMGProfilingMethod2.class.getName() + "] Start broadcasting reference matrix file.");
             referenceInfoMatrix = ctx.broadcast(new ReferenceInfoMatrix(referenceMatrixFilePath, speciesGenomeGCFilePath));
+            //LOG.info("[SOAPMetas::" + COMGProfilingMethod2.class.getName() + "] Finish broadcasting reference matrix file.");
         }
         LOG.info("[SOAPMetas::" + COMGProfilingMethod2.class.getName() + "] Start COMG Profiling.");
 //        samRecord.getStringAttribute("RG")

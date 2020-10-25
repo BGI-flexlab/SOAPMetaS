@@ -680,7 +680,7 @@ public class MetasOptions implements Serializable {
                     throw new MissingOptionException("Missing -i (--multi-fq-list) option.");
                 }
             }
-            if (commandLine.hasOption("skip-profiling")){
+            if (commandLine.hasOption("skip-profiling") || this.gcBiasTrainingMode){
                 this.doProfiling = false;
             } else {
                 if (this.referenceMatrixFilePath == null) {
